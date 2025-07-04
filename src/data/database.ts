@@ -1,0 +1,113 @@
+import Dexie, { type Table } from 'dexie';
+import type { 
+  Hobby, 
+  WeatherData, 
+  WeatherForecast, 
+  Location, 
+  AppSettings 
+} from '../types';
+
+export class HobbyWeatherDatabase extends Dexie {
+  hobbies!: Table<Hobby>;
+  weatherData!: Table<WeatherData>;
+  weatherForecasts!: Table<WeatherForecast>;
+  locations!: Table<Location>;
+  settings!: Table<AppSettings>;
+
+  constructor() {
+    super('HobbyWeatherDB');
+    
+    this.version(1).stores({
+      hobbies: '++id, name, isActive, createdAt',
+      weatherData: '++id, [lat+lon], datetime, weatherType, cachedAt',
+      weatherForecasts: '++id, [lat+lon], cachedAt',
+      locations: '++id, name, isDefault, createdAt',
+      settings: '++id'
+    });
+
+    // Version 2で趣味に活動時間帯を追加
+    this.version(2).stores({
+      hobbies: '++id, name, isActive, createdAt',
+      weatherData: '++id, [lat+lon], datetime, weatherType, cachedAt',
+      weatherForecasts: '++id, [lat+lon], cachedAt',
+      locations: '++id, name, isDefault, createdAt',
+      settings: '++id'
+    }).upgrade(async (trans) => {
+      // 既存の趣味データに活動時間帯を追加
+      await trans.table('hobbies').toCollection().modify((hobby) => {
+        if (!hobby.preferredTimeOfDay) {
+          hobby.preferredTimeOfDay = [];
+        }
+      });
+    });
+
+    // Version 3で場所に種別・住所・カテゴリを追加
+    this.version(3).stores({
+      hobbies: '++id, name, isActive, createdAt',
+      weatherData: '++id, [lat+lon], datetime, weatherType, cachedAt',
+      weatherForecasts: '++id, [lat+lon], cachedAt',
+      locations: '++id, name, isDefault, createdAt',
+      settings: '++id'
+    }).upgrade(async (trans) => {
+      // 既存の場所データに新しいフィールドを追加
+      await trans.table('locations').toCollection().modify((location) => {
+        if (!location.type) {
+          location.type = 'city'; // 既存の場所はデフォルトで都市とする
+        }
+        if (!location.address) {
+          location.address = undefined;
+        }
+        if (!location.category) {
+          location.category = undefined;
+        }
+      });
+    });
+
+    this.hobbies.hook('creating', (_, obj) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+
+    this.hobbies.hook('updating', (modifications) => {
+      (modifications as any).updatedAt = new Date();
+    });
+
+    this.locations.hook('creating', (_, obj) => {
+      obj.createdAt = new Date();
+    });
+
+    this.settings.hook('creating', (_, obj) => {
+      obj.updatedAt = new Date();
+    });
+
+    this.settings.hook('updating', (modifications) => {
+      (modifications as any).updatedAt = new Date();
+    });
+  }
+
+  async initializeDefaultData() {
+    const settingsCount = await this.settings.count();
+    if (settingsCount === 0) {
+      await this.settings.add({
+        temperatureUnit: 'celsius',
+        windSpeedUnit: 'kmh',
+        language: 'ja',
+        notificationsEnabled: true,
+        cacheExpiration: 6,
+        updatedAt: new Date()
+      });
+    }
+  }
+
+  async clearExpiredCache() {
+    const now = new Date();
+    const settings = await this.settings.toCollection().first();
+    const expirationHours = settings?.cacheExpiration || 6;
+    const expirationTime = new Date(now.getTime() - expirationHours * 60 * 60 * 1000);
+
+    await this.weatherData.where('cachedAt').below(expirationTime).delete();
+    await this.weatherForecasts.where('cachedAt').below(expirationTime).delete();
+  }
+}
+
+export const db = new HobbyWeatherDatabase();

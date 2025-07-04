@@ -1,0 +1,266 @@
+import React, { useState } from 'react';
+import type { RecommendationFilters } from '../../services/recommendation.service';
+import type { WeatherType } from '../../types';
+
+interface RecommendationFiltersProps {
+  filters: RecommendationFilters;
+  onFiltersChange: (filters: Partial<RecommendationFilters>) => void;
+  onClearFilters: () => void;
+  className?: string;
+}
+
+const WEATHER_TYPE_OPTIONS: { value: WeatherType; label: string; icon: string }[] = [
+  { value: 'clear', label: '晴れ', icon: '☀️' },
+  { value: 'clouds', label: '曇り', icon: '☁️' },
+  { value: 'rain', label: '雨', icon: '🌧️' },
+  { value: 'snow', label: '雪', icon: '❄️' },
+  { value: 'drizzle', label: '小雨', icon: '🌦️' },
+  { value: 'thunderstorm', label: '雷雨', icon: '⛈️' },
+  { value: 'mist', label: '霧', icon: '🌫️' },
+  { value: 'fog', label: '濃霧', icon: '🌫️' }
+];
+
+export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
+  filters,
+  onFiltersChange,
+  onClearFilters,
+  className = ''
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleMinScoreChange = (value: string) => {
+    const minScore = value ? parseFloat(value) : undefined;
+    onFiltersChange({ minScore });
+  };
+
+  const handleDateRangeChange = (field: 'start' | 'end', value: string) => {
+    if (!value) {
+      if (field === 'start') {
+        onFiltersChange({
+          dateRange: filters.dateRange?.end ? {
+            start: new Date(),
+            end: filters.dateRange.end
+          } : undefined
+        });
+      } else {
+        onFiltersChange({
+          dateRange: filters.dateRange?.start ? {
+            start: filters.dateRange.start,
+            end: new Date()
+          } : undefined
+        });
+      }
+      return;
+    }
+
+    const date = new Date(value);
+    const currentRange = filters.dateRange || { start: new Date(), end: new Date() };
+    
+    onFiltersChange({
+      dateRange: {
+        ...currentRange,
+        [field]: date
+      }
+    });
+  };
+
+  const handleWeatherTypeToggle = (weatherType: WeatherType) => {
+    const currentTypes = filters.weatherTypes || [];
+    const newTypes = currentTypes.includes(weatherType)
+      ? currentTypes.filter(type => type !== weatherType)
+      : [...currentTypes, weatherType];
+    
+    onFiltersChange({
+      weatherTypes: newTypes.length > 0 ? newTypes : undefined
+    });
+  };
+
+  const handleDayFilterChange = (filter: 'excludeWeekends' | 'excludeWeekdays') => {
+    onFiltersChange({
+      [filter]: !filters[filter]
+    });
+  };
+
+  const hasActiveFilters = Object.keys(filters).length > 0;
+
+  const formatDateForInput = (date?: Date): string => {
+    if (!date) return '';
+    return date.toISOString().split('T')[0];
+  };
+
+  return (
+    <div className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`}>
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <h3 className="text-lg font-semibold text-gray-900">フィルター</h3>
+            {hasActiveFilters && (
+              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                適用中
+              </span>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            {hasActiveFilters && (
+              <button
+                onClick={onClearFilters}
+                className="text-sm text-gray-600 hover:text-gray-800 underline"
+              >
+                クリア
+              </button>
+            )}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              {isExpanded ? '閉じる' : '詳細設定'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Filters */}
+      <div className="px-6 py-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Min Score */}
+          <div>
+            <label htmlFor="min-score" className="block text-sm font-medium text-gray-700 mb-1">
+              最小スコア
+            </label>
+            <select
+              id="min-score"
+              value={filters.minScore || ''}
+              onChange={(e) => handleMinScoreChange(e.target.value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+            >
+              <option value="">すべて</option>
+              <option value="70">70点以上</option>
+              <option value="60">60点以上</option>
+              <option value="50">50点以上</option>
+              <option value="40">40点以上</option>
+            </select>
+          </div>
+
+          {/* Weather Type Quick Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              天気
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {WEATHER_TYPE_OPTIONS.slice(0, 3).map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleWeatherTypeToggle(option.value)}
+                  className={`text-xs px-2 py-1 rounded border transition-colors ${
+                    filters.weatherTypes?.includes(option.value)
+                      ? 'bg-blue-100 border-blue-300 text-blue-800'
+                      : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {option.icon} {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Day Type Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              曜日
+            </label>
+            <div className="space-y-1">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={!!filters.excludeWeekends}
+                  onChange={() => handleDayFilterChange('excludeWeekends')}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">週末を除外</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={!!filters.excludeWeekdays}
+                  onChange={() => handleDayFilterChange('excludeWeekdays')}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">平日を除外</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Active Filters Count */}
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">
+                {Object.keys(filters).length}
+              </div>
+              <div className="text-xs text-gray-600">適用中</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Filters */}
+      {isExpanded && (
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="space-y-6">
+            {/* Date Range */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">期間設定</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="start-date" className="block text-sm text-gray-700 mb-1">
+                    開始日
+                  </label>
+                  <input
+                    id="start-date"
+                    type="date"
+                    value={formatDateForInput(filters.dateRange?.start)}
+                    onChange={(e) => handleDateRangeChange('start', e.target.value)}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="end-date" className="block text-sm text-gray-700 mb-1">
+                    終了日
+                  </label>
+                  <input
+                    id="end-date"
+                    type="date"
+                    value={formatDateForInput(filters.dateRange?.end)}
+                    onChange={(e) => handleDateRangeChange('end', e.target.value)}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* All Weather Types */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">天気条件</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {WEATHER_TYPE_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleWeatherTypeToggle(option.value)}
+                    className={`text-sm px-3 py-2 rounded border transition-colors ${
+                      filters.weatherTypes?.includes(option.value)
+                        ? 'bg-blue-100 border-blue-300 text-blue-800'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="mr-2">{option.icon}</span>
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
