@@ -96,8 +96,9 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
   /**
    * 特定の趣味の推薦を取得
    */
-  const getRecommendationsForHobby = useCallback((hobbyId: string): HobbyRecommendation | undefined => {
-    return state.recommendations.find(rec => rec.hobby.id === hobbyId);
+  const getRecommendationsForHobby = useCallback((hobbyId: number | string): HobbyRecommendation | undefined => {
+    const id = typeof hobbyId === 'string' ? parseInt(hobbyId, 10) : hobbyId;
+    return state.recommendations.find(rec => rec.hobby.id === id);
   }, [state.recommendations]);
 
   /**

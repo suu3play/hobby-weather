@@ -78,7 +78,7 @@ export const HobbyList: React.FC<HobbyListProps> = ({
                 <div className="mb-3">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">希望天気:</h4>
                   <div className="flex flex-wrap gap-2">
-                    {hobby.preferredWeather.map((condition, index) => (
+                    {hobby.preferredWeather?.map((condition, index) => (
                       <div
                         key={index}
                         className="inline-flex items-center space-x-1 bg-blue-50 text-blue-800 px-2 py-1 rounded-md text-sm"
@@ -95,7 +95,7 @@ export const HobbyList: React.FC<HobbyListProps> = ({
 
                 <div className="text-xs text-gray-500">
                   作成日: {formatDate(hobby.createdAt)}
-                  {hobby.updatedAt.getTime() !== hobby.createdAt.getTime() && (
+                  {hobby.updatedAt && hobby.updatedAt.getTime() !== hobby.createdAt.getTime() && (
                     <span> | 更新日: {formatDate(hobby.updatedAt)}</span>
                   )}
                 </div>

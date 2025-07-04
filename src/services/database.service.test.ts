@@ -14,13 +14,14 @@ describe('DatabaseService', () => {
     
     // Create test database with unique name
     class TestDatabase extends HobbyWeatherDatabase {
-      constructor() {
+      constructor(name: string) {
         super();
-        this.name = testDbName;
+        // @ts-ignore - temporary workaround for readonly property
+        this.name = name;
       }
     }
     
-    testDb = new TestDatabase();
+    testDb = new TestDatabase(testDbName);
     await testDb.open();
     
     // Clear any existing data first

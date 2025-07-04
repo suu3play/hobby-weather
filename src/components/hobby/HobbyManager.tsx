@@ -187,7 +187,7 @@ export const HobbyManager: React.FC = () => {
           
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="text-2xl font-bold text-gray-600">
-              {hobbies.reduce((total, hobby) => total + hobby.preferredWeather.length, 0)}
+              {hobbies.reduce((total, hobby) => total + (hobby.preferredWeather?.length || 0), 0)}
             </div>
             <div className="text-sm text-gray-800">天気条件数</div>
           </div>

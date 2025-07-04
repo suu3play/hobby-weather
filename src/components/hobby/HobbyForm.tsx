@@ -47,7 +47,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
         preferredWeather: hobby.preferredWeather || [],
         preferredTimeOfDay: hobby.preferredTimeOfDay || [],
         isActive: hobby.isActive,
-        isOutdoor: hobby.isOutdoor,
+        isOutdoor: hobby.isOutdoor ?? true,
         minTemperature: hobby.minTemperature,
         maxTemperature: hobby.maxTemperature
       });

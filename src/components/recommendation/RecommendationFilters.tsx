@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import type { RecommendationFilters } from '../../services/recommendation.service';
+import type { RecommendationFilters as RecommendationFiltersType } from '../../services/recommendation.service';
 import type { WeatherType } from '../../types';
 
 interface RecommendationFiltersProps {
-  filters: RecommendationFilters;
-  onFiltersChange: (filters: Partial<RecommendationFilters>) => void;
+  filters: RecommendationFiltersType;
+  onFiltersChange: (filters: Partial<RecommendationFiltersType>) => void;
   onClearFilters: () => void;
   className?: string;
 }

@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  checkEnvironmentVariables, 
-  checkWeatherServiceApiKey, 
-  testApiConnection, 
   runDiagnostics 
 } from '../../services/api-key-test';
 

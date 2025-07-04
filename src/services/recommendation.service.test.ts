@@ -10,7 +10,10 @@ describe('RecommendationService', () => {
       description: '山歩きを楽しむ',
       isActive: true,
       isOutdoor: true,
-      preferredWeather: ['clear', 'clouds'],
+      preferredWeather: [
+        { condition: 'clear', weight: 8 },
+        { condition: 'clouds', weight: 6 }
+      ],
       minTemperature: 15,
       maxTemperature: 25,
       createdAt: new Date('2024-01-01')
@@ -21,7 +24,10 @@ describe('RecommendationService', () => {
       description: '室内で本を読む',
       isActive: true,
       isOutdoor: false,
-      preferredWeather: ['rain', 'clouds'],
+      preferredWeather: [
+        { condition: 'rain', weight: 9 },
+        { condition: 'clouds', weight: 7 }
+      ],
       minTemperature: 20,
       maxTemperature: 30,
       createdAt: new Date('2024-01-01')
@@ -32,7 +38,9 @@ describe('RecommendationService', () => {
       description: '砂浜でスポーツ',
       isActive: true,
       isOutdoor: true,
-      preferredWeather: ['clear'],
+      preferredWeather: [
+        { condition: 'clear', weight: 10 }
+      ],
       minTemperature: 25,
       maxTemperature: 35,
       createdAt: new Date('2024-01-01')
@@ -125,7 +133,8 @@ describe('RecommendationService', () => {
     lat: 35.6762,
     lon: 139.6503,
     forecasts: mockForecasts,
-    generatedAt: new Date('2024-01-14T12:00:00')
+    generatedAt: new Date('2024-01-14T12:00:00'),
+    cachedAt: new Date('2024-01-14T12:00:00')
   };
 
   describe('generateRecommendations', () => {
@@ -255,7 +264,7 @@ describe('RecommendationService', () => {
         description: '',
         isActive: true,
         isOutdoor: true,
-        preferredWeather: ['clear'],
+        preferredWeather: [{ condition: 'clear', weight: 8 }],
         minTemperature: 20,
         maxTemperature: 25,
         createdAt: new Date()
@@ -277,7 +286,7 @@ describe('RecommendationService', () => {
         description: '',
         isActive: true,
         isOutdoor: true,
-        preferredWeather: ['clear'],
+        preferredWeather: [{ condition: 'clear', weight: 8 }],
         minTemperature: 10,
         maxTemperature: 30,
         createdAt: new Date()
@@ -304,7 +313,7 @@ describe('RecommendationService', () => {
         description: '',
         isActive: true,
         isOutdoor: true,
-        preferredWeather: ['snow'],
+        preferredWeather: [{ condition: 'snow', weight: 8 }],
         minTemperature: -10,
         maxTemperature: 5,
         createdAt: new Date()

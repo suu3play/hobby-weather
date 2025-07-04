@@ -58,7 +58,7 @@ describe('Database', () => {
       const updated = await testDb.hobbies.get(id);
 
       expect(updated?.name).toBe('マウンテンバイク');
-      expect(updated?.updatedAt.getTime()).toBeGreaterThanOrEqual(original!.updatedAt.getTime());
+      expect(updated?.updatedAt?.getTime()).toBeGreaterThanOrEqual(original!.updatedAt?.getTime() || 0);
     });
   });
 

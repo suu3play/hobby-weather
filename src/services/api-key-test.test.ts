@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { checkEnvironmentVariables, testApiConnection } from './api-key-test';
 
 // fetch をモック
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 describe('API Key Test Functions', () => {
   describe('checkEnvironmentVariables', () => {
