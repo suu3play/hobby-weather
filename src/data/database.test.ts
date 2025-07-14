@@ -58,7 +58,7 @@ describe('Database', () => {
       const updated = await testDb.hobbies.get(id);
 
       expect(updated?.name).toBe('マウンテンバイク');
-      expect(updated?.updatedAt?.getTime()).toBeGreaterThanOrEqual(original!.updatedAt?.getTime() || 0);
+      expect(updated?.updatedAt?.getTime()).toBeGreaterThanOrEqual(original?.updatedAt?.getTime() || 0);
     });
   });
 
@@ -113,6 +113,7 @@ describe('Database', () => {
         weatherDescription: '晴れ',
         cloudiness: 0,
         uvIndex: 8,
+        generatedAt: oldDate,
         cachedAt: oldDate
       });
 

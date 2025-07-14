@@ -103,8 +103,8 @@ export class DatabaseService {
 
   async updateSettings(changes: Partial<AppSettings>): Promise<number> {
     const settings = await this.getSettings();
-    if (settings) {
-      return await this.db.settings.update(settings.id!, changes);
+    if (settings && settings.id !== undefined) {
+      return await this.db.settings.update(settings.id, changes);
     } else {
       return await this.db.settings.add({
         temperatureUnit: 'celsius',
@@ -141,31 +141,35 @@ export class DatabaseService {
   }
 
   async importData(jsonData: string): Promise<void> {
-    const data = JSON.parse(jsonData);
+    const data = JSON.parse(jsonData) as {
+      hobbies?: Array<Hobby & { id?: number }>;
+      locations?: Array<Location & { id?: number }>;
+      settings?: AppSettings & { id?: number };
+    };
     
     // Clear existing data
     await this.clearAllData();
     
     // Import hobbies
-    if (data.hobbies) {
+    if (data.hobbies && Array.isArray(data.hobbies)) {
       for (const hobby of data.hobbies) {
-        delete hobby.id; // Let database assign new IDs
-        await this.createHobby(hobby);
+        const { id, ...hobbyData } = hobby;
+        await this.createHobby(hobbyData);
       }
     }
     
     // Import locations
-    if (data.locations) {
+    if (data.locations && Array.isArray(data.locations)) {
       for (const location of data.locations) {
-        delete location.id;
-        await this.saveLocation(location);
+        const { id, ...locationData } = location;
+        await this.saveLocation(locationData);
       }
     }
     
     // Import settings
     if (data.settings) {
-      delete data.settings.id;
-      await this.updateSettings(data.settings);
+      const { id, ...settingsData } = data.settings;
+      await this.updateSettings(settingsData);
     }
   }
 }

@@ -65,10 +65,16 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         lat: searchResult.lat,
         lon: searchResult.lon,
         isDefault: true,
-        type: searchResult.type,
-        address: searchResult.address,
-        category: searchResult.category
+        type: searchResult.type
       };
+      
+      // Add optional properties only if they exist
+      if (searchResult.address) {
+        locationData.address = searchResult.address;
+      }
+      if (searchResult.category) {
+        locationData.category = searchResult.category;
+      }
 
       await databaseService.saveLocation(locationData);
       
@@ -91,9 +97,13 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   const handleSavedLocationSelect = async (location: Location) => {
     try {
-      await databaseService.updateLocation(location.id!, { isDefault: true });
-      onLocationSelect({ ...location, isDefault: true });
-      setIsExpanded(false);
+      if (location.id) {
+        await databaseService.updateLocation(location.id, { isDefault: true });
+        onLocationSelect({ ...location, isDefault: true });
+        setIsExpanded(false);
+      } else {
+        setSearchError('場所IDが見つかりません');
+      }
     } catch (error) {
       setSearchError(error instanceof Error ? error.message : '場所の選択に失敗しました');
     }
@@ -113,7 +123,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       landmark: '🗼',
       address: '📍'
     };
-    return icons[type] || '📍';
+    return icons[type] ?? '📍';
   };
 
   // 場所タイプのラベルを取得
@@ -124,7 +134,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       landmark: 'ランドマーク',
       address: '住所'
     };
-    return labels[type] || '場所';
+    return labels[type] ?? '場所';
   };
 
 
@@ -236,7 +246,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                         
                         <div className="flex items-center justify-between mt-2">
                           <p className="text-xs text-gray-500">
-                            {result.country || 'JP'} ({result.lat.toFixed(4)}, {result.lon.toFixed(4)})
+                            {result.country ?? 'JP'} ({result.lat.toFixed(4)}, {result.lon.toFixed(4)})
                           </p>
                           <span className="text-xs text-gray-400">
                             {result.source === 'openweather' ? 'OpenWeather' : 'OpenStreetMap'}

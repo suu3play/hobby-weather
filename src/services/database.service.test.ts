@@ -84,7 +84,9 @@ describe('DatabaseService', () => {
 
       expect(activeHobbies).toHaveLength(1);
       expect(allHobbies).toHaveLength(2);
-      expect(activeHobbies[0].name).toBe('アクティブ趣味');
+      const activeHobby = activeHobbies.find(h => h.name === 'アクティブ趣味');
+      expect(activeHobby).toBeDefined();
+      expect(activeHobby?.name).toBe('アクティブ趣味');
     });
 
     it('should update hobby', async () => {
@@ -199,7 +201,9 @@ describe('DatabaseService', () => {
 
       expect(parsed.hobbies).toHaveLength(1);
       expect(parsed.locations).toHaveLength(1);
-      expect(parsed.hobbies[0].name).toBe('テスト趣味');
+      const exportedHobby = parsed.hobbies.find((h: any) => h.name === 'テスト趣味');
+      expect(exportedHobby).toBeDefined();
+      expect(exportedHobby?.name).toBe('テスト趣味');
 
       // Clear and import
       await service.clearAllData();
@@ -217,7 +221,9 @@ describe('DatabaseService', () => {
 
       expect(hobbies).toHaveLength(1);
       expect(locations).toHaveLength(1);
-      expect(hobbies[0].name).toBe('テスト趣味');
+      const importedHobby = hobbies.find(h => h.name === 'テスト趣味');
+      expect(importedHobby).toBeDefined();
+      expect(importedHobby?.name).toBe('テスト趣味');
     });
   });
 });

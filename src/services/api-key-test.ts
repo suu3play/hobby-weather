@@ -6,20 +6,20 @@
 export function checkEnvironmentVariables() {
   console.log('=== 環境変数確認 ===');
   console.log('import.meta.env:', import.meta.env);
-  console.log('VITE_OPENWEATHER_API_KEY:', import.meta.env.VITE_OPENWEATHER_API_KEY);
-  console.log('typeof VITE_OPENWEATHER_API_KEY:', typeof import.meta.env.VITE_OPENWEATHER_API_KEY);
-  console.log('length:', import.meta.env.VITE_OPENWEATHER_API_KEY?.length);
+  console.log('VITE_OPENWEATHER_API_KEY:', import.meta.env['VITE_OPENWEATHER_API_KEY']);
+  console.log('typeof VITE_OPENWEATHER_API_KEY:', typeof import.meta.env['VITE_OPENWEATHER_API_KEY']);
+  console.log('length:', import.meta.env['VITE_OPENWEATHER_API_KEY']?.length);
   
   // プロセス環境変数も確認（ブラウザでは通常undefined）
   if (typeof process !== 'undefined' && process.env) {
-    console.log('process.env.VITE_OPENWEATHER_API_KEY:', process.env.VITE_OPENWEATHER_API_KEY);
+    console.log('process.env.VITE_OPENWEATHER_API_KEY:', process.env['VITE_OPENWEATHER_API_KEY']);
   }
   
   return {
-    hasApiKey: !!import.meta.env.VITE_OPENWEATHER_API_KEY,
-    apiKeyLength: import.meta.env.VITE_OPENWEATHER_API_KEY?.length || 0,
-    apiKeyPreview: import.meta.env.VITE_OPENWEATHER_API_KEY ? 
-      `${import.meta.env.VITE_OPENWEATHER_API_KEY.substring(0, 8)}...` : 
+    hasApiKey: !!import.meta.env['VITE_OPENWEATHER_API_KEY'],
+    apiKeyLength: import.meta.env['VITE_OPENWEATHER_API_KEY']?.length ?? 0,
+    apiKeyPreview: import.meta.env['VITE_OPENWEATHER_API_KEY'] ? 
+      `${import.meta.env['VITE_OPENWEATHER_API_KEY'].substring(0, 8)}...` : 
       'undefined'
   };
 }
@@ -46,7 +46,7 @@ export async function checkWeatherServiceApiKey() {
     
     return {
       hasApiKey: !!service.apiKey,
-      apiKeyLength: service.apiKey?.length || 0,
+      apiKeyLength: service.apiKey?.length ?? 0,
       apiKeyPreview: service.apiKey ? 
         `${service.apiKey.substring(0, 8)}...` : 
         'undefined or empty'
@@ -68,7 +68,7 @@ export async function checkWeatherServiceApiKey() {
 export async function testApiConnection() {
   console.log('=== API接続テスト ===');
   
-  const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
+  const apiKey = import.meta.env['VITE_OPENWEATHER_API_KEY'];
   
   if (!apiKey) {
     console.error('API Keyが設定されていません');
@@ -99,7 +99,7 @@ export async function testApiConnection() {
       const data = await response.json();
       console.log('API接続成功:', {
         city: data.name,
-        weather: data.weather[0].description,
+        weather: data.weather[0]?.description,
         temp: data.main.temp
       });
       
@@ -107,7 +107,7 @@ export async function testApiConnection() {
         success: true,
         data: {
           city: data.name,
-          weather: data.weather[0].description,
+          weather: data.weather[0]?.description,
           temperature: data.main.temp
         }
       };
@@ -118,7 +118,7 @@ export async function testApiConnection() {
       return {
         success: false,
         status: response.status,
-        error: errorData.message || 'API request failed'
+        error: errorData.message ?? 'API request failed'
       };
     }
   } catch (error) {

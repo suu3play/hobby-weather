@@ -98,7 +98,7 @@ export const useWeather = (): UseWeatherReturn => {
       const savedLocation = await databaseService.getDefaultLocation();
       
       updateState({
-        location: savedLocation,
+        location: savedLocation ?? null,
         isLocationLoading: false
       });
 
@@ -118,8 +118,8 @@ export const useWeather = (): UseWeatherReturn => {
     updateState({ location });
     
     // Update as default location if not already set
-    if (!location.isDefault) {
-      await databaseService.updateLocation(location.id!, { isDefault: true });
+    if (!location.isDefault && location.id) {
+      await databaseService.updateLocation(location.id, { isDefault: true });
     }
 
     // Fetch weather for the new location

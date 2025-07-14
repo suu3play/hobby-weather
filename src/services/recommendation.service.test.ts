@@ -155,8 +155,10 @@ describe('RecommendationService', () => {
       );
 
       for (let i = 0; i < recommendations.length - 1; i++) {
-        expect(recommendations[i].overallScore).toBeGreaterThanOrEqual(
-          recommendations[i + 1].overallScore
+        const current = recommendations[i];
+        const next = recommendations[i + 1];
+        expect(current?.overallScore).toBeGreaterThanOrEqual(
+          next?.overallScore || 0
         );
       }
     });
@@ -175,13 +177,17 @@ describe('RecommendationService', () => {
       expect(beachVolleyRec).toBeDefined();
 
       // ハイキングは1日目（適温・晴れ）で高スコアになるはず
-      const hikingBestDay = hikingRec!.recommendedDays[0];
-      expect(hikingBestDay.date.toDateString()).toBe(mockForecasts[0].date.toDateString());
-      expect(hikingBestDay.score).toBeGreaterThan(70);
+      const hikingBestDay = hikingRec?.recommendedDays[0];
+      expect(hikingBestDay).toBeDefined();
+      const firstForecast = mockForecasts[0];
+      expect(hikingBestDay?.date.toDateString()).toBe(firstForecast?.date.toDateString());
+      expect(hikingBestDay?.score).toBeGreaterThan(70);
 
       // ビーチバレーは3日目（高温・晴れ）で高スコアになるはず
-      const beachBestDay = beachVolleyRec!.recommendedDays[0];
-      expect(beachBestDay.date.toDateString()).toBe(mockForecasts[2].date.toDateString());
+      const beachBestDay = beachVolleyRec?.recommendedDays[0];
+      expect(beachBestDay).toBeDefined();
+      const thirdForecast = mockForecasts[2];
+      expect(beachBestDay?.date.toDateString()).toBe(thirdForecast?.date.toDateString());
     });
 
     it('should handle indoor activities appropriately', async () => {
@@ -195,8 +201,10 @@ describe('RecommendationService', () => {
       expect(readingRec).toBeDefined();
 
       // 読書は雨の日（2日目）で高スコアになるはず
-      const readingBestDay = readingRec!.recommendedDays[0];
-      expect(readingBestDay.date.toDateString()).toBe(mockForecasts[1].date.toDateString());
+      const readingBestDay = readingRec?.recommendedDays[0];
+      expect(readingBestDay).toBeDefined();
+      const secondForecast = mockForecasts[1];
+      expect(readingBestDay?.date.toDateString()).toBe(secondForecast?.date.toDateString());
     });
 
     it('should apply filters correctly', async () => {
@@ -228,8 +236,12 @@ describe('RecommendationService', () => {
 
     it('should exclude weekends when filter is applied', async () => {
       // 日曜日（1/14の次の日曜日）を含む予報を作成
+      const baseForecast = mockForecasts[0];
+      if (!baseForecast) {
+        throw new Error('ベース予報が見つかりません');
+      }
       const sundayForecast: DailyForecast = {
-        ...mockForecasts[0],
+        ...baseForecast,
         date: new Date('2024-01-21') // 日曜日
       };
 
@@ -275,8 +287,9 @@ describe('RecommendationService', () => {
         mockWeatherForecast
       );
 
-      const bestDay = recommendations[0].recommendedDays[0];
-      expect(bestDay.score).toBeGreaterThan(80);
+      const bestDay = recommendations[0]?.recommendedDays[0];
+      expect(bestDay).toBeDefined();
+      expect(bestDay?.score).toBeGreaterThan(80);
     });
 
     it('should penalize rain for outdoor activities', async () => {
@@ -297,7 +310,7 @@ describe('RecommendationService', () => {
         mockWeatherForecast
       );
 
-      const rainyDay = recommendations[0].recommendedDays.find(
+      const rainyDay = recommendations[0]?.recommendedDays.find(
         day => day.forecast.weatherType === 'rain'
       );
 
@@ -325,7 +338,9 @@ describe('RecommendationService', () => {
       );
 
       // 全ての日が気温範囲外なので、スコアは低くなるはず
-      recommendations[0].recommendedDays.forEach(day => {
+      const coldWeatherRec = recommendations[0];
+      expect(coldWeatherRec).toBeDefined();
+      coldWeatherRec?.recommendedDays.forEach(day => {
         expect(day.score).toBeLessThan(60);
       });
     });
@@ -333,29 +348,37 @@ describe('RecommendationService', () => {
 
   describe('factor analysis', () => {
     it('should identify matching factors correctly', async () => {
+      const hikingHobby = mockHobbies[0];
+      if (!hikingHobby) {
+        throw new Error('ハイキング趣味が見つかりません');
+      }
       const recommendations = await recommendationService.generateRecommendations(
-        [mockHobbies[0]], // ハイキング
+        [hikingHobby], // ハイキング
         mockWeatherForecast
       );
 
-      const clearDay = recommendations[0].recommendedDays.find(
+      const clearDay = recommendations[0]?.recommendedDays.find(
         day => day.forecast.weatherType === 'clear'
       );
 
       expect(clearDay).toBeDefined();
-      expect(clearDay!.matchingFactors.length).toBeGreaterThan(0);
-      expect(clearDay!.matchingFactors.some(factor => 
+      expect(clearDay?.matchingFactors.length).toBeGreaterThan(0);
+      expect(clearDay?.matchingFactors.some(factor => 
         factor.includes('晴') || factor.includes('好適')
       )).toBe(true);
     });
 
     it('should identify warning factors for extreme conditions', async () => {
+      const hikingHobby = mockHobbies[0];
+      if (!hikingHobby) {
+        throw new Error('ハイキング趣味が見つかりません');
+      }
       const recommendations = await recommendationService.generateRecommendations(
-        [mockHobbies[0]], // ハイキング（適温15-25度）
+        [hikingHobby], // ハイキング（適温15-25度）
         mockWeatherForecast
       );
 
-      const hotDay = recommendations[0].recommendedDays.find(
+      const hotDay = recommendations[0]?.recommendedDays.find(
         day => day.forecast.temperature.max > 30
       );
 
@@ -377,7 +400,7 @@ describe('RecommendationService', () => {
       );
 
       expect(topRecs).toHaveLength(2);
-      expect(topRecs[0].overallScore).toBeGreaterThanOrEqual(topRecs[1].overallScore);
+      expect(topRecs[0]?.overallScore).toBeGreaterThanOrEqual(topRecs[1]?.overallScore ?? 0);
     });
   });
 
@@ -392,7 +415,8 @@ describe('RecommendationService', () => {
 
       dateRecs.forEach(rec => {
         expect(rec.recommendedDays).toHaveLength(1);
-        expect(rec.recommendedDays[0].date.toDateString()).toBe(targetDate.toDateString());
+        const recDay = rec.recommendedDays[0];
+        expect(recDay?.date.toDateString()).toBe(targetDate.toDateString());
       });
     });
   });
