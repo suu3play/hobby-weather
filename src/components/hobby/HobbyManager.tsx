@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import type { Hobby } from '../../types';
 import { useHobby } from '../../hooks/useHobby';
+import { useRecommendation } from '../../hooks/useRecommendation';
 import { HobbyForm } from './HobbyForm';
 import { HobbyList } from './HobbyList';
+import { RecommendationFilters } from '../recommendation/RecommendationFilters';
 
 type ViewMode = 'list' | 'create' | 'edit';
 
@@ -19,6 +21,12 @@ export const HobbyManager: React.FC = () => {
     refreshHobbies,
     clearError
   } = useHobby();
+
+  const {
+    filters,
+    updateFilters,
+    clearFilters
+  } = useRecommendation();
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [editingHobby, setEditingHobby] = useState<Hobby | null>(null);
@@ -191,6 +199,17 @@ export const HobbyManager: React.FC = () => {
             </div>
             <div className="text-sm text-gray-800">天気条件数</div>
           </div>
+        </div>
+      )}
+
+      {/* Recommendation Filters */}
+      {viewMode === 'list' && hobbies.length > 0 && (
+        <div className="mt-6">
+          <RecommendationFilters
+            filters={filters}
+            onFiltersChange={updateFilters}
+            onClearFilters={clearFilters}
+          />
         </div>
       )}
     </div>
