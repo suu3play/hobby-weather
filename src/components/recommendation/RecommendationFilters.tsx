@@ -30,25 +30,33 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
 
   const handleMinScoreChange = (value: string) => {
     const minScore = value ? parseFloat(value) : undefined;
-    onFiltersChange({ minScore });
+    const update: Partial<RecommendationFiltersType> = {};
+    if (minScore !== undefined) {
+      update.minScore = minScore;
+    }
+    onFiltersChange(update);
   };
 
   const handleDateRangeChange = (field: 'start' | 'end', value: string) => {
     if (!value) {
       if (field === 'start') {
-        onFiltersChange({
-          dateRange: filters.dateRange?.end ? {
+        const update: Partial<RecommendationFiltersType> = {};
+        if (filters.dateRange?.end) {
+          update.dateRange = {
             start: new Date(),
             end: filters.dateRange.end
-          } : undefined
-        });
+          };
+        }
+        onFiltersChange(update);
       } else {
-        onFiltersChange({
-          dateRange: filters.dateRange?.start ? {
+        const update: Partial<RecommendationFiltersType> = {};
+        if (filters.dateRange?.start) {
+          update.dateRange = {
             start: filters.dateRange.start,
             end: new Date()
-          } : undefined
-        });
+          };
+        }
+        onFiltersChange(update);
       }
       return;
     }
@@ -65,14 +73,16 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
   };
 
   const handleWeatherTypeToggle = (weatherType: WeatherType) => {
-    const currentTypes = filters.weatherTypes || [];
+    const currentTypes = filters.weatherTypes ?? [];
     const newTypes = currentTypes.includes(weatherType)
       ? currentTypes.filter(type => type !== weatherType)
       : [...currentTypes, weatherType];
     
-    onFiltersChange({
-      weatherTypes: newTypes.length > 0 ? newTypes : undefined
-    });
+    const update: Partial<RecommendationFiltersType> = {};
+    if (newTypes.length > 0) {
+      update.weatherTypes = newTypes;
+    }
+    onFiltersChange(update);
   };
 
   const handleDayFilterChange = (filter: 'excludeWeekends' | 'excludeWeekdays') => {
@@ -85,7 +95,8 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
 
   const formatDateForInput = (date?: Date): string => {
     if (!date) return '';
-    return date.toISOString().split('T')[0];
+    const isoString = date.toISOString();
+    return isoString.split('T')[0] ?? '';
   };
 
   return (

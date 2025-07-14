@@ -57,27 +57,60 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const validationErrors = validateHobby(formData);
+    // Create a proper validation object
+    const validationData: Partial<Hobby> = {
+      name: formData.name,
+      preferredWeather: formData.preferredWeather,
+      preferredTimeOfDay: formData.preferredTimeOfDay,
+      isActive: formData.isActive,
+      isOutdoor: formData.isOutdoor
+    };
+    
+    // Add optional fields only if they have values
+    if (formData.description.trim()) {
+      validationData.description = formData.description.trim();
+    }
+    if (formData.minTemperature !== undefined) {
+      validationData.minTemperature = formData.minTemperature;
+    }
+    if (formData.maxTemperature !== undefined) {
+      validationData.maxTemperature = formData.maxTemperature;
+    }
+    
+    const validationErrors = validateHobby(validationData);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
     }
 
     setErrors([]);
-    onSubmit({
+    
+    // Create properly typed object for submission
+    const submitData: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'> = {
       name: formData.name.trim(),
-      description: formData.description.trim() || undefined,
       preferredWeather: formData.preferredWeather,
       preferredTimeOfDay: formData.preferredTimeOfDay,
       isActive: formData.isActive,
       isOutdoor: formData.isOutdoor,
-      minTemperature: formData.minTemperature,
-      maxTemperature: formData.maxTemperature
-    });
+      // createdAt will be set by the database service
+    };
+
+    // Add optional properties only if they have values
+    if (formData.description.trim()) {
+      submitData.description = formData.description.trim();
+    }
+    if (formData.minTemperature !== undefined) {
+      submitData.minTemperature = formData.minTemperature;
+    }
+    if (formData.maxTemperature !== undefined) {
+      submitData.maxTemperature = formData.maxTemperature;
+    }
+
+    onSubmit(submitData);
   };
 
   const addWeatherCondition = (type: string) => {
-    const weatherType = type as any;
+    const weatherType = type as WeatherCondition["condition"];
     const existing = formData.preferredWeather.find(w => w.condition === weatherType);
     
     if (existing) return;
@@ -110,9 +143,9 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       ...prev,
       name: suggestion.name,
       isOutdoor: suggestion.isOutdoor,
-      preferredWeather: suggestion.defaultWeather?.map(w => createWeatherCondition(w, 8)) || [],
-      preferredTimeOfDay: suggestion.defaultTimeOfDay || [],
-      description: suggestion.description || ''
+      preferredWeather: suggestion.defaultWeather?.map(w => createWeatherCondition(w, 8)) ?? [],
+      preferredTimeOfDay: suggestion.defaultTimeOfDay ?? [],
+      description: suggestion.description ?? ''
     }));
     setShowSuggestions(false);
   };

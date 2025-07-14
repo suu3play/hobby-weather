@@ -26,7 +26,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ weather, className = '
   const getWindDirection = (degrees: number): string => {
     const directions = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
     const index = Math.round(degrees / 45) % 8;
-    return directions[index];
+    return directions[index] ?? '不明';
   };
 
   const getUVLevel = (uvIndex: number): { level: string; color: string } => {

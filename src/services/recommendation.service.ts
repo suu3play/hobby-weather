@@ -103,27 +103,27 @@ class RecommendationService {
     // 天気タイプスコア (40%)
     const weatherScore = this.calculateWeatherScore(hobby, forecast);
     score += weatherScore * 0.4;
-    breakdown.weather = weatherScore;
+    breakdown['weather'] = weatherScore;
 
     // 気温スコア (25%)
     const temperatureScore = this.calculateTemperatureScore(hobby, forecast);
     score += temperatureScore * 0.25;
-    breakdown.temperature = temperatureScore;
+    breakdown['temperature'] = temperatureScore;
 
     // 降水確率スコア (20%)
     const precipitationScore = this.calculatePrecipitationScore(hobby, forecast);
     score += precipitationScore * 0.2;
-    breakdown.precipitation = precipitationScore;
+    breakdown['precipitation'] = precipitationScore;
 
     // 風速スコア (10%)
     const windScore = this.calculateWindScore(hobby, forecast);
     score += windScore * 0.1;
-    breakdown.wind = windScore;
+    breakdown['wind'] = windScore;
 
     // UVスコア (5%)
     const uvScore = this.calculateUVScore(hobby, forecast);
     score += uvScore * 0.05;
-    breakdown.uv = uvScore;
+    breakdown['uv'] = uvScore;
 
     return { score: Math.max(0, Math.min(100, score)), breakdown };
   }
@@ -311,11 +311,12 @@ class RecommendationService {
     if (recommendedDays.length === 0) return -1;
     
     let bestIndex = 0;
-    let bestScore = recommendedDays[0].score;
+    let bestScore = recommendedDays[0]?.score || 0;
 
     for (let i = 1; i < recommendedDays.length; i++) {
-      if (recommendedDays[i].score > bestScore) {
-        bestScore = recommendedDays[i].score;
+      const currentScore = recommendedDays[i]?.score || 0;
+      if (currentScore > bestScore) {
+        bestScore = currentScore;
         bestIndex = i;
       }
     }

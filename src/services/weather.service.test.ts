@@ -177,8 +177,9 @@ describe('WeatherService', () => {
       const result = await service.getWeatherForecast(35.6762, 139.6503, true);
 
       expect(result.forecasts).toHaveLength(1);
-      expect(result.forecasts[0].temperature.day).toBe(25.5);
-      expect(result.forecasts[0].weatherType).toBe('clear');
+      const firstForecast = result.forecasts[0];
+      expect(firstForecast?.temperature.day).toBe(25.5);
+      expect(firstForecast?.weatherType).toBe('clear');
       expect(result.lat).toBe(35.6762);
       expect(result.lon).toBe(139.6503);
     });
@@ -205,9 +206,10 @@ describe('WeatherService', () => {
       const result = await service.searchLocation('Tokyo');
 
       expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('Tokyo');
-      expect(result[0].lat).toBe(35.6762);
-      expect(result[0].country).toBe('JP');
+      const firstResult = result[0];
+      expect(firstResult?.name).toBe('Tokyo');
+      expect(firstResult?.lat).toBe(35.6762);
+      expect(firstResult?.country).toBe('JP');
     });
   });
 

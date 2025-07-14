@@ -51,6 +51,7 @@ export interface WeatherData {
   weatherDescription: string;
   cloudiness: number;
   uvIndex: number;
+  generatedAt: Date;
   cachedAt: Date;
 }
 

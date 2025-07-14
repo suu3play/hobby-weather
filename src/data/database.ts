@@ -41,11 +41,34 @@ export class HobbyWeatherDatabase extends Dexie {
       });
     });
 
-    // Version 3で場所に種別・住所・カテゴリを追加
+    // Version 3で天気データにgeneratedAtを追加
     this.version(3).stores({
       hobbies: '++id, name, isActive, createdAt',
-      weatherData: '++id, [lat+lon], datetime, weatherType, cachedAt',
-      weatherForecasts: '++id, [lat+lon], cachedAt',
+      weatherData: '++id, [lat+lon], datetime, weatherType, generatedAt, cachedAt',
+      weatherForecasts: '++id, [lat+lon], generatedAt, cachedAt',
+      locations: '++id, name, isDefault, createdAt',
+      settings: '++id'
+    }).upgrade(async (trans) => {
+      // 既存の天気データにgeneratedAtを追加
+      await trans.table('weatherData').toCollection().modify((weatherData) => {
+        if (!weatherData.generatedAt) {
+          weatherData.generatedAt = weatherData.cachedAt || new Date();
+        }
+      });
+      
+      // 既存の天気予報データにgeneratedAtを追加
+      await trans.table('weatherForecasts').toCollection().modify((forecast) => {
+        if (!forecast.generatedAt) {
+          forecast.generatedAt = forecast.cachedAt || new Date();
+        }
+      });
+    });
+
+    // Version 4で場所に種別・住所・カテゴリを追加
+    this.version(4).stores({
+      hobbies: '++id, name, isActive, createdAt',
+      weatherData: '++id, [lat+lon], datetime, weatherType, generatedAt, cachedAt',
+      weatherForecasts: '++id, [lat+lon], generatedAt, cachedAt',
       locations: '++id, name, isDefault, createdAt',
       settings: '++id'
     }).upgrade(async (trans) => {

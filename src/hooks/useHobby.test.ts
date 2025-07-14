@@ -52,7 +52,7 @@ describe('useHobby', () => {
       }
     ];
 
-    const mockActiveHobbies: Hobby[] = [mockHobbies[0]];
+    const mockActiveHobbies: Hobby[] = mockHobbies.slice(0, 1);
 
     (databaseService.getAllHobbies as any).mockResolvedValue(mockHobbies);
     (databaseService.getActiveHobbies as any).mockResolvedValue(mockActiveHobbies);

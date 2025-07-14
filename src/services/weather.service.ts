@@ -1,5 +1,6 @@
 import type { 
   OpenWeatherMapCurrentResponse, 
+  OpenWeatherMapForecastResponse,
   WeatherApiError 
 } from '../types/api';
 import type { WeatherData, WeatherForecast, DailyForecast, WeatherType, LocationSearchResult, LocationType } from '../types';
@@ -21,13 +22,13 @@ export class WeatherService {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        localApiKey = parsed.openWeatherApiKey || '';
+        localApiKey = parsed.openWeatherApiKey ?? '';
       } catch (error) {
         console.error('Failed to parse saved API settings:', error);
       }
     }
     
-    const apiKey = localApiKey || import.meta.env.VITE_OPENWEATHER_API_KEY || '';
+    const apiKey = localApiKey || (import.meta.env['VITE_OPENWEATHER_API_KEY'] ?? '');
     
     if (!apiKey) {
       console.warn('OpenWeatherMap API key not found. Please set it in Settings or VITE_OPENWEATHER_API_KEY environment variable.');
@@ -85,6 +86,7 @@ export class WeatherService {
     const url = `${this.baseUrl}/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric&lang=ja`;
     const response: OpenWeatherMapCurrentResponse = await this.makeRequest(url);
 
+    const now = new Date();
     const weatherData: Omit<WeatherData, 'id'> = {
       lat,
       lon,
@@ -95,12 +97,13 @@ export class WeatherService {
       pressure: response.main.pressure,
       visibility: response.visibility,
       windSpeed: response.wind.speed,
-      windDirection: response.wind.deg,
-      weatherType: this.mapWeatherCondition(response.weather[0].main),
-      weatherDescription: response.weather[0].description,
+      windDirection: response.wind?.deg ?? 0,
+      weatherType: this.mapWeatherCondition(response.weather?.[0]?.main ?? 'clear'),
+      weatherDescription: response.weather?.[0]?.description ?? 'unknown',
       cloudiness: response.clouds.all,
       uvIndex: 0, // Current weather API doesn't provide UV index
-      cachedAt: new Date()
+      generatedAt: now,
+      cachedAt: now
     };
 
     // Save to cache
@@ -120,17 +123,25 @@ export class WeatherService {
 
     // OneCall API is paid service since June 2023, use 5-day forecast instead
     const url = `${this.baseUrl}/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric&lang=ja`;
-    const response: any = await this.makeRequest(url);
+    const response: OpenWeatherMapForecastResponse = await this.makeRequest(url);
+
+    // Validate response structure
+    if (!response.list || !Array.isArray(response.list)) {
+      throw new Error('Invalid forecast response format');
+    }
 
     // Group forecasts by date and calculate daily aggregates
     const dailyData = new Map<string, any[]>();
     
-    response.list.forEach((item: any) => {
+    response.list.forEach((item) => {
       const date = new Date(item.dt * 1000).toDateString();
       if (!dailyData.has(date)) {
         dailyData.set(date, []);
       }
-      dailyData.get(date)!.push(item);
+      const dayData = dailyData.get(date);
+      if (dayData) {
+        dayData.push(item);
+      }
     });
 
     const dailyForecasts: DailyForecast[] = Array.from(dailyData.entries())
@@ -143,33 +154,36 @@ export class WeatherService {
         const winds = items.map(item => item.wind.speed);
         
         // Use the most common weather condition for the day
-        const weather = items[Math.floor(items.length / 2)].weather[0];
+        const weather = items[Math.floor(items.length / 2)]?.weather?.[0];
+        if (!weather) {
+          throw new Error('Invalid weather data in forecast');
+        }
         
         return {
           date: new Date(dateString),
           temperature: {
             min: Math.min(...temps),
             max: Math.max(...temps),
-            morning: items.find(item => new Date(item.dt * 1000).getHours() === 6)?.main.temp || temps[0],
-            day: items.find(item => new Date(item.dt * 1000).getHours() === 12)?.main.temp || temps[Math.floor(temps.length / 2)],
-            evening: items.find(item => new Date(item.dt * 1000).getHours() === 18)?.main.temp || temps[temps.length - 1],
-            night: items.find(item => new Date(item.dt * 1000).getHours() === 0)?.main.temp || temps[0]
+            morning: items.find(item => new Date(item.dt * 1000).getHours() === 6)?.main.temp ?? temps[0] ?? 0,
+            day: items.find(item => new Date(item.dt * 1000).getHours() === 12)?.main.temp ?? temps[Math.floor(temps.length / 2)] ?? 0,
+            evening: items.find(item => new Date(item.dt * 1000).getHours() === 18)?.main.temp ?? temps[temps.length - 1] ?? 0,
+            night: items.find(item => new Date(item.dt * 1000).getHours() === 0)?.main.temp ?? temps[0] ?? 0
           },
           feelsLike: {
-            morning: items.find(item => new Date(item.dt * 1000).getHours() === 6)?.main.feels_like || feelsLike[0],
-            day: items.find(item => new Date(item.dt * 1000).getHours() === 12)?.main.feels_like || feelsLike[Math.floor(feelsLike.length / 2)],
-            evening: items.find(item => new Date(item.dt * 1000).getHours() === 18)?.main.feels_like || feelsLike[feelsLike.length - 1],
-            night: items.find(item => new Date(item.dt * 1000).getHours() === 0)?.main.feels_like || feelsLike[0]
+            morning: items.find(item => new Date(item.dt * 1000).getHours() === 6)?.main.feels_like ?? feelsLike[0] ?? 0,
+            day: items.find(item => new Date(item.dt * 1000).getHours() === 12)?.main.feels_like ?? feelsLike[Math.floor(feelsLike.length / 2)] ?? 0,
+            evening: items.find(item => new Date(item.dt * 1000).getHours() === 18)?.main.feels_like ?? feelsLike[feelsLike.length - 1] ?? 0,
+            night: items.find(item => new Date(item.dt * 1000).getHours() === 0)?.main.feels_like ?? feelsLike[0] ?? 0
           },
           humidity: Math.round(humidities.reduce((a, b) => a + b, 0) / humidities.length),
           pressure: Math.round(pressures.reduce((a, b) => a + b, 0) / pressures.length),
           windSpeed: Math.round((winds.reduce((a, b) => a + b, 0) / winds.length) * 10) / 10,
-          windDirection: items[Math.floor(items.length / 2)].wind.deg || 0,
+          windDirection: items[Math.floor(items.length / 2)]?.wind?.deg ?? 0,
           weatherType: this.mapWeatherCondition(weather.main),
           weatherDescription: weather.description,
-          cloudiness: items[Math.floor(items.length / 2)].clouds?.all || 0,
+          cloudiness: items[Math.floor(items.length / 2)]?.clouds?.all ?? 0,
           uvIndex: 0, // 5-day forecast doesn't include UV index
-          pop: Math.max(...items.map(item => item.pop || 0))
+          pop: Math.max(...items.map(item => item.pop ?? 0))
         };
       });
 
@@ -344,11 +358,11 @@ export class WeatherService {
     };
 
     if (location.tags?.amenity) {
-      return amenityTypes[location.tags.amenity] || location.tags.amenity;
+      return amenityTypes[location.tags.amenity] ?? location.tags.amenity;
     }
 
     if (location.tags?.shop) {
-      return shopTypes[location.tags.shop] || location.tags.shop;
+      return shopTypes[location.tags.shop] ?? location.tags.shop;
     }
 
     if (location.tags?.tourism) {
@@ -411,7 +425,10 @@ export class WeatherService {
     }
 
     const location = locations[0];
-    return location.local_names?.ja || location.name || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    if (location) {
+      return location.local_names?.ja ?? location.name ?? `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    }
+    return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
   }
 
   getWeatherIcon(weatherType: WeatherType): string {
@@ -428,7 +445,7 @@ export class WeatherService {
       dust: '💨'
     };
 
-    return iconMap[weatherType] || '❓';
+    return iconMap[weatherType] ?? '❓';
   }
 
   getWeatherDescription(weatherType: WeatherType): string {
@@ -445,7 +462,7 @@ export class WeatherService {
       dust: '砂埃'
     };
 
-    return descriptionMap[weatherType] || '不明';
+    return descriptionMap[weatherType] ?? '不明';
   }
 }
 

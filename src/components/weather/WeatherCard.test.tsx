@@ -18,6 +18,7 @@ describe('WeatherCard', () => {
     windDirection: 180,
     weatherType: 'clear',
     weatherDescription: '晴天',
+    generatedAt: new Date('2024-01-15T12:00:00'),
     cloudiness: 0,
     uvIndex: 5.2,
     cachedAt: new Date('2024-01-15T12:00:00')
