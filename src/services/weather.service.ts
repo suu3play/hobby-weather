@@ -100,6 +100,7 @@ export class WeatherService {
       windDirection: response.wind?.deg ?? 0,
       weatherType: this.mapWeatherCondition(response.weather?.[0]?.main ?? 'clear'),
       weatherDescription: response.weather?.[0]?.description ?? 'unknown',
+      condition: response.weather?.[0]?.description ?? 'unknown',
       cloudiness: response.clouds.all,
       uvIndex: 0, // Current weather API doesn't provide UV index
       generatedAt: now,

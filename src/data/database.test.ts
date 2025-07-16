@@ -111,6 +111,7 @@ describe('Database', () => {
         windDirection: 180,
         weatherType: 'clear',
         weatherDescription: '晴れ',
+        condition: '晴れ',
         cloudiness: 0,
         uvIndex: 8,
         generatedAt: oldDate,
