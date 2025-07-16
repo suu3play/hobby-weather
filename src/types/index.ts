@@ -49,6 +49,7 @@ export interface WeatherData {
   windDirection: number;
   weatherType: WeatherType;
   weatherDescription: string;
+  condition: string; // 天気状況の説明文
   cloudiness: number;
   uvIndex: number;
   generatedAt: Date;
@@ -102,6 +103,8 @@ export interface Location {
   type?: LocationType;
   address?: string;
   category?: string; // 店舗カテゴリ（レストラン、公園、美術館など）
+  state?: string; // 都道府県/州
+  country?: string; // 国
   createdAt: Date;
 }
 

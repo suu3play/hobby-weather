@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { HobbyManager } from './components/hobby/HobbyManager';
 import { WeatherDisplay } from './components/weather/WeatherDisplay';
 import { RecommendationDashboard } from './components/recommendation/RecommendationDashboard';
 import { SettingsPage } from './components/settings/SettingsPage';
+import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
+import { useInitialSetup } from './hooks/useInitialSetup';
 import myLogo from './assets/hobbyWeather.png';
 
 // アプリケーションのメインタブ
@@ -10,6 +12,23 @@ type TabType = 'weather' | 'hobbies' | 'recommendations' | 'settings';
 
 function App() {
     const [activeTab, setActiveTab] = useState<TabType>('recommendations');
+    const { setupState } = useInitialSetup();
+    const [showSetupFlow, setShowSetupFlow] = useState(false);
+
+    // セットアップ完了状態の監視
+    React.useEffect(() => {
+        setShowSetupFlow(!setupState.isCompleted && !setupState.isLoading);
+    }, [setupState.isCompleted, setupState.isLoading]);
+
+    // カスタムイベントでセットアップ完了を監視
+    React.useEffect(() => {
+        const handleSetupCompleted = () => {
+            setShowSetupFlow(false);
+        };
+
+        window.addEventListener('setup-completed', handleSetupCompleted);
+        return () => window.removeEventListener('setup-completed', handleSetupCompleted);
+    }, []);
 
     // タブの設定
     const tabs = [
@@ -18,6 +37,23 @@ function App() {
         { id: 'hobbies' as TabType, label: '趣味管理', icon: '🎨' },
         { id: 'settings' as TabType, label: '設定', icon: '⚙️' },
     ];
+
+    // 初期セットアップが完了していない場合、セットアップフローを表示
+    if (showSetupFlow) {
+        return <InitialSetupFlow />;
+    }
+
+    // 初期化中の場合、ローディング画面を表示
+    if (setupState.isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-gray-600">アプリケーションを初期化中...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">

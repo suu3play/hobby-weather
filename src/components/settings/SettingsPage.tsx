@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ApiKeyDiagnostics } from '../common/ApiKeyDiagnostics';
+import { SetupStatusSection } from './SetupStatusSection';
+import { SetupResetSection } from './SetupResetSection';
 
 interface ApiKeySettings {
   openWeatherApiKey: string;
@@ -63,6 +65,9 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <div className="p-6 space-y-8">
+          {/* セットアップ状態セクション */}
+          <SetupStatusSection />
+
           {/* API Key設定セクション */}
           <section>
             <div className="flex items-center space-x-2 mb-4">
@@ -156,6 +161,9 @@ export const SettingsPage: React.FC = () => {
               <ApiKeyDiagnostics />
             </div>
           </section>
+
+          {/* セットアップリセットセクション */}
+          <SetupResetSection />
         </div>
       </div>
     </div>
