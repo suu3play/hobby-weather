@@ -5,6 +5,7 @@ import { RecommendationDashboard } from './components/recommendation/Recommendat
 import { SettingsPage } from './components/settings/SettingsPage';
 import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
 import { useInitialSetup } from './hooks/useInitialSetup';
+import { ThemeToggle } from './components/theme/ThemeToggle';
 import myLogo from './assets/hobbyWeather.png';
 
 // アプリケーションのメインタブ
@@ -27,7 +28,8 @@ function App() {
         };
 
         window.addEventListener('setup-completed', handleSetupCompleted);
-        return () => window.removeEventListener('setup-completed', handleSetupCompleted);
+        return () =>
+            window.removeEventListener('setup-completed', handleSetupCompleted);
     }, []);
 
     // タブの設定
@@ -46,19 +48,21 @@ function App() {
     // 初期化中の場合、ローディング画面を表示
     if (setupState.isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-background-primary flex items-center justify-center">
                 <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-gray-600">アプリケーションを初期化中...</p>
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mb-4"></div>
+                    <p className="text-text-secondary">
+                        アプリケーションを初期化中...
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background-primary">
             {/* ヘッダー */}
-            <header className="bg-white shadow-sm border-b border-gray-200">
+            <header className="bg-surface-primary shadow-sm border-b border-border-primary">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-3">
@@ -67,15 +71,18 @@ function App() {
                                 alt="ロゴ"
                                 className="w-12 h-12"
                             />
-                            <h1 className="text-xl font-bold text-gray-900">
+                            <h1 className="text-xl font-bold text-text-primary">
                                 趣味予報
                             </h1>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-text-tertiary">
                                 hobby-weather
                             </span>
                         </div>
 
                         <div className="flex items-center space-x-4">
+                            {/* テーマ切り替えボタン */}
+                            <ThemeToggle variant="button" />
+
                             {/* ナビゲーションタブ */}
                             <nav className="flex space-x-1">
                                 {tabs.map((tab) => (
@@ -84,8 +91,8 @@ function App() {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${
                                             activeTab === tab.id
-                                                ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                                ? 'bg-primary-100 text-primary-700 border border-primary-200'
+                                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
                                         }`}
                                     >
                                         <span>{tab.icon}</span>
@@ -111,10 +118,10 @@ function App() {
             </main>
 
             {/* フッター */}
-            <footer className="bg-white border-t border-gray-200 mt-12">
+            <footer className="bg-surface-primary border-t border-border-primary mt-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex justify-between items-center">
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-text-secondary">
                             © 2025 趣味予報 - 天気に基づく趣味おすすめアプリ
                         </div>
                     </div>
