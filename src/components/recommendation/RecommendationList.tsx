@@ -77,10 +77,10 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
                     )}
                     {/* タイトル・説明文（中央寄せ） */}
                     <div className="flex flex-col items-center">
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-bold text-text-primary">
                             趣味おすすめ日
                         </h2>
-                        <p className="text-gray-600">
+                        <p className="text-text-secondary">
                             天気予報に基づいて最適な趣味とタイミングを提案します。
                         </p>
                     </div>
