@@ -4,7 +4,10 @@ import type {
   WeatherData, 
   WeatherForecast, 
   Location, 
-  AppSettings 
+  AppSettings,
+  NotificationConfig,
+  NotificationHistory,
+  NotificationSettings
 } from '../types';
 
 export class HobbyWeatherDatabase extends Dexie {
@@ -13,6 +16,9 @@ export class HobbyWeatherDatabase extends Dexie {
   weatherForecasts!: Table<WeatherForecast>;
   locations!: Table<Location>;
   settings!: Table<AppSettings>;
+  notificationConfigs!: Table<NotificationConfig>;
+  notificationHistory!: Table<NotificationHistory>;
+  notificationSettings!: Table<NotificationSettings>;
 
   constructor() {
     super('HobbyWeatherDB');
@@ -86,6 +92,28 @@ export class HobbyWeatherDatabase extends Dexie {
       });
     });
 
+    // Version 5で通知機能のテーブルを追加
+    this.version(5).stores({
+      hobbies: '++id, name, isActive, createdAt',
+      weatherData: '++id, [lat+lon], datetime, weatherType, generatedAt, cachedAt',
+      weatherForecasts: '++id, [lat+lon], generatedAt, cachedAt',
+      locations: '++id, name, isDefault, createdAt',
+      settings: '++id',
+      notificationConfigs: '++id, type, enabled, createdAt',
+      notificationHistory: '++id, configId, type, sentAt',
+      notificationSettings: '++id'
+    }).upgrade(async (trans) => {
+      // デフォルトの通知設定を追加
+      await trans.table('notificationSettings').add({
+        globalEnabled: true,
+        quietHours: null,
+        maxDailyNotifications: 10,
+        soundEnabled: true,
+        vibrationEnabled: true,
+        updatedAt: new Date()
+      });
+    });
+
     this.hobbies.hook('creating', (_, obj) => {
       obj.createdAt = new Date();
       obj.updatedAt = new Date();
@@ -106,6 +134,23 @@ export class HobbyWeatherDatabase extends Dexie {
     this.settings.hook('updating', (modifications) => {
       (modifications as any).updatedAt = new Date();
     });
+
+    this.notificationConfigs.hook('creating', (_, obj) => {
+      obj.createdAt = new Date();
+      obj.updatedAt = new Date();
+    });
+
+    this.notificationConfigs.hook('updating', (modifications) => {
+      (modifications as any).updatedAt = new Date();
+    });
+
+    this.notificationSettings.hook('creating', (_, obj) => {
+      obj.updatedAt = new Date();
+    });
+
+    this.notificationSettings.hook('updating', (modifications) => {
+      (modifications as any).updatedAt = new Date();
+    });
   }
 
   async initializeDefaultData() {
@@ -117,6 +162,19 @@ export class HobbyWeatherDatabase extends Dexie {
         language: 'ja',
         notificationsEnabled: true,
         cacheExpiration: 6,
+        updatedAt: new Date()
+      });
+    }
+
+    // デフォルトの通知設定を初期化
+    const notificationSettingsCount = await this.notificationSettings.count();
+    if (notificationSettingsCount === 0) {
+      await this.notificationSettings.add({
+        globalEnabled: true,
+        quietHours: null,
+        maxDailyNotifications: 10,
+        soundEnabled: true,
+        vibrationEnabled: true,
         updatedAt: new Date()
       });
     }

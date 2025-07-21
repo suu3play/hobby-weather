@@ -1,0 +1,150 @@
+import { describe, it, expect } from 'vitest';
+import { HighScoreNotificationService } from '../high-score-notification.service';
+import type { Hobby, WeatherForecast, HobbyRecommendation } from '../../types';
+
+const createMockHobby = (id: number, name: string, isActive = true): Hobby => ({
+  id,
+  name,
+  isActive,
+  preferredWeather: [{ condition: 'clear', weight: 8 }],
+  minTemperature: 15,
+  maxTemperature: 25,
+  createdAt: new Date(),
+  isOutdoor: true
+});
+
+const createMockWeatherForecast = (): WeatherForecast => ({
+  location: { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
+  current: {
+    temperature: 22,
+    humidity: 60,
+    windSpeed: 5,
+    uvIndex: 6,
+    pressure: 1013,
+    visibility: 10,
+    weatherType: 'clear',
+    description: '晴れ',
+    precipitationProbability: 10,
+    lastUpdated: new Date()
+  },
+  daily: []
+});
+
+const createMockRecommendation = (hobby: Hobby, score: number): HobbyRecommendation => ({
+  hobby,
+  overallScore: score,
+  bestDayIndex: 0,
+  reasons: ['天気が良好'],
+  warnings: [],
+  dailyScores: [score, score - 10, score - 20]
+});
+
+describe('HighScoreNotificationService - 基本機能', () => {
+  describe('createHighScoreNotificationPayload', () => {
+    it('単一の趣味の場合は適切なペイロードを作成する', () => {
+      const service = HighScoreNotificationService.getInstance();
+      const hobby = createMockHobby(1, 'テニス');
+      const recommendations = [createMockRecommendation(hobby, 85)];
+      const forecast = createMockWeatherForecast();
+
+      const payload = service.createHighScoreNotificationPayload(recommendations, forecast);
+
+      expect(payload.type).toBe('high-score');
+      expect(payload.title).toBe('テニスが最適です！');
+      expect(payload.message).toContain('晴れで気温22°C');
+      expect(payload.message).toContain('スコア85点');
+      expect(payload.icon).toBe('🌟');
+      expect(payload.data?.recommendations).toHaveLength(1);
+      expect(payload.data?.recommendations[0].hobbyName).toBe('テニス');
+      expect(payload.data?.recommendations[0].score).toBe(85);
+    });
+
+    it('複数の趣味の場合は適切なペイロードを作成する', () => {
+      const service = HighScoreNotificationService.getInstance();
+      const hobbies = [
+        createMockHobby(1, 'テニス'),
+        createMockHobby(2, 'ジョギング'),
+        createMockHobby(3, 'サイクリング')
+      ];
+      const recommendations = hobbies.map((hobby, index) => 
+        createMockRecommendation(hobby, 85 - index * 2)
+      );
+      const forecast = createMockWeatherForecast();
+
+      const payload = service.createHighScoreNotificationPayload(recommendations, forecast);
+
+      expect(payload.type).toBe('high-score');
+      expect(payload.title).toBe('3つの趣味が最適です！');
+      expect(payload.message).toContain('テニス、ジョギング、サイクリング');
+      expect(payload.message).toContain('最高スコア: 85点');
+      expect(payload.icon).toBe('⭐');
+      expect(payload.data?.recommendations).toHaveLength(3);
+      expect(payload.data?.temperature).toBe(22);
+      expect(payload.data?.weatherCondition).toBe('晴れ');
+    });
+
+    it('天気タイプが正しく日本語変換される', () => {
+      const service = HighScoreNotificationService.getInstance();
+      const hobby = createMockHobby(1, 'テニス');
+      const recommendations = [createMockRecommendation(hobby, 90)];
+      
+      // 雨の天気予報
+      const rainForecast: WeatherForecast = {
+        location: { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
+        current: {
+          temperature: 18,
+          humidity: 80,
+          windSpeed: 3,
+          uvIndex: 2,
+          pressure: 1005,
+          visibility: 8,
+          weatherType: 'rain',
+          description: 'rainy',
+          precipitationProbability: 90,
+          lastUpdated: new Date()
+        },
+        daily: []
+      };
+
+      const payload = service.createHighScoreNotificationPayload(recommendations, rainForecast);
+
+      expect(payload.message).toContain('雨で気温18°C');
+    });
+  });
+
+  describe('getWeatherDescription', () => {
+    it('天気タイプが正しく日本語に変換される', () => {
+      const service = HighScoreNotificationService.getInstance();
+      
+      // private method にアクセスするため any でキャスト
+      const getWeatherDescription = (service as any).getWeatherDescription;
+      
+      expect(getWeatherDescription('clear')).toBe('晴れ');
+      expect(getWeatherDescription('clouds')).toBe('曇り');
+      expect(getWeatherDescription('rain')).toBe('雨');
+      expect(getWeatherDescription('snow')).toBe('雪');
+      expect(getWeatherDescription('unknown')).toBe('unknown');
+    });
+  });
+
+  describe('サービスの基本機能', () => {
+    it('シングルトンパターンで同一インスタンスを返す', () => {
+      const instance1 = HighScoreNotificationService.getInstance();
+      const instance2 = HighScoreNotificationService.getInstance();
+      
+      expect(instance1).toBe(instance2);
+    });
+
+    it('forceEvaluateHighScore メソッドが存在する', () => {
+      const service = HighScoreNotificationService.getInstance();
+      
+      expect(typeof service.forceEvaluateHighScore).toBe('function');
+    });
+
+    it('getHighScoreStatistics メソッドが存在する', () => {
+      const service = HighScoreNotificationService.getInstance();
+      
+      expect(typeof service.getHighScoreStatistics).toBe('function');
+    });
+  });
+});

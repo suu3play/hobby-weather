@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ApiKeyDiagnostics } from '../common/ApiKeyDiagnostics';
 import { SetupStatusSection } from './SetupStatusSection';
 import { SetupResetSection } from './SetupResetSection';
+import { NotificationSettings } from '../notification/NotificationSettings';
 
 interface ApiKeySettings {
   openWeatherApiKey: string;
@@ -152,6 +153,12 @@ export const SettingsPage: React.FC = () => {
                 </div>
               )}
             </div>
+          </section>
+
+          {/* 通知設定セクション */}
+          <section>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">通知設定</h3>
+            <NotificationSettings />
           </section>
 
           {/* API診断セクション */}

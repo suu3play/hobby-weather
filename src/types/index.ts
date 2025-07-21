@@ -136,3 +136,6 @@ export interface AppSettings {
   cacheExpiration: number; // hours
   updatedAt: Date;
 }
+
+// Re-export notification types
+export * from './notification';
