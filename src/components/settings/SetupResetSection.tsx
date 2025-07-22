@@ -68,7 +68,7 @@ export const SetupResetSection: React.FC = () => {
     return (
         <section>
             <div className="flex items-center space-x-2 mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-text-primary">
                     セットアップリセット
                 </h3>
                 <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">

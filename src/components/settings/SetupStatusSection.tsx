@@ -24,7 +24,7 @@ export const SetupStatusSection: React.FC = () => {
             {/* セットアップ状態表示 */}
             <section>
                 <div className="flex items-center space-x-2 mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-text-primary">
                         セットアップ状態
                     </h3>
                     <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
@@ -49,7 +49,9 @@ export const SetupStatusSection: React.FC = () => {
                                         : 'text-red-600'
                                 }`}
                             >
-                                {setupState.hasApiKey ? '✓ 設定済み' : '✗ 未設定'}
+                                {setupState.hasApiKey
+                                    ? '✓ 設定済み'
+                                    : '✗ 未設定'}
                             </div>
                         </div>
 
@@ -68,7 +70,9 @@ export const SetupStatusSection: React.FC = () => {
                                         : 'text-red-600'
                                 }`}
                             >
-                                {setupState.hasLocation ? '✓ 設定済み' : '✗ 未設定'}
+                                {setupState.hasLocation
+                                    ? '✓ 設定済み'
+                                    : '✗ 未設定'}
                             </div>
                             {setupState.hasLocation && (
                                 <div className="text-xs text-gray-500 mt-1">
@@ -113,7 +117,9 @@ export const SetupStatusSection: React.FC = () => {
                                             : 'text-orange-600'
                                     }`}
                                 >
-                                    {setupState.isCompleted ? '✓ 完了' : '⚠ 未完了'}
+                                    {setupState.isCompleted
+                                        ? '✓ 完了'
+                                        : '⚠ 未完了'}
                                 </span>
                             </div>
 
