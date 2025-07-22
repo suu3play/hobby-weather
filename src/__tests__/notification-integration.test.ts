@@ -9,7 +9,7 @@ Object.defineProperty(globalThis, 'Notification', {
     body: string | undefined;
     constructor(title: string, options?: NotificationOptions) {
       this.title = title;
-      this.body = options?.body;
+      this.body = options?.body ?? undefined;
     }
     static permission: NotificationPermission = 'granted';
     static requestPermission = vi.fn().mockResolvedValue('granted');
