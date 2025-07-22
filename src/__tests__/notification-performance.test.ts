@@ -5,10 +5,7 @@ import type { NotificationPayload } from '../types/notification';
 // Global mocks
 Object.defineProperty(globalThis, 'Notification', {
   value: class MockNotification {
-    title: string;
-    constructor(title: string, options?: NotificationOptions) {
-      this.title = title;
-    }
+    constructor(_title: string, _options?: NotificationOptions) {}
     static permission: NotificationPermission = 'granted';
     static requestPermission = vi.fn().mockResolvedValue('granted');
     close = vi.fn();
@@ -133,7 +130,7 @@ describe('通知システム パフォーマンステスト', () => {
       message: '大量のデータを含む通知'.repeat(100),
       data: {
         recommendations: Array.from({ length: 100 }, (_, i) => ({
-          hobbyName: `趣味${i}`,
+          name: `趣味${i}`,
           score: Math.random() * 100,
           details: {
             weather: `天気${i}`,
@@ -242,8 +239,8 @@ describe('通知システム 品質メトリクス', () => {
   it('通知データの整合性が保たれている', () => {
     const payload = service.createDetailedHighScoreNotification(
       [
-        { hobbyName: 'テニス', score: 90 },
-        { hobbyName: 'ジョギング', score: 85 }
+        { name: 'テニス', score: 90 },
+        { name: 'ジョギング', score: 85 }
       ],
       '晴れ',
       22

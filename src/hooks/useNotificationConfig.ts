@@ -136,7 +136,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
   const refreshHistory = useCallback(async () => {
     try {
       setError(null);
-      const historyData = await configService.getNotificationHistory(50);
+      const historyData = await configService.getNotificationHistory({ limit: 50 });
       setHistory(historyData);
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知履歴の再読み込みに失敗しました');

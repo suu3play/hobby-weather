@@ -3,11 +3,12 @@ import { RecommendationService } from './recommendation.service';
 import { WeatherService } from './weather.service';
 import { NotificationConfigService } from './notification-config.service';
 import type { 
-  Hobby, 
   WeatherForecast,
-  HobbyRecommendation,
-  NotificationPayload 
+  NotificationPayload,
+  DailyForecast,
+  Hobby
 } from '../types';
+// import type { HobbyRecommendation } from './recommendation.service'; // Unused import
 
 export interface HighScoreThreshold {
   minScore: number; // 通知を送る最低スコア（デフォルト: 80）
@@ -15,9 +16,19 @@ export interface HighScoreThreshold {
   cooldownHours: number; // 同じ趣味の再通知までの時間（デフォルト: 6時間）
 }
 
+// 内部用のスコア付き趣味推薦
+export interface ScoredRecommendation {
+  hobby: Hobby;
+  score: number;
+  overallScore: number;
+  date: Date;
+  weather: DailyForecast;
+  reasons: string[];
+}
+
 export interface HighScoreNotificationResult {
   notificationSent: boolean;
-  recommendations: HobbyRecommendation[];
+  recommendations: ScoredRecommendation[];
   reason?: string;
 }
 
@@ -34,7 +45,7 @@ export class HighScoreNotificationService {
     weatherService?: WeatherService,
     configService?: NotificationConfigService
   ) {
-    this.databaseService = databaseService || DatabaseService.getInstance();
+    this.databaseService = databaseService || new DatabaseService();
     this.recommendationService = recommendationService || new RecommendationService();
     this.weatherService = weatherService || new WeatherService();
     this.configService = configService || new NotificationConfigService();
@@ -57,7 +68,8 @@ export class HighScoreNotificationService {
   ): Promise<HighScoreNotificationResult> {
     try {
       // 現在の天気予報を取得
-      const forecast = await this.weatherService.getCurrentForecast();
+      const defaultLocation = { lat: 35.6762, lon: 139.6503 }; // Tokyo default
+      const forecast = await this.weatherService.getWeatherForecast(defaultLocation.lat, defaultLocation.lon);
       if (!forecast) {
         return {
           notificationSent: false,
@@ -82,8 +94,31 @@ export class HighScoreNotificationService {
         forecast
       );
 
+      // RecommendationServiceの形式をNotificationサービス用に変換
+      const convertedRecommendations = recommendations.map(rec => ({
+        hobby: rec.hobby,
+        score: rec.overallScore,
+        overallScore: rec.overallScore,
+        date: new Date(),
+        weather: forecast.forecasts?.[0] || {
+          date: new Date(),
+          temperature: { min: 18, max: 25, morning: 20, day: 22, evening: 21, night: 19 },
+          feelsLike: { morning: 19, day: 21, evening: 20, night: 18 },
+          humidity: forecast.current?.humidity || 60,
+          pressure: forecast.current?.pressure || 1013,
+          windSpeed: forecast.current?.windSpeed || 5,
+          windDirection: forecast.current?.windDirection || 180,
+          weatherType: forecast.current?.weatherType || 'clear',
+          weatherDescription: forecast.current?.weatherDescription || '晴れ',
+          cloudiness: forecast.current?.cloudiness || 10,
+          uvIndex: forecast.current?.uvIndex || 6,
+          pop: 10
+        },
+        reasons: rec.recommendedDays?.[0]?.matchingFactors || ['天気に基づいた推薦']
+      }));
+
       // 高スコアの趣味をフィルタリング
-      const highScoreRecommendations = recommendations
+      const highScoreRecommendations = convertedRecommendations
         .filter(rec => rec.overallScore >= threshold.minScore)
         .sort((a, b) => b.overallScore - a.overallScore)
         .slice(0, threshold.topN);
@@ -127,12 +162,13 @@ export class HighScoreNotificationService {
 
   // 高スコア通知のペイロードを作成
   createHighScoreNotificationPayload(
-    recommendations: HobbyRecommendation[],
+    recommendations: ScoredRecommendation[],
     forecast: WeatherForecast
   ): NotificationPayload {
     const topHobby = recommendations[0];
-    const weatherCondition = this.getWeatherDescription(forecast.current.weatherType);
-    const temperature = Math.round(forecast.current.temperature);
+    const currentWeather = forecast.current;
+    const weatherCondition = this.getWeatherDescription(currentWeather?.weatherType || 'clear');
+    const temperature = Math.round(currentWeather?.temperature || 20);
 
     // 複数の趣味がある場合
     if (recommendations.length > 1) {
@@ -144,12 +180,11 @@ export class HighScoreNotificationService {
       return {
         type: 'high-score',
         title: `${recommendations.length}つの趣味が最適です！`,
-        message: `${weatherCondition}で気温${temperature}°C。${hobbyNames}などがおすすめです。最高スコア: ${Math.round(topHobby.overallScore)}点`,
+        message: `${weatherCondition}で気温${temperature}°C。${hobbyNames}などがおすすめです。最高スコア: ${Math.round(topHobby?.overallScore ?? 0)}点`,
         icon: '⭐',
         data: {
           recommendations: recommendations.map(rec => ({
-            hobbyId: rec.hobby.id!,
-            hobbyName: rec.hobby.name,
+            name: rec.hobby.name,
             score: rec.overallScore
           })),
           weatherCondition,
@@ -161,14 +196,13 @@ export class HighScoreNotificationService {
     // 単一の趣味の場合
     return {
       type: 'high-score',
-      title: `${topHobby.hobby.name}が最適です！`,
-      message: `${weatherCondition}で気温${temperature}°C。スコア${Math.round(topHobby.overallScore)}点の高評価です！`,
+      title: `${topHobby?.hobby.name ?? '趣味活動'}が最適です！`,
+      message: `${weatherCondition}で気温${temperature}°C。スコア${Math.round(topHobby?.overallScore ?? 0)}点の高評価です！`,
       icon: '🌟',
       data: {
         recommendations: [{
-          hobbyId: topHobby.hobby.id!,
-          hobbyName: topHobby.hobby.name,
-          score: topHobby.overallScore
+          name: topHobby?.hobby.name ?? '趣味活動',
+          score: topHobby?.overallScore ?? 0
         }],
         weatherCondition,
         temperature
@@ -193,9 +227,9 @@ export class HighScoreNotificationService {
 
       // いずれかの趣味が最近通知されていたらクールダウン中
       for (const notification of recentNotifications) {
-        if (notification.data && notification.data.recommendations) {
-          const notifiedHobbyIds = notification.data.recommendations.map(
-            (rec: any) => rec.hobbyId
+        if (notification.data && notification.data['recommendations'] && Array.isArray(notification.data['recommendations'])) {
+          const notifiedHobbyIds = (notification.data['recommendations'] as any[]).map(
+            (rec: any) => rec.hobbyId || rec.name
           );
           
           const hasOverlap = hobbyIds.some(id => notifiedHobbyIds.includes(id));
@@ -268,7 +302,7 @@ export class HighScoreNotificationService {
 
       // スコアの平均を計算
       const scores = history
-        .map(h => h.data?.recommendations?.[0]?.score || 0)
+        .map(h => (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations']) && h.data['recommendations'][0] && typeof h.data['recommendations'][0] === 'object' && 'score' in h.data['recommendations'][0]) ? (h.data['recommendations'][0] as any).score : 0)
         .filter(score => score > 0);
       
       const averageScore = scores.length > 0 
@@ -278,9 +312,12 @@ export class HighScoreNotificationService {
       // 最も多く通知された趣味を特定
       const hobbyCount: Record<string, number> = {};
       history.forEach(h => {
-        if (h.data?.recommendations) {
-          h.data.recommendations.forEach((rec: any) => {
-            hobbyCount[rec.hobbyName] = (hobbyCount[rec.hobbyName] || 0) + 1;
+        if (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations'])) {
+          (h.data['recommendations'] as any[]).forEach((rec: any) => {
+            const hobbyName = rec.name || rec.hobbyName; // \u30b3\u30f3\u30d1\u30c1\u30d3\u30ea\u30c6\u30a3\u306e\u305f\u3081\u4e21\u65b9\u3092\u30b5\u30dd\u30fc\u30c8
+            if (hobbyName) {
+              hobbyCount[hobbyName] = (hobbyCount[hobbyName] || 0) + 1;
+            }
           });
         }
       });
@@ -296,7 +333,7 @@ export class HighScoreNotificationService {
         totalHighScoreNotifications: history.length,
         averageScore: Math.round(averageScore),
         topHobby,
-        lastNotificationTime: history.length > 0 ? history[0].sentAt : null
+        lastNotificationTime: history.length > 0 ? (history[0]?.sentAt ?? null) : null
       };
 
     } catch (error) {
