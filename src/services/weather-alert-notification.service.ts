@@ -87,7 +87,8 @@ export class WeatherAlertNotificationService {
   // 天気急変アラートの評価
   async evaluateWeatherAlerts(): Promise<WeatherAlertResult[]> {
     try {
-      const currentForecast = await this.weatherService.getCurrentForecast();
+      const defaultLocation = { lat: 35.6762, lon: 139.6503 }; // Tokyo default
+      const currentForecast = await this.weatherService.getWeatherForecast(defaultLocation.lat, defaultLocation.lon);
       if (!currentForecast) {
         return [{
           alertTriggered: false,
@@ -185,19 +186,19 @@ export class WeatherAlertNotificationService {
 
     switch (condition.type) {
       case 'precipitation':
-        currentValue = forecast.current.precipitationProbability;
+        currentValue = forecast.forecasts[0]?.pop ?? 0;
         break;
       case 'temperature':
-        currentValue = forecast.current.temperature;
+        currentValue = forecast.forecasts[0]?.temperature.day ?? 0;
         break;
       case 'wind':
-        currentValue = forecast.current.windSpeed;
+        currentValue = forecast.forecasts[0]?.windSpeed ?? 0;
         break;
       case 'uv':
-        currentValue = forecast.current.uvIndex;
+        currentValue = forecast.forecasts[0]?.uvIndex ?? 0;
         break;
       case 'visibility':
-        currentValue = forecast.current.visibility;
+        currentValue = 10000; // visibility not available in forecast data
         break;
       default:
         currentValue = 0;
@@ -233,14 +234,14 @@ export class WeatherAlertNotificationService {
     currentForecast: WeatherForecast
   ): WeatherAlertResult[] {
     const alerts: WeatherAlertResult[] = [];
-    const timeDiff = (currentForecast.current.lastUpdated.getTime() - 
-                     previousForecast.current.lastUpdated.getTime()) / (1000 * 60); // 分
+    const timeDiff = (currentForecast.generatedAt.getTime() - 
+                     previousForecast.generatedAt.getTime()) / (1000 * 60); // 分
 
     // 1時間以内の変化のみを急変として扱う
     if (timeDiff > 60) return alerts;
 
     // 気温の急変チェック
-    const tempChange = currentForecast.current.temperature - previousForecast.current.temperature;
+    const tempChange = (currentForecast.forecasts[0]?.temperature.day ?? 0) - (previousForecast.forecasts[0]?.temperature.day ?? 0);
     if (Math.abs(tempChange) >= 5) {
       alerts.push({
         alertTriggered: true,
@@ -248,16 +249,16 @@ export class WeatherAlertNotificationService {
         severity: Math.abs(tempChange) >= 10 ? 'urgent' : 'high',
         message: `気温が${Math.abs(tempChange)}°C${tempChange > 0 ? '上昇' : '下降'}しました`,
         details: [{
-          currentValue: currentForecast.current.temperature,
-          threshold: previousForecast.current.temperature,
+          currentValue: currentForecast.forecasts[0]?.temperature.day ?? 0,
+          threshold: previousForecast.forecasts[0]?.temperature.day ?? 0,
           condition: { type: 'temperature', threshold: 5, comparison: 'change' }
         }]
       });
     }
 
     // 降水確率の急変チェック
-    const precipChange = currentForecast.current.precipitationProbability - 
-                        previousForecast.current.precipitationProbability;
+    const precipChange = (currentForecast.forecasts[0]?.pop ?? 0) - 
+                        (previousForecast.forecasts[0]?.pop ?? 0);
     if (precipChange >= 30) {
       alerts.push({
         alertTriggered: true,
@@ -265,15 +266,15 @@ export class WeatherAlertNotificationService {
         severity: precipChange >= 50 ? 'urgent' : 'high',
         message: `降水確率が${precipChange}%上昇しました`,
         details: [{
-          currentValue: currentForecast.current.precipitationProbability,
-          threshold: previousForecast.current.precipitationProbability,
+          currentValue: currentForecast.forecasts[0]?.pop ?? 0,
+          threshold: previousForecast.forecasts[0]?.pop ?? 0,
           condition: { type: 'precipitation', threshold: 30, comparison: 'change' }
         }]
       });
     }
 
     // 風速の急変チェック
-    const windChange = currentForecast.current.windSpeed - previousForecast.current.windSpeed;
+    const windChange = (currentForecast.forecasts[0]?.windSpeed ?? 0) - (previousForecast.forecasts[0]?.windSpeed ?? 0);
     if (windChange >= 10) {
       alerts.push({
         alertTriggered: true,
@@ -281,8 +282,8 @@ export class WeatherAlertNotificationService {
         severity: windChange >= 15 ? 'urgent' : 'high',
         message: `風速が${windChange}m/s増加しました`,
         details: [{
-          currentValue: currentForecast.current.windSpeed,
-          threshold: previousForecast.current.windSpeed,
+          currentValue: currentForecast.forecasts[0]?.windSpeed ?? 0,
+          threshold: previousForecast.forecasts[0]?.windSpeed ?? 0,
           condition: { type: 'wind', threshold: 10, comparison: 'change' }
         }]
       });

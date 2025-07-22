@@ -30,7 +30,7 @@ export interface RecommendationFilters {
   excludeWeekdays?: boolean; // 平日を除外
 }
 
-class RecommendationService {
+export class RecommendationService {
   /**
    * 趣味に基づいて天気予報からおすすめを生成
    */

@@ -1,6 +1,6 @@
 import { DatabaseService } from './database.service';
 import { WeatherService } from './weather.service';
-import { RecommendationService } from './recommendation.service';
+import { recommendationService, RecommendationService } from './recommendation.service';
 import { NotificationConfigService } from './notification-config.service';
 import type { 
   Hobby, 

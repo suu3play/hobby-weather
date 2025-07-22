@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HighScoreNotificationService } from '../high-score-notification.service';
 import { DatabaseService } from '../database.service';
-import { RecommendationService } from '../recommendation.service';
+import { recommendationService, RecommendationService } from '../recommendation.service';
 import { WeatherService } from '../weather.service';
 import { NotificationConfigService } from '../notification-config.service';
 import type { Hobby, WeatherForecast, HobbyRecommendation } from '../../types';

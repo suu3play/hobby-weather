@@ -6,7 +6,7 @@ import type { NotificationPayload } from '../types/notification';
 Object.defineProperty(globalThis, 'Notification', {
   value: class MockNotification {
     title: string;
-    body?: string;
+    body: string | undefined;
     constructor(title: string, options?: NotificationOptions) {
       this.title = title;
       this.body = options?.body;
@@ -182,7 +182,7 @@ describe('通知システム統合テスト', () => {
 
     it('不正な通知ペイロードでもエラーにならない', async () => {
       const invalidPayload = {
-        type: 'unknown-type',
+        type: 'regular-report' as const,
         title: '',
         message: ''
       } as NotificationPayload;

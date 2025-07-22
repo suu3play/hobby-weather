@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotificationService } from '../services/notification.service';
 import type { NotificationPayload } from '../types/notification';
 
 // Global mocks
 Object.defineProperty(globalThis, 'Notification', {
   value: class MockNotification {
-    constructor(title: string, options?: NotificationOptions) {}
+    constructor(_title: string, _options?: NotificationOptions) {}
     static permission: NotificationPermission = 'granted';
     static requestPermission = vi.fn().mockResolvedValue('granted');
     close = vi.fn();
@@ -130,7 +130,7 @@ describe('通知システム パフォーマンステスト', () => {
       message: '大量のデータを含む通知'.repeat(100),
       data: {
         recommendations: Array.from({ length: 100 }, (_, i) => ({
-          hobbyName: `趣味${i}`,
+          name: `趣味${i}`,
           score: Math.random() * 100,
           details: {
             weather: `天気${i}`,
