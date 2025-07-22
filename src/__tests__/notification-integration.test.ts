@@ -114,9 +114,9 @@ describe('通知システム統合テスト', () => {
     it('複数趣味の高スコア通知を作成できる', () => {
       const payload = notificationService.createDetailedHighScoreNotification(
         [
-          { hobbyName: 'テニス', score: 90 },
-          { hobbyName: 'ジョギング', score: 85 },
-          { hobbyName: 'サイクリング', score: 80 }
+          { name: 'テニス', score: 90 },
+          { name: 'ジョギング', score: 85 },
+          { name: 'サイクリング', score: 80 }
         ],
         '晴れ',
         22

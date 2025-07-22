@@ -295,6 +295,7 @@ export class WeatherAlertNotificationService {
   // アラートメッセージの生成
   private generateAlertMessage(alertType: string, details: WeatherAlertResult['details']): string {
     const primaryDetail = details[0];
+    if (!primaryDetail) return `天気急変アラート: ${alertType}`;
     const value = Math.round(primaryDetail.currentValue * 10) / 10;
 
     switch (alertType) {
@@ -325,7 +326,7 @@ export class WeatherAlertNotificationService {
       });
 
       return recentAlerts.some(alert => 
-        alert.data && alert.data.alertType === alertType
+        alert.data && (alert.data as any).alertType === alertType
       );
     } catch (error) {
       console.error('クールダウンチェックエラー:', error);
@@ -414,7 +415,7 @@ export class WeatherAlertNotificationService {
         totalAlerts: history.length,
         byType,
         bySeverity,
-        lastAlertTime: history.length > 0 ? history[0].sentAt : null
+        lastAlertTime: history.length > 0 ? (history[0]?.sentAt ?? null) : null
       };
 
     } catch (error) {

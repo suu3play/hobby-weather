@@ -239,8 +239,8 @@ describe('通知システム 品質メトリクス', () => {
   it('通知データの整合性が保たれている', () => {
     const payload = service.createDetailedHighScoreNotification(
       [
-        { hobbyName: 'テニス', score: 90 },
-        { hobbyName: 'ジョギング', score: 85 }
+        { name: 'テニス', score: 90 },
+        { name: 'ジョギング', score: 85 }
       ],
       '晴れ',
       22

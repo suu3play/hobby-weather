@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HighScoreNotificationService } from '../high-score-notification.service';
 import { DatabaseService } from '../database.service';
-import { recommendationService, RecommendationService } from '../recommendation.service';
+import { RecommendationService } from '../recommendation.service';
 import { WeatherService } from '../weather.service';
 import { NotificationConfigService } from '../notification-config.service';
-import type { Hobby, WeatherForecast, HobbyRecommendation } from '../../types';
+import type { Hobby, WeatherForecast, DailyForecast } from '../../types';
+// import type { HobbyRecommendation } from '../recommendation.service'; // Unused import
+import type { ScoredRecommendation } from '../high-score-notification.service';
 
 // モック設定
 vi.mock('../database.service', () => ({
-  DatabaseService: {
-    getInstance: vi.fn()
-  }
+  DatabaseService: vi.fn()
 }));
 vi.mock('../recommendation.service', () => ({
   RecommendationService: vi.fn()
@@ -34,29 +34,52 @@ const createMockHobby = (id: number, name: string, isActive = true): Hobby => ({
 });
 
 const createMockWeatherForecast = (): WeatherForecast => ({
-  location: { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
+  lat: 35.6762,
+  lon: 139.6503,
   current: {
+    lat: 35.6762,
+    lon: 139.6503,
+    datetime: new Date(),
     temperature: 22,
+    feelsLike: 20,
     humidity: 60,
-    windSpeed: 5,
-    uvIndex: 6,
     pressure: 1013,
     visibility: 10,
+    windSpeed: 5,
+    windDirection: 180,
     weatherType: 'clear',
-    description: '晴れ',
-    precipitationProbability: 10,
-    lastUpdated: new Date()
+    weatherDescription: '晴れ',
+    condition: '晴れ',
+    cloudiness: 10,
+    uvIndex: 6,
+    generatedAt: new Date(),
+    cachedAt: new Date()
   },
-  daily: []
+  forecasts: [],
+  generatedAt: new Date(),
+  cachedAt: new Date()
 });
 
-const createMockRecommendation = (hobby: Hobby, score: number): HobbyRecommendation => ({
+const createMockRecommendation = (hobby: Hobby, score: number): ScoredRecommendation => ({
   hobby,
+  score,
   overallScore: score,
-  bestDayIndex: 0,
-  reasons: ['天気が良好'],
-  warnings: [],
-  dailyScores: [score, score - 10, score - 20]
+  date: new Date(),
+  weather: {
+    date: new Date(),
+    temperature: { min: 18, max: 25, morning: 20, day: 22, evening: 21, night: 19 },
+    feelsLike: { morning: 19, day: 21, evening: 20, night: 18 },
+    humidity: 60,
+    pressure: 1013,
+    windSpeed: 5,
+    windDirection: 180,
+    weatherType: 'clear',
+    weatherDescription: '晴れ',
+    cloudiness: 10,
+    uvIndex: 6,
+    pop: 10
+  } as DailyForecast,
+  reasons: ['天気が良好']
 });
 
 describe('HighScoreNotificationService', () => {
@@ -76,7 +99,7 @@ describe('HighScoreNotificationService', () => {
     mockDatabaseService = {
       getActiveHobbies: vi.fn()
     };
-    vi.mocked(DatabaseService.getInstance).mockReturnValue(mockDatabaseService);
+    vi.mocked(DatabaseService).mockImplementation(() => mockDatabaseService);
 
     // RecommendationService のモック
     mockRecommendationService = {
@@ -86,7 +109,7 @@ describe('HighScoreNotificationService', () => {
 
     // WeatherService のモック
     mockWeatherService = {
-      getCurrentForecast: vi.fn()
+      getWeatherForecast: vi.fn()
     };
     vi.mocked(WeatherService).mockImplementation(() => mockWeatherService);
 
@@ -106,7 +129,7 @@ describe('HighScoreNotificationService', () => {
 
   describe('evaluateAndCreateNotification', () => {
     it('天気予報が取得できない場合は通知しない', async () => {
-      mockWeatherService.getCurrentForecast.mockResolvedValue(null);
+      mockWeatherService.getWeatherForecast.mockResolvedValue(null);
 
       const result = await service.evaluateAndCreateNotification();
 
@@ -115,7 +138,7 @@ describe('HighScoreNotificationService', () => {
     });
 
     it('アクティブな趣味がない場合は通知しない', async () => {
-      mockWeatherService.getCurrentForecast.mockResolvedValue(createMockWeatherForecast());
+      mockWeatherService.getWeatherForecast.mockResolvedValue(createMockWeatherForecast());
       mockDatabaseService.getActiveHobbies.mockResolvedValue([]);
 
       const result = await service.evaluateAndCreateNotification();
@@ -127,9 +150,9 @@ describe('HighScoreNotificationService', () => {
     it('高スコアの趣味がない場合は通知しない', async () => {
       const hobbies = [createMockHobby(1, 'テニス')];
       const forecast = createMockWeatherForecast();
-      const lowScoreRecommendations = [createMockRecommendation(hobbies[0], 60)];
+      const lowScoreRecommendations = [createMockRecommendation(hobbies[0]!, 60)];
 
-      mockWeatherService.getCurrentForecast.mockResolvedValue(forecast);
+      mockWeatherService.getWeatherForecast.mockResolvedValue(forecast);
       mockDatabaseService.getActiveHobbies.mockResolvedValue(hobbies);
       mockRecommendationService.generateRecommendations.mockResolvedValue(lowScoreRecommendations);
 
@@ -142,9 +165,9 @@ describe('HighScoreNotificationService', () => {
     it('高スコアの趣味がある場合は通知する', async () => {
       const hobbies = [createMockHobby(1, 'テニス')];
       const forecast = createMockWeatherForecast();
-      const highScoreRecommendations = [createMockRecommendation(hobbies[0], 85)];
+      const highScoreRecommendations = [createMockRecommendation(hobbies[0]!, 85)];
 
-      mockWeatherService.getCurrentForecast.mockResolvedValue(forecast);
+      mockWeatherService.getWeatherForecast.mockResolvedValue(forecast);
       mockDatabaseService.getActiveHobbies.mockResolvedValue(hobbies);
       mockRecommendationService.generateRecommendations.mockResolvedValue(highScoreRecommendations);
 
@@ -152,13 +175,13 @@ describe('HighScoreNotificationService', () => {
 
       expect(result.notificationSent).toBe(true);
       expect(result.recommendations).toHaveLength(1);
-      expect(result.recommendations[0].overallScore).toBe(85);
+      expect(result.recommendations?.[0]?.overallScore).toBe(85);
     });
 
     it('クールダウン期間中は通知しない', async () => {
       const hobbies = [createMockHobby(1, 'テニス')];
       const forecast = createMockWeatherForecast();
-      const highScoreRecommendations = [createMockRecommendation(hobbies[0], 85)];
+      const highScoreRecommendations = [createMockRecommendation(hobbies[0]!, 85)];
 
       // 最近の通知履歴を設定（クールダウン期間内）
       const recentNotification = {
@@ -173,7 +196,7 @@ describe('HighScoreNotificationService', () => {
         }
       };
 
-      mockWeatherService.getCurrentForecast.mockResolvedValue(forecast);
+      mockWeatherService.getWeatherForecast.mockResolvedValue(forecast);
       mockDatabaseService.getActiveHobbies.mockResolvedValue(hobbies);
       mockRecommendationService.generateRecommendations.mockResolvedValue(highScoreRecommendations);
       mockConfigService.getNotificationHistory.mockResolvedValue([recentNotification]);
@@ -197,7 +220,7 @@ describe('HighScoreNotificationService', () => {
         createMockRecommendation(hobby, 90 - index * 2) // 90, 88, 86, 84, 82
       );
 
-      mockWeatherService.getCurrentForecast.mockResolvedValue(forecast);
+      mockWeatherService.getWeatherForecast.mockResolvedValue(forecast);
       mockDatabaseService.getActiveHobbies.mockResolvedValue(hobbies);
       mockRecommendationService.generateRecommendations.mockResolvedValue(recommendations);
 
@@ -209,8 +232,8 @@ describe('HighScoreNotificationService', () => {
 
       expect(result.notificationSent).toBe(true);
       expect(result.recommendations).toHaveLength(3);
-      expect(result.recommendations[0].hobby.name).toBe('テニス');
-      expect(result.recommendations[0].overallScore).toBe(90);
+      expect(result.recommendations?.[0]?.hobby.name).toBe('テニス');
+      expect(result.recommendations?.[0]?.overallScore).toBe(90);
     });
   });
 
@@ -256,16 +279,16 @@ describe('HighScoreNotificationService', () => {
     it('強制評価では閾値とクールダウンを調整する', async () => {
       const hobbies = [createMockHobby(1, 'テニス')];
       const forecast = createMockWeatherForecast();
-      const recommendations = [createMockRecommendation(hobbies[0], 65)];
+      const recommendations = [createMockRecommendation(hobbies[0]!, 65)];
 
-      mockWeatherService.getCurrentForecast.mockResolvedValue(forecast);
+      mockWeatherService.getWeatherForecast.mockResolvedValue(forecast);
       mockDatabaseService.getActiveHobbies.mockResolvedValue(hobbies);
       mockRecommendationService.generateRecommendations.mockResolvedValue(recommendations);
 
       const result = await service.forceEvaluateHighScore();
 
       expect(result.notificationSent).toBe(true);
-      expect(result.recommendations[0].overallScore).toBe(65);
+      expect(result.recommendations?.[0]?.overallScore).toBe(65);
     });
   });
 
