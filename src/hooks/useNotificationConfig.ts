@@ -46,7 +46,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       const [configsData, settingsData, historyData] = await Promise.all([
         configService.getAllNotificationConfigs(),
         configService.getNotificationSettings(),
-        configService.getNotificationHistory(50) // 最新50件
+        configService.getNotificationHistory({ limit: 50 }) // 最新50件
       ]);
       
       setConfigs(configsData);

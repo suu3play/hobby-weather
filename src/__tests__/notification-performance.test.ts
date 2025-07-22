@@ -1,11 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotificationService } from '../services/notification.service';
 import type { NotificationPayload } from '../types/notification';
 
 // Global mocks
 Object.defineProperty(globalThis, 'Notification', {
   value: class MockNotification {
-    constructor(title: string, options?: NotificationOptions) {}
+    title: string;
+    constructor(title: string, options?: NotificationOptions) {
+      this.title = title;
+    }
     static permission: NotificationPermission = 'granted';
     static requestPermission = vi.fn().mockResolvedValue('granted');
     close = vi.fn();

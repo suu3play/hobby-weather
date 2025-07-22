@@ -9,7 +9,7 @@ Object.defineProperty(globalThis, 'Notification', {
     body?: string;
     constructor(title: string, options?: NotificationOptions) {
       this.title = title;
-      this.body = options?.body;
+      this.body = options?.body ?? undefined;
     }
     static permission: NotificationPermission = 'granted';
     static requestPermission = vi.fn().mockResolvedValue('granted');
@@ -182,7 +182,7 @@ describe('通知システム統合テスト', () => {
 
     it('不正な通知ペイロードでもエラーにならない', async () => {
       const invalidPayload = {
-        type: 'unknown-type',
+        type: 'regular-report' as const,
         title: '',
         message: ''
       } as NotificationPayload;

@@ -60,6 +60,7 @@ export interface WeatherForecast {
   id?: number;
   lat: number;
   lon: number;
+  current?: WeatherData;
   forecasts: DailyForecast[];
   generatedAt: Date;
   cachedAt: Date;
@@ -122,6 +123,7 @@ export interface LocationSearchResult {
 export interface HobbyRecommendation {
   hobby: Hobby;
   score: number;
+  overallScore: number;
   date: Date;
   weather: DailyForecast;
   reasons: string[];

@@ -57,6 +57,16 @@ export interface NotificationHistory {
   sentAt: Date;
   clicked?: boolean;
   dismissed?: boolean;
+  data?: {
+    severity?: 'low' | 'medium' | 'high' | 'urgent';
+    alertType?: string;
+    hobbyId?: number;
+    hobbyName?: string;
+    score?: number;
+    weatherData?: unknown;
+    url?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface NotificationPayload {
@@ -72,6 +82,13 @@ export interface NotificationPayload {
     weatherData?: unknown;
     alertType?: string;
     url?: string;
+    severity?: 'low' | 'medium' | 'high' | 'urgent';
+    topHobbies?: Array<{ name: string; score: number }>;
+    actionItems?: string[];
+    recommendations?: Array<{ name: string; score: number }>;
+    weatherDescription?: string;
+    temperature?: number;
+    [key: string]: unknown;
   };
 }
 
