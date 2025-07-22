@@ -146,6 +146,10 @@ export class RegularReportNotificationService {
 
     const highScoreCount = recommendations.filter(rec => rec.overallScore >= 80).length;
     const topHobby = recommendations[0];
+    
+    if (!topHobby) {
+      return `${periodText[period.type]}は天気条件がやや厳しく、推薦できる趣味活動がありません。`;
+    }
 
     if (highScoreCount === 0) {
       return `${periodText[period.type]}は天気条件がやや厳しく、${recommendations.length}つの趣味活動を確認しましたが高スコアの活動は少なめです。`;
@@ -165,28 +169,30 @@ export class RegularReportNotificationService {
 
   // 天気概要の生成
   private generateWeatherSummary(forecast: WeatherForecast, _period: ReportPeriod): string {
-    const currentWeather = forecast.current;
-    const weatherDescription = this.getWeatherDescription(currentWeather?.weatherType || 'clear');
+    const currentWeather = forecast.forecasts?.[0];
+    if (!currentWeather) return '天気データを取得できませんでした。';
     
-    let summary = `現在は${weatherDescription}で気温${Math.round(currentWeather?.temperature ?? 20)}°C、`;
+    const weatherDescription = this.getWeatherDescription(currentWeather.weatherType);
     
-    const precipProb = 30; // デフォルト値 - precipitationProbability は WeatherData に存在しない
-    if (precipProb > 60) {
-      summary += `降水確率${precipProb}%と雨の可能性が高めです。`;
-    } else if (precipProb > 30) {
-      summary += `降水確率${precipProb}%と変化しやすい天候です。`;
+    let summary = `現在は${weatherDescription}で気温${Math.round(currentWeather.temperature.day)}°C、`;
+    
+    const precipitationPercent = Math.round(currentWeather.pop * 100);
+    if (precipitationPercent > 60) {
+      summary += `降水確率${precipitationPercent}%と雨の可能性が高めです。`;
+    } else if (precipitationPercent > 30) {
+      summary += `降水確率${precipitationPercent}%と変化しやすい天候です。`;
     } else {
-      summary += `降水確率${precipProb}%と安定した天候です。`;
+      summary += `降水確率${precipitationPercent}%と安定した天候です。`;
     }
 
     // 風速情報を追加
-    if ((currentWeather?.windSpeed ?? 0) > 10) {
-      summary += ` 風が強めです（${currentWeather?.windSpeed ?? 0}m/s）。`;
+    if (currentWeather.windSpeed > 10) {
+      summary += ` 風が強めです（${currentWeather.windSpeed}m/s）。`;
     }
 
     // UV指数情報を追加
-    if ((currentWeather?.uvIndex ?? 0) > 6) {
-      summary += ` UV指数が高いため日焼け対策をお勧めします（UV指数${currentWeather?.uvIndex ?? 0}）。`;
+    if (currentWeather.uvIndex > 6) {
+      summary += ` UV指数が高いため日焼け対策をお勧めします（UV指数${currentWeather.uvIndex}）。`;
     }
 
     return summary;
