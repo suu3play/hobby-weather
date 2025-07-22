@@ -107,7 +107,7 @@ export class NotificationService {
 
   // 高スコア通知の詳細版（複数推薦対応）
   createDetailedHighScoreNotification(
-    recommendations: Array<{hobbyName: string; score: number}>,
+    recommendations: Array<{name: string; score: number}>,
     weatherDescription: string,
     temperature: number
   ): NotificationPayload {
@@ -116,8 +116,8 @@ export class NotificationService {
     if (recommendations.length === 1) {
       return {
         type: 'high-score',
-        title: `🌟 ${topRecommendation.hobbyName}が最適！`,
-        message: `${weatherDescription}で気温${temperature}°C。スコア${Math.round(topRecommendation.score)}点の高評価です！`,
+        title: `🌟 ${topRecommendation?.name ?? '趣味活動'}が最適！`,
+        message: `${weatherDescription}で気温${temperature}°C。スコア${Math.round(topRecommendation?.score ?? 0)}点の高評価です！`,
         data: {
           recommendations,
           weatherDescription,
@@ -128,13 +128,13 @@ export class NotificationService {
 
     const hobbyNames = recommendations
       .slice(0, 3)
-      .map(rec => rec.hobbyName)
+      .map(rec => rec.name)
       .join('、');
 
     return {
       type: 'high-score',
       title: `⭐ ${recommendations.length}つの趣味が最適です！`,
-      message: `${weatherDescription}で気温${temperature}°C。${hobbyNames}などがおすすめです。最高スコア: ${Math.round(topRecommendation.score)}点`,
+      message: `${weatherDescription}で気温${temperature}°C。${hobbyNames}などがおすすめです。最高スコア: ${Math.round(topRecommendation?.score ?? 0)}点`,
       data: {
         recommendations,
         weatherDescription,

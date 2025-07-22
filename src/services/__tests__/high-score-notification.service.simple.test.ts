@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { HighScoreNotificationService } from '../high-score-notification.service';
-import type { Hobby, WeatherForecast, HobbyRecommendation } from '../../types';
+import type { Hobby, WeatherForecast, DailyForecast } from '../../types';
+import type { ScoredRecommendation } from '../high-score-notification.service';
 
 const createMockHobby = (id: number, name: string, isActive = true): Hobby => ({
   id,
@@ -14,29 +15,52 @@ const createMockHobby = (id: number, name: string, isActive = true): Hobby => ({
 });
 
 const createMockWeatherForecast = (): WeatherForecast => ({
-  location: { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
+  lat: 35.6762,
+  lon: 139.6503,
   current: {
+    lat: 35.6762,
+    lon: 139.6503,
+    datetime: new Date(),
     temperature: 22,
+    feelsLike: 20,
     humidity: 60,
-    windSpeed: 5,
-    uvIndex: 6,
     pressure: 1013,
     visibility: 10,
+    windSpeed: 5,
+    windDirection: 180,
     weatherType: 'clear',
-    description: '晴れ',
-    precipitationProbability: 10,
-    lastUpdated: new Date()
+    weatherDescription: '晴れ',
+    condition: '晴れ',
+    cloudiness: 10,
+    uvIndex: 6,
+    generatedAt: new Date(),
+    cachedAt: new Date()
   },
-  daily: []
+  forecasts: [],
+  generatedAt: new Date(),
+  cachedAt: new Date()
 });
 
-const createMockRecommendation = (hobby: Hobby, score: number): HobbyRecommendation => ({
+const createMockRecommendation = (hobby: Hobby, score: number): ScoredRecommendation => ({
   hobby,
+  score,
   overallScore: score,
-  bestDayIndex: 0,
-  reasons: ['天気が良好'],
-  warnings: [],
-  dailyScores: [score, score - 10, score - 20]
+  date: new Date(),
+  weather: {
+    date: new Date(),
+    temperature: { min: 18, max: 25, morning: 20, day: 22, evening: 21, night: 19 },
+    feelsLike: { morning: 19, day: 21, evening: 20, night: 18 },
+    humidity: 60,
+    pressure: 1013,
+    windSpeed: 5,
+    windDirection: 180,
+    weatherType: 'clear',
+    weatherDescription: '晴れ',
+    cloudiness: 10,
+    uvIndex: 6,
+    pop: 10
+  } as DailyForecast,
+  reasons: ['天気が良好']
 });
 
 describe('HighScoreNotificationService - 基本機能', () => {
@@ -55,8 +79,8 @@ describe('HighScoreNotificationService - 基本機能', () => {
       expect(payload.message).toContain('スコア85点');
       expect(payload.icon).toBe('🌟');
       expect(payload.data?.recommendations).toHaveLength(1);
-      expect(payload.data?.recommendations[0].hobbyName).toBe('テニス');
-      expect(payload.data?.recommendations[0].score).toBe(85);
+      expect(payload.data?.recommendations?.[0]?.name).toBe('テニス');
+      expect(payload.data?.recommendations?.[0]?.score).toBe(85);
     });
 
     it('複数の趣味の場合は適切なペイロードを作成する', () => {
@@ -80,7 +104,7 @@ describe('HighScoreNotificationService - 基本機能', () => {
       expect(payload.icon).toBe('⭐');
       expect(payload.data?.recommendations).toHaveLength(3);
       expect(payload.data?.temperature).toBe(22);
-      expect(payload.data?.weatherCondition).toBe('晴れ');
+      expect(payload.data && 'weatherCondition' in payload.data ? payload.data['weatherCondition'] : undefined).toBe('晴れ');
     });
 
     it('天気タイプが正しく日本語変換される', () => {
@@ -90,20 +114,30 @@ describe('HighScoreNotificationService - 基本機能', () => {
       
       // 雨の天気予報
       const rainForecast: WeatherForecast = {
-        location: { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
+        lat: 35.6762,
+        lon: 139.6503,
         current: {
+          lat: 35.6762,
+          lon: 139.6503,
+          datetime: new Date(),
           temperature: 18,
+          feelsLike: 16,
           humidity: 80,
-          windSpeed: 3,
-          uvIndex: 2,
           pressure: 1005,
           visibility: 8,
+          windSpeed: 3,
+          windDirection: 90,
           weatherType: 'rain',
-          description: 'rainy',
-          precipitationProbability: 90,
-          lastUpdated: new Date()
+          weatherDescription: 'rainy',
+          condition: 'rainy',
+          cloudiness: 90,
+          uvIndex: 2,
+          generatedAt: new Date(),
+          cachedAt: new Date()
         },
-        daily: []
+        forecasts: [],
+        generatedAt: new Date(),
+        cachedAt: new Date()
       };
 
       const payload = service.createHighScoreNotificationPayload(recommendations, rainForecast);

@@ -5,7 +5,7 @@ interface ScheduledTask {
   id: string;
   configId: number;
   nextRun: Date;
-  lastRun?: Date;
+  lastRun: Date | undefined;
   title: string;
   type: string;
 }
@@ -42,7 +42,7 @@ export function useNotificationScheduler(): UseNotificationSchedulerReturn {
           id: status.nextTask.id,
           configId: status.nextTask.configId,
           nextRun: status.nextTask.nextRun,
-          lastRun: status.nextTask.lastRun,
+          lastRun: status.nextTask.lastRun ?? undefined,
           title: status.nextTask.config.title,
           type: status.nextTask.config.type
         });
@@ -55,7 +55,7 @@ export function useNotificationScheduler(): UseNotificationSchedulerReturn {
         id: task.id,
         configId: task.configId,
         nextRun: task.nextRun,
-        lastRun: task.lastRun,
+        lastRun: task.lastRun ?? undefined,
         title: task.config.title,
         type: task.config.type
       })));

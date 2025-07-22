@@ -22,7 +22,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    
+
     /* Additional strict checks */
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,

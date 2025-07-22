@@ -6,7 +6,7 @@ import type { NotificationPayload } from '../types/notification';
 Object.defineProperty(globalThis, 'Notification', {
   value: class MockNotification {
     title: string;
-    body?: string;
+    body: string | undefined;
     constructor(title: string, options?: NotificationOptions) {
       this.title = title;
       this.body = options?.body;
@@ -114,9 +114,9 @@ describe('通知システム統合テスト', () => {
     it('複数趣味の高スコア通知を作成できる', () => {
       const payload = notificationService.createDetailedHighScoreNotification(
         [
-          { hobbyName: 'テニス', score: 90 },
-          { hobbyName: 'ジョギング', score: 85 },
-          { hobbyName: 'サイクリング', score: 80 }
+          { name: 'テニス', score: 90 },
+          { name: 'ジョギング', score: 85 },
+          { name: 'サイクリング', score: 80 }
         ],
         '晴れ',
         22
@@ -182,7 +182,7 @@ describe('通知システム統合テスト', () => {
 
     it('不正な通知ペイロードでもエラーにならない', async () => {
       const invalidPayload = {
-        type: 'unknown-type',
+        type: 'regular-report' as const,
         title: '',
         message: ''
       } as NotificationPayload;
