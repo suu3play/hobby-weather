@@ -1,6 +1,7 @@
 import React from 'react';
 import type { DailyForecast } from '../../types';
 import { weatherService } from '../../services/weather.service';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ForecastCardProps {
   forecast: DailyForecast;
@@ -8,6 +9,7 @@ interface ForecastCardProps {
 }
 
 export const ForecastCard: React.FC<ForecastCardProps> = ({ forecast, isToday = false }) => {
+  const { currentTheme } = useTheme();
   const formatDate = (date: Date) => {
     if (isToday) return '今日';
     
@@ -33,9 +35,15 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ forecast, isToday = 
   };
 
   return (
-    <div className={`bg-white rounded-lg border-2 p-4 transition-all hover:shadow-md ${
-      isToday ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
-    }`}>
+    <div className="rounded-lg border-2 p-4 transition-all hover:shadow-md" style={{
+      backgroundColor: isToday
+        ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)')
+        : currentTheme.colors.background,
+      borderColor: isToday
+        ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)')
+        : currentTheme.colors.border.primary,
+      color: currentTheme.colors.text.primary
+    }}>
       {/* Date */}
       <div className="text-center mb-3">
         <h4 className={`font-semibold ${isToday ? 'text-blue-900' : 'text-gray-900'}`}>
@@ -86,40 +94,42 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ forecast, isToday = 
       {/* Additional Info */}
       <div className="space-y-2">
         <div className="flex justify-between items-center text-xs">
-          <span className="text-gray-600">湿度</span>
+          <span style={{ color: currentTheme.colors.text.secondary }}>湿度</span>
           <span className="font-medium">{forecast.humidity}%</span>
         </div>
         
         <div className="flex justify-between items-center text-xs">
-          <span className="text-gray-600">風速</span>
+          <span style={{ color: currentTheme.colors.text.secondary }}>風速</span>
           <span className="font-medium">{forecast.windSpeed.toFixed(1)} m/s</span>
         </div>
         
         {forecast.uvIndex > 0 && (
           <div className="flex justify-between items-center text-xs">
-            <span className="text-gray-600">UV指数</span>
+            <span style={{ color: currentTheme.colors.text.secondary }}>UV指数</span>
             <span className="font-medium">{forecast.uvIndex.toFixed(1)}</span>
           </div>
         )}
       </div>
 
       {/* Time-specific temperatures */}
-      <div className="mt-3 pt-3 border-t border-gray-200">
+      <div className="mt-3 pt-3 border-t" style={{
+        borderColor: currentTheme.colors.border.primary
+      }}>
         <div className="grid grid-cols-4 gap-1 text-xs">
           <div className="text-center">
-            <p className="text-gray-600">朝</p>
+            <p style={{ color: currentTheme.colors.text.secondary }}>朝</p>
             <p className="font-medium">{Math.round(forecast.temperature.morning)}°</p>
           </div>
           <div className="text-center">
-            <p className="text-gray-600">昼</p>
+            <p style={{ color: currentTheme.colors.text.secondary }}>昼</p>
             <p className="font-medium">{Math.round(forecast.temperature.day)}°</p>
           </div>
           <div className="text-center">
-            <p className="text-gray-600">夕</p>
+            <p style={{ color: currentTheme.colors.text.secondary }}>夕</p>
             <p className="font-medium">{Math.round(forecast.temperature.evening)}°</p>
           </div>
           <div className="text-center">
-            <p className="text-gray-600">夜</p>
+            <p style={{ color: currentTheme.colors.text.secondary }}>夜</p>
             <p className="font-medium">{Math.round(forecast.temperature.night)}°</p>
           </div>
         </div>

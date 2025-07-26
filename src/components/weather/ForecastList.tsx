@@ -1,6 +1,7 @@
 import React from 'react';
 import type { WeatherForecast } from '../../types';
 import { ForecastCard } from './ForecastCard';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ForecastListProps {
   forecast: WeatherForecast;
@@ -8,6 +9,7 @@ interface ForecastListProps {
 }
 
 export const ForecastList: React.FC<ForecastListProps> = ({ forecast, className = '' }) => {
+  const { currentTheme } = useTheme();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -21,18 +23,29 @@ export const ForecastList: React.FC<ForecastListProps> = ({ forecast, className 
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`}>
+    <div className={`rounded-lg shadow-md border ${className}`} style={{
+      backgroundColor: currentTheme.colors.background,
+      borderColor: currentTheme.colors.border.primary
+    }}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="px-6 py-4 border-b" style={{
+        borderColor: currentTheme.colors.border.primary
+      }}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">7日間の天気予報</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-lg font-semibold" style={{
+              color: currentTheme.colors.text.primary
+            }}>7日間の天気予報</h3>
+            <p className="text-sm" style={{
+              color: currentTheme.colors.text.secondary
+            }}>
               {forecast.forecasts.length}日間の詳細予報
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs" style={{
+              color: currentTheme.colors.text.tertiary
+            }}>
               更新: {formatCacheTime(forecast.cachedAt)}
             </p>
           </div>
@@ -44,8 +57,12 @@ export const ForecastList: React.FC<ForecastListProps> = ({ forecast, className 
         {forecast.forecasts.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-gray-400 text-4xl mb-4">🌤️</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">予報データがありません</h3>
-            <p className="text-gray-600">天気予報を取得できませんでした。</p>
+            <h3 className="text-lg font-medium mb-2" style={{
+              color: currentTheme.colors.text.primary
+            }}>予報データがありません</h3>
+            <p style={{
+              color: currentTheme.colors.text.secondary
+            }}>天気予報を取得できませんでした。</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
@@ -68,8 +85,13 @@ export const ForecastList: React.FC<ForecastListProps> = ({ forecast, className 
 
       {/* Summary Statistics */}
       {forecast.forecasts.length > 0 && (
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-          <h4 className="text-sm font-medium text-gray-900 mb-3">週間サマリー</h4>
+        <div className="px-6 py-4 border-t rounded-b-lg" style={{
+          backgroundColor: currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.1)' : 'rgb(249, 250, 251)',
+          borderColor: currentTheme.colors.border.primary
+        }}>
+          <h4 className="text-sm font-medium mb-3" style={{
+            color: currentTheme.colors.text.primary
+          }}>週間サマリー</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-gray-600">最高気温</p>

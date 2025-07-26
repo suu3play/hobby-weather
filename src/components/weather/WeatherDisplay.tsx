@@ -1,10 +1,12 @@
 import React from 'react';
 import { useWeather } from '../../hooks/useWeather';
+import { useTheme } from '../../contexts/ThemeContext';
 import { WeatherCard } from './WeatherCard';
 import { ForecastList } from './ForecastList';
 import { LocationSelector } from './LocationSelector';
 
 export const WeatherDisplay: React.FC = () => {
+    const { currentTheme } = useTheme();
     const {
         currentWeather,
         forecast,
@@ -33,7 +35,11 @@ export const WeatherDisplay: React.FC = () => {
 
             {/* Error Display */}
             {(error || locationError) && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="rounded-md p-4" style={{
+                    backgroundColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgb(254, 242, 242)',
+                    borderColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : 'rgb(254, 202, 202)',
+                    borderWidth: '1px'
+                }}>
                     <div className="flex">
                         <div className="flex-shrink-0">
                             <span className="text-red-400">⚠️</span>
@@ -149,8 +155,13 @@ export const WeatherDisplay: React.FC = () => {
 
             {/* Stats */}
             {currentWeather && forecast && (
-                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <div className="rounded-lg shadow-md border p-6" style={{
+                    backgroundColor: currentTheme.colors.background,
+                    borderColor: currentTheme.colors.border.primary
+                }}>
+                    <h3 className="text-lg font-semibold mb-4" style={{
+                        color: currentTheme.colors.text.primary
+                    }}>
                         統計情報
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -158,7 +169,9 @@ export const WeatherDisplay: React.FC = () => {
                             <div className="text-2xl font-bold text-blue-600">
                                 {Math.round(currentWeather.temperature)}°C
                             </div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm" style={{
+                                color: currentTheme.colors.text.secondary
+                            }}>
                                 現在気温
                             </div>
                         </div>
@@ -172,7 +185,9 @@ export const WeatherDisplay: React.FC = () => {
                                 ).toFixed(0)}
                                 °C
                             </div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm" style={{
+                                color: currentTheme.colors.text.secondary
+                            }}>
                                 週間最高
                             </div>
                         </div>
@@ -186,7 +201,9 @@ export const WeatherDisplay: React.FC = () => {
                                 ).toFixed(0)}
                                 °C
                             </div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm" style={{
+                                color: currentTheme.colors.text.secondary
+                            }}>
                                 週間最低
                             </div>
                         </div>
@@ -199,7 +216,9 @@ export const WeatherDisplay: React.FC = () => {
                                     ).length
                                 }
                             </div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm" style={{
+                                color: currentTheme.colors.text.secondary
+                            }}>
                                 晴れ予想日
                             </div>
                         </div>

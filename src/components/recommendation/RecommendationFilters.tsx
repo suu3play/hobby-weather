@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { RecommendationFilters as RecommendationFiltersType } from '../../services/recommendation.service';
 import type { WeatherType } from '../../types';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface RecommendationFiltersProps {
   filters: RecommendationFiltersType;
@@ -26,6 +27,7 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
   onClearFilters,
   className = ''
 }) => {
+  const { currentTheme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleMinScoreChange = (value: string) => {
@@ -100,14 +102,24 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`}>
+    <div className={`rounded-lg shadow-md border ${className}`} style={{
+      backgroundColor: currentTheme.colors.background,
+      borderColor: currentTheme.colors.border.primary
+    }}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="px-6 py-4 border-b" style={{
+        borderColor: currentTheme.colors.border.primary
+      }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h3 className="text-lg font-semibold text-gray-900">フィルター</h3>
+            <h3 className="text-lg font-semibold" style={{
+              color: currentTheme.colors.text.primary
+            }}>フィルター</h3>
             {hasActiveFilters && (
-              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+              <span className="text-xs px-2 py-1 rounded-full" style={{
+                backgroundColor: currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(219, 234, 254)',
+                color: currentTheme.mode === 'dark' ? 'rgb(147, 197, 253)' : 'rgb(30, 64, 175)'
+              }}>
                 適用中
               </span>
             )}
@@ -116,7 +128,16 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
             {hasActiveFilters && (
               <button
                 onClick={onClearFilters}
-                className="text-sm text-gray-600 hover:text-gray-800 underline"
+                className="text-sm underline transition-colors"
+                style={{
+                  color: currentTheme.colors.text.secondary
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = currentTheme.colors.text.primary;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = currentTheme.colors.text.secondary;
+                }}
               >
                 クリア
               </button>
@@ -136,7 +157,9 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Min Score */}
           <div>
-            <label htmlFor="min-score" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="min-score" className="block text-sm font-medium mb-1" style={{
+              color: currentTheme.colors.text.secondary
+            }}>
               最小スコア
             </label>
             <select
