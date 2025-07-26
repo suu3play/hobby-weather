@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useInitialSetup } from '../../hooks/useInitialSetup';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const SetupResetSection: React.FC = () => {
     const { refreshSetupState } = useInitialSetup();
+    const { currentTheme } = useTheme();
     const [isResetting, setIsResetting] = useState(false);
     const [resetMessage, setResetMessage] = useState<{
         type: 'success' | 'error';
@@ -71,13 +73,20 @@ export const SetupResetSection: React.FC = () => {
                 <h3 className="text-lg font-medium text-text-primary">
                     セットアップリセット
                 </h3>
-                <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                <span className="text-xs px-2 py-1 rounded-full" style={{
+                    backgroundColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : 'rgb(254, 242, 242)',
+                    color: currentTheme.mode === 'dark' ? 'rgb(248, 113, 113)' : 'rgb(153, 27, 27)'
+                }}>
                     危険操作
                 </span>
             </div>
 
             {/* リセット機能 */}
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="rounded-lg p-4 mb-4" style={{
+                backgroundColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgb(254, 242, 242)',
+                borderColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : 'rgb(254, 202, 202)',
+                borderWidth: '1px'
+            }}>
                 <div className="flex items-start">
                     <div className="flex-shrink-0">
                         <span className="text-red-400 text-lg">⚠️</span>
@@ -103,7 +112,20 @@ export const SetupResetSection: React.FC = () => {
                             <button
                                 onClick={resetSetupInfo}
                                 disabled={isResetting}
-                                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                                className="text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                                style={{
+                                    backgroundColor: currentTheme.mode === 'dark' ? '#dc2626' : '#dc2626'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isResetting) {
+                                        e.currentTarget.style.backgroundColor = '#b91c1c';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isResetting) {
+                                        e.currentTarget.style.backgroundColor = '#dc2626';
+                                    }
+                                }}
                             >
                                 {isResetting
                                     ? 'リセット中...'
@@ -113,7 +135,16 @@ export const SetupResetSection: React.FC = () => {
                             {resetMessage?.type === 'success' && (
                                 <button
                                     onClick={reloadToSetup}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
+                                    className="text-white px-4 py-2 rounded-md transition-colors text-sm"
+                                    style={{
+                                        backgroundColor: currentTheme.mode === 'dark' ? currentTheme.colors.primary : '#2563eb'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? '#3b82f6' : '#1d4ed8';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? currentTheme.colors.primary : '#2563eb';
+                                    }}
                                 >
                                     初期セットアップに戻る
                                 </button>
@@ -126,11 +157,19 @@ export const SetupResetSection: React.FC = () => {
             {/* リセット結果メッセージ */}
             {resetMessage && (
                 <div
-                    className={`p-3 rounded-md ${
-                        resetMessage.type === 'success'
-                            ? 'bg-green-50 text-green-800 border border-green-200'
-                            : 'bg-red-50 text-red-800 border border-red-200'
-                    }`}
+                    className="p-3 rounded-md"
+                    style={{
+                        backgroundColor: resetMessage.type === 'success'
+                            ? (currentTheme.mode === 'dark' ? 'rgba(34, 197, 94, 0.1)' : 'rgb(240, 253, 244)')
+                            : (currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgb(254, 242, 242)'),
+                        color: resetMessage.type === 'success'
+                            ? (currentTheme.mode === 'dark' ? 'rgb(134, 239, 172)' : 'rgb(22, 101, 52)')
+                            : (currentTheme.mode === 'dark' ? 'rgb(248, 113, 113)' : 'rgb(153, 27, 27)'),
+                        borderColor: resetMessage.type === 'success'
+                            ? (currentTheme.mode === 'dark' ? 'rgba(34, 197, 94, 0.2)' : 'rgb(187, 247, 208)')
+                            : (currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : 'rgb(254, 202, 202)'),
+                        borderWidth: '1px'
+                    }}
                 >
                     {resetMessage.text}
                 </div>

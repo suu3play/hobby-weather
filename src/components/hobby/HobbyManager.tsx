@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { Hobby } from '../../types';
 import { useHobby } from '../../hooks/useHobby';
 import { useRecommendation } from '../../hooks/useRecommendation';
+import { useTheme } from '../../contexts/ThemeContext';
 import { HobbyForm } from './HobbyForm';
 import { HobbyList } from './HobbyList';
 import { RecommendationFilters } from '../recommendation/RecommendationFilters';
@@ -23,6 +24,7 @@ export const HobbyManager: React.FC = () => {
     } = useHobby();
 
     const { filters, updateFilters, clearFilters } = useRecommendation();
+    const { currentTheme } = useTheme();
 
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [editingHobby, setEditingHobby] = useState<Hobby | null>(null);
@@ -76,7 +78,11 @@ export const HobbyManager: React.FC = () => {
 
             {/* Error Display */}
             {error && (
-                <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="mb-6 rounded-md p-4" style={{
+                    backgroundColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgb(254, 242, 242)',
+                    borderColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : 'rgb(254, 202, 202)',
+                    borderWidth: '1px'
+                }}>
                     <div className="flex">
                         <div className="flex-shrink-0">
                             <span className="text-red-400">⚠️</span>
@@ -107,7 +113,19 @@ export const HobbyManager: React.FC = () => {
                     <div className="flex items-center space-x-4">
                         <button
                             onClick={() => setViewMode('create')}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                            className="text-white px-4 py-2 rounded-md transition-colors"
+                            style={{
+                                backgroundColor: currentTheme.mode === 'dark' ? currentTheme.colors.primary : '#2563eb',
+                                ':hover': {
+                                    backgroundColor: currentTheme.mode === 'dark' ? '#3b82f6' : '#1d4ed8'
+                                }
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? '#3b82f6' : '#1d4ed8';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? currentTheme.colors.primary : '#2563eb';
+                            }}
                         >
                             + 新しい趣味を追加
                         </button>
@@ -149,7 +167,10 @@ export const HobbyManager: React.FC = () => {
             )}
 
             {/* Main Content */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="rounded-lg shadow-sm border" style={{
+                backgroundColor: currentTheme.colors.background,
+                borderColor: currentTheme.mode === 'dark' ? 'rgba(75, 85, 99, 0.3)' : 'rgb(229, 231, 235)'
+            }}>
                 <div className="p-6">
                     {viewMode === 'list' && (
                         <HobbyList
@@ -193,7 +214,9 @@ export const HobbyManager: React.FC = () => {
             {/* Stats */}
             {viewMode === 'list' && hobbies.length > 0 && (
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="p-4 rounded-lg" style={{
+                        backgroundColor: currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)'
+                    }}>
                         <div className="text-2xl font-bold text-blue-600">
                             {hobbies.length}
                         </div>
@@ -202,14 +225,18 @@ export const HobbyManager: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="p-4 rounded-lg" style={{
+                        backgroundColor: currentTheme.mode === 'dark' ? 'rgba(34, 197, 94, 0.1)' : 'rgb(240, 253, 244)'
+                    }}>
                         <div className="text-2xl font-bold text-green-600">
                             {activeHobbies.length}
                         </div>
                         <div className="text-sm text-green-800">有効な趣味</div>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="p-4 rounded-lg" style={{
+                        backgroundColor: currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.1)' : 'rgb(249, 250, 251)'
+                    }}>
                         <div className="text-2xl font-bold text-gray-600">
                             {hobbies.reduce(
                                 (total, hobby) =>
