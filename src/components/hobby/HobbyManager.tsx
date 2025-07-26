@@ -115,10 +115,7 @@ export const HobbyManager: React.FC = () => {
                             onClick={() => setViewMode('create')}
                             className="text-white px-4 py-2 rounded-md transition-colors"
                             style={{
-                                backgroundColor: currentTheme.mode === 'dark' ? currentTheme.colors.primary : '#2563eb',
-                                ':hover': {
-                                    backgroundColor: currentTheme.mode === 'dark' ? '#3b82f6' : '#1d4ed8'
-                                }
+                                backgroundColor: currentTheme.mode === 'dark' ? currentTheme.colors.primary : '#2563eb'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? '#3b82f6' : '#1d4ed8';
