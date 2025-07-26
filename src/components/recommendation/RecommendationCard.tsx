@@ -1,6 +1,7 @@
 import React from 'react';
 import type { HobbyRecommendation } from '../../services/recommendation.service';
 import { weatherService } from '../../services/weather.service';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // おすすめカードのプロパティ
 interface RecommendationCardProps {
@@ -14,6 +15,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   onViewDetails,
   className = ''
 }) => {
+  const { currentTheme } = useTheme();
   const { hobby, recommendedDays, overallScore, bestDayIndex } = recommendation;
   const bestDay = recommendedDays[bestDayIndex];
 
@@ -52,12 +54,23 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow ${className}`}>
+    <div 
+      className={`rounded-lg shadow-md border p-6 hover:shadow-lg transition-shadow ${className}`}
+      style={{
+        backgroundColor: currentTheme.colors.surface.primary,
+        borderColor: currentTheme.colors.border.primary,
+      }}
+    >
       {/* ヘッダー */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-1">
-            <h3 className="text-lg font-semibold text-gray-900">{hobby.name}</h3>
+            <h3 
+              className="text-lg font-semibold"
+              style={{ color: currentTheme.colors.text.primary }}
+            >
+              {hobby.name}
+            </h3>
             {hobby.isOutdoor && (
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                 屋外
@@ -65,7 +78,12 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             )}
           </div>
           {hobby.description && (
-            <p className="text-sm text-gray-600">{hobby.description}</p>
+            <p 
+              className="text-sm"
+              style={{ color: currentTheme.colors.text.secondary }}
+            >
+              {hobby.description}
+            </p>
           )}
         </div>
 
@@ -77,10 +95,25 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       </div>
 
       {/* 最適日 */}
-      <div className="bg-blue-50 rounded-lg p-4 mb-4">
+      <div 
+        className="rounded-lg p-4 mb-4"
+        style={{ 
+          backgroundColor: currentTheme.mode === 'dark' 
+            ? 'rgba(59, 130, 246, 0.1)' 
+            : 'rgb(239, 246, 255)'
+        }}
+      >
         <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-medium text-blue-900">最適な日</h4>
-          <span className="text-sm font-medium text-blue-800">
+          <h4 
+            className="text-sm font-medium"
+            style={{ color: currentTheme.colors.text.primary }}
+          >
+            最適な日
+          </h4>
+          <span 
+            className="text-sm font-medium"
+            style={{ color: currentTheme.colors.primary }}
+          >
             {formatDate(bestDay.date)}
           </span>
         </div>
@@ -92,10 +125,16 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               {weatherService.getWeatherIcon(bestDay.forecast.weatherType)}
             </span>
             <div>
-              <p className="text-sm font-medium text-gray-900">
+              <p 
+                className="text-sm font-medium"
+                style={{ color: currentTheme.colors.text.primary }}
+              >
                 {bestDay.forecast.weatherDescription}
               </p>
-              <p className="text-xs text-gray-600">
+              <p 
+                className="text-xs"
+                style={{ color: currentTheme.colors.text.secondary }}
+              >
                 {Math.round(bestDay.forecast.temperature.max)}° / {Math.round(bestDay.forecast.temperature.min)}°
               </p>
             </div>
@@ -113,10 +152,19 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       {/* 良い条件 */}
       {bestDay.matchingFactors.length > 0 && (
         <div className="mb-4">
-          <h5 className="text-xs font-medium text-green-700 mb-2">✓ 良い条件</h5>
+          <h5 
+            className="text-xs font-medium mb-2"
+            style={{ color: currentTheme.colors.success }}
+          >
+            ✓ 良い条件
+          </h5>
           <div className="space-y-1">
             {bestDay.matchingFactors.slice(0, 2).map((factor, index) => (
-              <p key={index} className="text-sm text-green-600">
+              <p 
+                key={index} 
+                className="text-sm"
+                style={{ color: currentTheme.colors.success }}
+              >
                 {factor}
               </p>
             ))}
@@ -127,10 +175,19 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       {/* 注意事項 */}
       {bestDay.warningFactors.length > 0 && (
         <div className="mb-4">
-          <h5 className="text-xs font-medium text-orange-700 mb-2">⚠ 注意事項</h5>
+          <h5 
+            className="text-xs font-medium mb-2"
+            style={{ color: currentTheme.colors.warning }}
+          >
+            ⚠ 注意事項
+          </h5>
           <div className="space-y-1">
             {bestDay.warningFactors.slice(0, 2).map((factor, index) => (
-              <p key={index} className="text-sm text-orange-600">
+              <p 
+                key={index} 
+                className="text-sm"
+                style={{ color: currentTheme.colors.warning }}
+              >
                 {factor}
               </p>
             ))}
@@ -141,15 +198,29 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       {/* その他の候補日 */}
       {recommendedDays.length > 1 && (
         <div className="mb-4">
-          <h5 className="text-xs font-medium text-gray-700 mb-2">他の候補日</h5>
+          <h5 
+            className="text-xs font-medium mb-2"
+            style={{ color: currentTheme.colors.text.secondary }}
+          >
+            他の候補日
+          </h5>
           <div className="flex space-x-2 overflow-x-auto">
             {recommendedDays.slice(1, 4).map((day, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 bg-gray-50 rounded px-3 py-2 text-center"
+                className="flex-shrink-0 rounded px-3 py-2 text-center"
+                style={{ backgroundColor: currentTheme.colors.surface.secondary }}
               >
-                <p className="text-xs text-gray-600">{formatDate(day.date)}</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p 
+                  className="text-xs"
+                  style={{ color: currentTheme.colors.text.tertiary }}
+                >
+                  {formatDate(day.date)}
+                </p>
+                <p 
+                  className="text-sm font-medium"
+                  style={{ color: currentTheme.colors.text.primary }}
+                >
                   {Math.round(day.score)}点
                 </p>
               </div>
@@ -159,15 +230,22 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       )}
 
       {/* アクション */}
-      <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-        <div className="text-xs text-gray-500">
+      <div 
+        className="flex justify-between items-center pt-4 border-t"
+        style={{ borderColor: currentTheme.colors.border.secondary }}
+      >
+        <div 
+          className="text-xs"
+          style={{ color: currentTheme.colors.text.tertiary }}
+        >
           {recommendedDays.length}日間の予測
         </div>
         
         {onViewDetails && (
           <button
             onClick={() => onViewDetails(recommendation)}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            className="text-sm font-medium hover:opacity-80 transition-opacity"
+            style={{ color: currentTheme.colors.primary }}
           >
             詳細を見る →
           </button>

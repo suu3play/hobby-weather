@@ -51,6 +51,7 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
         onComplete();
       }, 1000);
     } catch (error) {
+      console.error('API Key保存エラー:', error);
       setError('API Keyの保存に失敗しました。もう一度お試しください。');
     } finally {
       setIsLoading(false);

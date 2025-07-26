@@ -59,7 +59,7 @@ export const CompletedSetupStep: React.FC<CompletedSetupStepProps> = ({ onComple
         </div>
 
         {/* Setup Summary */}
-        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8">
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-6 mb-8">
           <h3 className="font-medium text-gray-900 mb-4 text-center">設定内容</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -146,7 +146,7 @@ export const CompletedSetupStep: React.FC<CompletedSetupStepProps> = ({ onComple
         {/* Start Button */}
         <button
           onClick={handleStartUsing}
-          className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-4 rounded-md hover:from-blue-700 hover:to-green-700 transition-all duration-200 font-medium text-lg"
+          className="w-full bg-gradient-to-r from-blue-600 to-green-600 dark:from-blue-500 dark:to-green-500 text-white py-3 px-4 rounded-md hover:from-blue-700 hover:to-green-700 dark:hover:from-blue-400 dark:hover:to-green-400 transition-all duration-200 font-medium text-lg"
         >
           趣味予報を始める
         </button>

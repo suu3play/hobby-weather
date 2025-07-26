@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Location, LocationSearchResult, LocationType } from '../../types';
 import { weatherService } from '../../services/weather.service';
 import { databaseService } from '../../services/database.service';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface LocationSelectorProps {
   currentLocation: Location | null;
@@ -16,6 +17,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   onCurrentLocationRequest,
   isLoading = false
 }) => {
+  const { currentTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [savedLocations, setSavedLocations] = useState<Location[]>([]);
@@ -45,7 +47,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     try {
       const results = await weatherService.searchLocation(searchQuery);
       setSearchResults(results);
-      
+
       if (results.length === 0) {
         setSearchError('該当する場所が見つかりませんでした');
       }
@@ -67,7 +69,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         isDefault: true,
         type: searchResult.type
       };
-      
+
       // Add optional properties only if they exist
       if (searchResult.address) {
         locationData.address = searchResult.address;
@@ -77,10 +79,10 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       }
 
       await databaseService.saveLocation(locationData);
-      
+
       // Get the saved location with ID
       const savedLocation = await databaseService.getDefaultLocation();
-      
+
       if (savedLocation) {
         onLocationSelect(savedLocation);
         await loadSavedLocations();
@@ -139,23 +141,35 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+    <div className="rounded-lg shadow-md border p-6" style={{
+      backgroundColor: currentTheme.colors.background.primary,
+      borderColor: currentTheme.colors.border.primary
+    }}>
       {/* Current Location Display */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">現在の場所</h3>
+          <h3 className="text-lg font-semibold mb-1" style={{
+            color: currentTheme.colors.text.primary
+          }}>現在の場所</h3>
           {currentLocation ? (
             <div className="flex items-center space-x-2">
               <span className="text-blue-600">📍</span>
-              <span className="text-gray-700">{currentLocation.name}</span>
+              <span style={{
+                color: currentTheme.colors.text.secondary
+              }}>{currentLocation.name}</span>
               {currentLocation.isDefault && (
-                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                <span className="text-xs px-2 py-1 rounded-full" style={{
+                  backgroundColor: currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(219, 234, 254)',
+                  color: currentTheme.mode === 'dark' ? 'rgb(147, 197, 253)' : 'rgb(30, 64, 175)'
+                }}>
                   デフォルト
                 </span>
               )}
             </div>
           ) : (
-            <p className="text-gray-500">場所が設定されていません</p>
+            <p style={{
+              color: currentTheme.colors.text.tertiary
+            }}>場所が設定されていません</p>
           )}
         </div>
 
@@ -168,7 +182,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           >
             {isLoading ? '取得中...' : '📍 現在地'}
           </button>
-          
+
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
@@ -208,7 +222,11 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
           {/* Search Error */}
           {searchError && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="mb-4 rounded-md p-3" style={{
+              backgroundColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgb(254, 242, 242)',
+              borderColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : 'rgb(254, 202, 202)',
+              borderWidth: '1px'
+            }}>
               <p className="text-sm text-red-700">{searchError}</p>
             </div>
           )}
@@ -222,7 +240,20 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                   <button
                     key={index}
                     onClick={() => handleLocationSelect(result)}
-                    className="w-full text-left p-3 border border-gray-200 rounded-md hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                    className="w-full text-left p-3 border rounded-md transition-colors"
+                    style={{
+                      backgroundColor: currentTheme.colors.background.primary,
+                      borderColor: currentTheme.colors.border.primary,
+                      color: currentTheme.colors.text.primary
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)';
+                      e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
+                      e.currentTarget.style.borderColor = currentTheme.colors.border.primary;
+                    }}
                   >
                     <div className="flex items-start space-x-3">
                       <span className="text-lg flex-shrink-0 mt-0.5">
@@ -235,15 +266,15 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                             {getLocationTypeLabel(result.type)}
                           </span>
                         </div>
-                        
+
                         {result.category && (
                           <p className="text-xs text-blue-600 mt-1">{result.category}</p>
                         )}
-                        
+
                         {result.address && (
                           <p className="text-xs text-gray-500 mt-1 truncate">{result.address}</p>
                         )}
-                        
+
                         <div className="flex items-center justify-between mt-2">
                           <p className="text-xs text-gray-500">
                             {result.country ?? 'JP'} ({result.lat.toFixed(4)}, {result.lon.toFixed(4)})
@@ -269,11 +300,28 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                   <button
                     key={location.id}
                     onClick={() => handleSavedLocationSelect(location)}
-                    className={`w-full text-left p-3 border rounded-md transition-colors ${
-                      currentLocation?.id === location.id
-                        ? 'border-blue-300 bg-blue-50'
-                        : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
-                    }`}
+                    className="w-full text-left p-3 border rounded-md transition-colors"
+                    style={{
+                      backgroundColor: currentLocation?.id === location.id
+                        ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(239, 246, 255)')
+                        : currentTheme.colors.background.primary,
+                      borderColor: currentLocation?.id === location.id
+                        ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)')
+                        : currentTheme.colors.border.primary,
+                      color: currentTheme.colors.text.primary
+                    }}
+                    onMouseEnter={(e) => {
+                      if (currentLocation?.id !== location.id) {
+                        e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.1)' : 'rgb(249, 250, 251)';
+                        e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.5)' : 'rgb(209, 213, 219)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (currentLocation?.id !== location.id) {
+                        e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
+                        e.currentTarget.style.borderColor = currentTheme.colors.border.primary;
+                      }
+                    }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-start space-x-3">
@@ -282,22 +330,27 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2">
-                            <p className="font-medium text-gray-900 truncate">{location.name}</p>
+                            <p className="font-medium truncate" style={{
+                              color: currentTheme.colors.text.primary
+                            }}>{location.name}</p>
                             {location.type && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs" style={{
+                                backgroundColor: currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(243, 244, 246)',
+                                color: currentTheme.mode === 'dark' ? 'rgb(156, 163, 175)' : 'rgb(75, 85, 99)'
+                              }}>
                                 {getLocationTypeLabel(location.type)}
                               </span>
                             )}
                           </div>
-                          
+
                           {location.category && (
                             <p className="text-xs text-blue-600 mt-1">{location.category}</p>
                           )}
-                          
+
                           {location.address && (
                             <p className="text-xs text-gray-500 mt-1 truncate">{location.address}</p>
                           )}
-                          
+
                           <p className="text-xs text-gray-500 mt-1">
                             ({location.lat.toFixed(4)}, {location.lon.toFixed(4)})
                           </p>

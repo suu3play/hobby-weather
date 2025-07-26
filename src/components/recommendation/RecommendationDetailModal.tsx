@@ -1,6 +1,7 @@
 import React from 'react';
 import type { HobbyRecommendation } from '../../services/recommendation.service';
 import { getWeatherConditionIcon, getWeatherConditionLabel } from '../../hooks/useHobby';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // おすすめ詳細モーダルのプロパティ
 interface RecommendationDetailModalProps {
@@ -12,6 +13,7 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
   recommendation,
   onClose
 }) => {
+  const { currentTheme } = useTheme();
   const { hobby, recommendedDays, overallScore } = recommendation;
 
   // スコアに基づく色分け
@@ -42,17 +44,37 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+      <div 
+        className="rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+        style={{ backgroundColor: currentTheme.colors.surface.primary }}
+      >
         {/* ヘッダー */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+        <div 
+          className="sticky top-0 border-b px-6 py-4"
+          style={{
+            backgroundColor: currentTheme.colors.surface.primary,
+            borderColor: currentTheme.colors.border.primary
+          }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{hobby.name}</h2>
-              <p className="text-sm text-gray-600">詳細なおすすめ情報</p>
+              <h2 
+                className="text-xl font-bold"
+                style={{ color: currentTheme.colors.text.primary }}
+              >
+                {hobby.name}
+              </h2>
+              <p 
+                className="text-sm"
+                style={{ color: currentTheme.colors.text.secondary }}
+              >
+                詳細なおすすめ情報
+              </p>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="hover:opacity-80 transition-opacity"
+              style={{ color: currentTheme.colors.text.tertiary }}
             >
               <span className="sr-only">閉じる</span>
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

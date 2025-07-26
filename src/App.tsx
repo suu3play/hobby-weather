@@ -62,7 +62,7 @@ function App() {
     return (
         <div className="min-h-screen bg-background-primary">
             {/* ヘッダー */}
-            <header className="bg-surface-primary shadow-sm border-b border-border-primary">
+            <header className="fixed top-0 left-0 right-0 bg-surface-primary shadow-sm border-b border-border-primary z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-3">
@@ -106,7 +106,7 @@ function App() {
             </header>
 
             {/* メインコンテンツ */}
-            <main className="py-6">
+            <main className="pt-16 py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {activeTab === 'recommendations' && (
                         <RecommendationDashboard />

@@ -8,6 +8,7 @@ import {
   getWeatherConditionLabel
 } from '../../hooks/useHobby';
 import { HOBBY_CATEGORIES, TIME_OF_DAY_OPTIONS, type HobbySuggestion } from '../../data/hobbySuggestions';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface HobbyFormProps {
   hobby?: Hobby;
@@ -22,6 +23,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
   onCancel,
   isLoading = false
 }) => {
+  const { currentTheme } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -163,13 +165,24 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {errors.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div 
+          className="border rounded-md p-4"
+          style={{
+            backgroundColor: currentTheme.mode === 'dark' 
+              ? 'rgba(239, 68, 68, 0.1)' 
+              : 'rgb(254, 242, 242)',
+            borderColor: currentTheme.colors.error
+          }}
+        >
           <div className="flex">
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
+              <h3 
+                className="text-sm font-medium"
+                style={{ color: currentTheme.colors.error }}
+              >
                 入力エラーがあります
               </h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="mt-2 text-sm" style={{ color: currentTheme.colors.error }}>
                 <ul className="list-disc list-inside space-y-1">
                   {errors.map((error, index) => (
                     <li key={index}>{error}</li>
@@ -195,18 +208,34 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
         </div>
 
         {showSuggestions && (
-          <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+          <div className="mb-4 p-4 rounded-lg" style={{
+            backgroundColor: currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.1)' : 'rgb(249, 250, 251)'
+          }}>
             <div className="mb-3">
               <label className="text-xs font-medium text-gray-600">カテゴリ選択:</label>
               <div className="flex space-x-2 mt-1">
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('')}
-                  className={`px-3 py-1 text-xs rounded-full ${
-                    selectedCategory === '' 
-                      ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className="px-3 py-1 text-xs rounded-full transition-colors"
+                  style={{
+                    backgroundColor: selectedCategory === ''
+                      ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(219, 234, 254)')
+                      : (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(229, 231, 235)'),
+                    color: selectedCategory === ''
+                      ? (currentTheme.mode === 'dark' ? 'rgb(147, 197, 253)' : 'rgb(30, 64, 175)')
+                      : (currentTheme.mode === 'dark' ? 'rgb(156, 163, 175)' : 'rgb(55, 65, 81)')
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedCategory !== '') {
+                      e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.4)' : 'rgb(209, 213, 219)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedCategory !== '') {
+                      e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(229, 231, 235)';
+                    }
+                  }}
                 >
                   すべて
                 </button>
@@ -215,11 +244,25 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                     key={category.name}
                     type="button"
                     onClick={() => setSelectedCategory(category.name)}
-                    className={`px-3 py-1 text-xs rounded-full ${
-                      selectedCategory === category.name 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                    className="px-3 py-1 text-xs rounded-full transition-colors"
+                    style={{
+                      backgroundColor: selectedCategory === category.name
+                        ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(219, 234, 254)')
+                        : (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(229, 231, 235)'),
+                      color: selectedCategory === category.name
+                        ? (currentTheme.mode === 'dark' ? 'rgb(147, 197, 253)' : 'rgb(30, 64, 175)')
+                        : (currentTheme.mode === 'dark' ? 'rgb(156, 163, 175)' : 'rgb(55, 65, 81)')
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedCategory !== category.name) {
+                        e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.4)' : 'rgb(209, 213, 219)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedCategory !== category.name) {
+                        e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(229, 231, 235)';
+                      }
+                    }}
                   >
                     {category.icon} {category.name}
                   </button>
@@ -236,7 +279,20 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                     key={index}
                     type="button"
                     onClick={() => selectHobbySuggestion(suggestion)}
-                    className="text-left p-2 rounded border hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                    className="text-left p-2 rounded border transition-colors"
+                    style={{
+                      backgroundColor: currentTheme.colors.background.primary,
+                      borderColor: currentTheme.colors.border.primary,
+                      color: currentTheme.colors.text.primary
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)';
+                      e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
+                      e.currentTarget.style.borderColor = currentTheme.colors.border.primary;
+                    }}
                   >
                     <div className="font-medium text-sm">{suggestion.name}</div>
                     <div className="text-xs text-gray-600 flex items-center space-x-1">
@@ -251,15 +307,25 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       </div>
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          趣味名 <span className="text-red-500">*</span>
+        <label 
+          htmlFor="name" 
+          className="block text-sm font-medium"
+          style={{ color: currentTheme.colors.text.secondary }}
+        >
+          趣味名 <span style={{ color: currentTheme.colors.error }}>*</span>
         </label>
         <input
           type="text"
           id="name"
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-2"
+          style={{
+            backgroundColor: currentTheme.colors.surface.secondary,
+            borderColor: currentTheme.colors.border.primary,
+            color: currentTheme.colors.text.primary,
+            border: `1px solid ${currentTheme.colors.border.primary}`
+          }}
           placeholder="例: ランニング"
           maxLength={50}
           required
@@ -267,7 +333,11 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+        <label 
+          htmlFor="description" 
+          className="block text-sm font-medium"
+          style={{ color: currentTheme.colors.text.secondary }}
+        >
           説明
         </label>
         <textarea
@@ -275,7 +345,13 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-2"
+          style={{
+            backgroundColor: currentTheme.colors.surface.secondary,
+            borderColor: currentTheme.colors.border.primary,
+            color: currentTheme.colors.text.primary,
+            border: `1px solid ${currentTheme.colors.border.primary}`
+          }}
           placeholder="趣味の詳細や楽しみ方について..."
           maxLength={200}
         />
@@ -285,15 +361,20 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          希望天気 <span className="text-red-500">*</span>
+        <label 
+          className="block text-sm font-medium mb-3"
+          style={{ color: currentTheme.colors.text.secondary }}
+        >
+          希望天気 <span style={{ color: currentTheme.colors.error }}>*</span>
         </label>
         
         {/* Selected weather conditions */}
         {formData.preferredWeather.length > 0 && (
           <div className="mb-4 space-y-2">
             {formData.preferredWeather.map((condition, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+              <div key={index} className="flex items-center space-x-3 p-3 rounded-lg" style={{
+                backgroundColor: currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)'
+              }}>
                 <span className="text-lg">
                   {getWeatherConditionIcon(condition.condition)}
                 </span>
@@ -334,11 +415,31 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                 type="button"
                 onClick={() => addWeatherCondition(type)}
                 disabled={isSelected}
-                className={`p-3 text-center rounded-lg border-2 transition-colors ${
-                  isSelected
-                    ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
-                }`}
+                className="p-3 text-center rounded-lg border-2 transition-colors"
+                style={{
+                  borderColor: isSelected
+                    ? (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.5)' : 'rgb(209, 213, 219)')
+                    : (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)'),
+                  backgroundColor: isSelected
+                    ? (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.2)' : 'rgb(243, 244, 246)')
+                    : currentTheme.colors.background.primary,
+                  color: isSelected
+                    ? (currentTheme.mode === 'dark' ? 'rgba(156, 163, 175, 0.7)' : 'rgb(156, 163, 175)')
+                    : currentTheme.colors.text.primary,
+                  cursor: isSelected ? 'not-allowed' : 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(59, 130, 246)';
+                    e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)';
+                    e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
+                  }
+                }}
               >
                 <div className="text-lg mb-1">{icon}</div>
                 <div className="text-xs font-medium">{label}</div>
@@ -361,11 +462,30 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                 key={option.key}
                 type="button"
                 onClick={() => toggleTimeOfDay(option.key)}
-                className={`p-3 text-center rounded-lg border-2 transition-colors ${
-                  isSelected
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
-                }`}
+                className="p-3 text-center rounded-lg border-2 transition-colors"
+                style={{
+                  borderColor: isSelected
+                    ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.7)' : 'rgb(59, 130, 246)')
+                    : (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)'),
+                  backgroundColor: isSelected
+                    ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(239, 246, 255)')
+                    : currentTheme.colors.background.primary,
+                  color: isSelected
+                    ? (currentTheme.mode === 'dark' ? 'rgb(147, 197, 253)' : 'rgb(29, 78, 216)')
+                    : currentTheme.colors.text.primary
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(59, 130, 246)';
+                    e.currentTarget.style.backgroundColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)';
+                    e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
+                  }
+                }}
               >
                 <div className="text-2xl mb-1">{option.icon}</div>
                 <div className="text-sm font-medium">{option.label}</div>
@@ -393,14 +513,23 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-80 transition-opacity"
+          style={{
+            backgroundColor: currentTheme.colors.surface.primary,
+            borderColor: currentTheme.colors.border.primary,
+            color: currentTheme.colors.text.secondary
+          }}
         >
           キャンセル
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: currentTheme.colors.primary,
+            color: currentTheme.colors.text.inverse
+          }}
         >
           {isLoading ? '保存中...' : (hobby ? '更新' : '作成')}
         </button>

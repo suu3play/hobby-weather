@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNotificationConfig } from '../../hooks/useNotificationConfig';
 import { useNotification } from '../../hooks/useNotification';
 import { NotificationPermissionPrompt } from './NotificationPermissionPrompt';
+import { useTheme } from '../../contexts/ThemeContext';
 import type { NotificationConfig, TimeRange } from '../../types/notification';
 
 interface NotificationSettingsProps {
@@ -9,6 +10,7 @@ interface NotificationSettingsProps {
 }
 
 export function NotificationSettings({ className = "" }: NotificationSettingsProps) {
+  const { currentTheme } = useTheme();
   const { permission } = useNotification();
   const { 
     configs, 
@@ -81,13 +83,28 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
   if (isLoading) {
     return (
-      <div className={`bg-white rounded-lg shadow p-6 ${className}`}>
+      <div 
+        className={`rounded-lg shadow p-6 ${className}`}
+        style={{ backgroundColor: currentTheme.colors.surface.primary }}
+      >
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-300 rounded mb-4"></div>
+          <div 
+            className="h-6 rounded mb-4"
+            style={{ backgroundColor: currentTheme.colors.surface.secondary }}
+          ></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-300 rounded"></div>
-            <div className="h-4 bg-gray-300 rounded"></div>
-            <div className="h-4 bg-gray-300 rounded"></div>
+            <div 
+              className="h-4 rounded"
+              style={{ backgroundColor: currentTheme.colors.surface.secondary }}
+            ></div>
+            <div 
+              className="h-4 rounded"
+              style={{ backgroundColor: currentTheme.colors.surface.secondary }}
+            ></div>
+            <div 
+              className="h-4 rounded"
+              style={{ backgroundColor: currentTheme.colors.surface.secondary }}
+            ></div>
           </div>
         </div>
       </div>
@@ -96,12 +113,35 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
   if (error) {
     return (
-      <div className={`bg-red-50 border border-red-200 rounded-lg p-4 ${className}`}>
+      <div 
+        className={`border rounded-lg p-4 ${className}`}
+        style={{
+          backgroundColor: currentTheme.mode === 'dark' 
+            ? 'rgba(239, 68, 68, 0.1)' 
+            : 'rgb(254, 242, 242)',
+          borderColor: currentTheme.colors.error
+        }}
+      >
         <div className="flex items-center">
-          <div className="text-red-600 mr-2">❌</div>
+          <div 
+            className="mr-2"
+            style={{ color: currentTheme.colors.error }}
+          >
+            ❌
+          </div>
           <div>
-            <h3 className="text-sm font-medium text-red-800">エラーが発生しました</h3>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
+            <h3 
+              className="text-sm font-medium"
+              style={{ color: currentTheme.colors.error }}
+            >
+              エラーが発生しました
+            </h3>
+            <p 
+              className="text-sm mt-1"
+              style={{ color: currentTheme.colors.error }}
+            >
+              {error}
+            </p>
           </div>
         </div>
       </div>
@@ -114,15 +154,33 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
       <NotificationPermissionPrompt />
 
       {/* グローバル設定 */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">🔔 通知設定</h2>
+      <div 
+        className="rounded-lg shadow p-6"
+        style={{ backgroundColor: currentTheme.colors.surface.primary }}
+      >
+        <h2 
+          className="text-lg font-semibold mb-4"
+          style={{ color: currentTheme.colors.text.primary }}
+        >
+          🔔 通知設定
+        </h2>
         
         <div className="space-y-4">
           {/* 全体の有効/無効 */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900">通知機能</h3>
-              <p className="text-sm text-gray-500">すべての通知の有効/無効を切り替え</p>
+              <h3 
+                className="text-sm font-medium"
+                style={{ color: currentTheme.colors.text.primary }}
+              >
+                通知機能
+              </h3>
+              <p 
+                className="text-sm"
+                style={{ color: currentTheme.colors.text.tertiary }}
+              >
+                すべての通知の有効/無効を切り替え
+              </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -140,8 +198,18 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">静寂時間</h3>
-                <p className="text-sm text-gray-500">指定した時間は通知を送信しません</p>
+                <h3 
+                  className="text-sm font-medium"
+                  style={{ color: currentTheme.colors.text.primary }}
+                >
+                  静寂時間
+                </h3>
+                <p 
+                  className="text-sm"
+                  style={{ color: currentTheme.colors.text.tertiary }}
+                >
+                  指定した時間は通知を送信しません
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -161,17 +229,39 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
                   value={quietStart}
                   onChange={(e) => setQuietStart(e.target.value)}
                   onBlur={handleQuietHoursChange}
-                  className="border rounded px-2 py-1 text-sm"
+                  className="rounded px-2 py-1 text-sm"
+                  style={{
+                    backgroundColor: currentTheme.colors.surface.secondary,
+                    borderColor: currentTheme.colors.border.primary,
+                    color: currentTheme.colors.text.primary,
+                    border: `1px solid ${currentTheme.colors.border.primary}`
+                  }}
                 />
-                <span className="text-sm text-gray-500">から</span>
+                <span 
+                  className="text-sm"
+                  style={{ color: currentTheme.colors.text.tertiary }}
+                >
+                  から
+                </span>
                 <input
                   type="time"
                   value={quietEnd}
                   onChange={(e) => setQuietEnd(e.target.value)}
                   onBlur={handleQuietHoursChange}
-                  className="border rounded px-2 py-1 text-sm"
+                  className="rounded px-2 py-1 text-sm"
+                  style={{
+                    backgroundColor: currentTheme.colors.surface.secondary,
+                    borderColor: currentTheme.colors.border.primary,
+                    color: currentTheme.colors.text.primary,
+                    border: `1px solid ${currentTheme.colors.border.primary}`
+                  }}
                 />
-                <span className="text-sm text-gray-500">まで</span>
+                <span 
+                  className="text-sm"
+                  style={{ color: currentTheme.colors.text.tertiary }}
+                >
+                  まで
+                </span>
               </div>
             )}
           </div>
@@ -180,13 +270,29 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
           <div className="border-t pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">1日の最大通知数</h3>
-                <p className="text-sm text-gray-500">1日に送信する通知の上限数</p>
+                <h3 
+                  className="text-sm font-medium"
+                  style={{ color: currentTheme.colors.text.primary }}
+                >
+                  1日の最大通知数
+                </h3>
+                <p 
+                  className="text-sm"
+                  style={{ color: currentTheme.colors.text.tertiary }}
+                >
+                  1日に送信する通知の上限数
+                </p>
               </div>
               <select
                 value={settings?.maxDailyNotifications || 10}
                 onChange={(e) => handleMaxNotificationsChange(Number(e.target.value))}
-                className="border rounded px-2 py-1 text-sm"
+                className="rounded px-2 py-1 text-sm"
+                style={{
+                  backgroundColor: currentTheme.colors.surface.secondary,
+                  borderColor: currentTheme.colors.border.primary,
+                  color: currentTheme.colors.text.primary,
+                  border: `1px solid ${currentTheme.colors.border.primary}`
+                }}
               >
                 <option value={5}>5回</option>
                 <option value={10}>10回</option>
@@ -200,8 +306,18 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
           <div className="border-t pt-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">通知音</h3>
-                <p className="text-sm text-gray-500">通知時に音を再生</p>
+                <h3 
+                  className="text-sm font-medium"
+                  style={{ color: currentTheme.colors.text.primary }}
+                >
+                  通知音
+                </h3>
+                <p 
+                  className="text-sm"
+                  style={{ color: currentTheme.colors.text.tertiary }}
+                >
+                  通知時に音を再生
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -216,8 +332,18 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">バイブレーション</h3>
-                <p className="text-sm text-gray-500">通知時に振動（対応デバイスのみ）</p>
+                <h3 
+                  className="text-sm font-medium"
+                  style={{ color: currentTheme.colors.text.primary }}
+                >
+                  バイブレーション
+                </h3>
+                <p 
+                  className="text-sm"
+                  style={{ color: currentTheme.colors.text.tertiary }}
+                >
+                  通知時に振動（対応デバイスのみ）
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -234,8 +360,16 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
       </div>
 
       {/* 通知タイプ別設定 */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">📋 通知タイプ設定</h2>
+      <div 
+        className="rounded-lg shadow p-6"
+        style={{ backgroundColor: currentTheme.colors.surface.primary }}
+      >
+        <h2 
+          className="text-lg font-semibold mb-4"
+          style={{ color: currentTheme.colors.text.primary }}
+        >
+          📋 通知タイプ設定
+        </h2>
         
         <div className="space-y-4">
           {configs.map((config) => (
@@ -247,7 +381,10 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
           ))}
           
           {configs.length === 0 && (
-            <p className="text-sm text-gray-500 text-center py-4">
+            <p 
+              className="text-sm text-center py-4"
+              style={{ color: currentTheme.colors.text.tertiary }}
+            >
               通知設定がありません
             </p>
           )}
@@ -255,12 +392,21 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
       </div>
 
       {/* 統計情報 */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div 
+        className="rounded-lg shadow p-6"
+        style={{ backgroundColor: currentTheme.colors.surface.primary }}
+      >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">📊 通知統計</h2>
+          <h2 
+            className="text-lg font-semibold"
+            style={{ color: currentTheme.colors.text.primary }}
+          >
+            📊 通知統計
+          </h2>
           <button
             onClick={loadStats}
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm hover:opacity-80 transition-opacity"
+            style={{ color: currentTheme.colors.primary }}
           >
             {showStats ? '再読み込み' : '統計を表示'}
           </button>
@@ -269,20 +415,46 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
         {showStats && stats && (
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-600">{stats.totalSent}</div>
-              <div className="text-sm text-gray-500">総送信数</div>
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: currentTheme.colors.primary }}
+              >
+                {stats.totalSent}
+              </div>
+              <div 
+                className="text-sm"
+                style={{ color: currentTheme.colors.text.tertiary }}
+              >
+                総送信数
+              </div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: currentTheme.colors.success }}
+              >
                 {(stats.clickRate * 100).toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-500">クリック率</div>
+              <div 
+                className="text-sm"
+                style={{ color: currentTheme.colors.text.tertiary }}
+              >
+                クリック率
+              </div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-600">
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: currentTheme.colors.warning }}
+              >
                 {(stats.dismissRate * 100).toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-500">非表示率</div>
+              <div 
+                className="text-sm"
+                style={{ color: currentTheme.colors.text.tertiary }}
+              >
+                非表示率
+              </div>
             </div>
           </div>
         )}
@@ -299,6 +471,7 @@ function NotificationConfigItem({
   config: NotificationConfig; 
   onToggle: (id: number) => Promise<void>; 
 }) {
+  const { currentTheme } = useTheme();
   const getConfigIcon = (type: string) => {
     switch (type) {
       case 'high-score': return '🌟';
@@ -324,12 +497,29 @@ function NotificationConfigItem({
   };
 
   return (
-    <div className="flex items-center justify-between p-3 border rounded-lg">
+    <div 
+      className="flex items-center justify-between p-3 rounded-lg"
+      style={{
+        backgroundColor: currentTheme.colors.surface.secondary,
+        borderColor: currentTheme.colors.border.primary,
+        border: `1px solid ${currentTheme.colors.border.primary}`
+      }}
+    >
       <div className="flex items-center space-x-3">
         <span className="text-xl">{getConfigIcon(config.type)}</span>
         <div>
-          <h4 className="text-sm font-medium text-gray-900">{config.title}</h4>
-          <p className="text-sm text-gray-500">{getConfigDescription(config.type)}</p>
+          <h4 
+            className="text-sm font-medium"
+            style={{ color: currentTheme.colors.text.primary }}
+          >
+            {config.title}
+          </h4>
+          <p 
+            className="text-sm"
+            style={{ color: currentTheme.colors.text.tertiary }}
+          >
+            {getConfigDescription(config.type)}
+          </p>
         </div>
       </div>
       
