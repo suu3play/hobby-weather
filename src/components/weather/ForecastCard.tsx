@@ -38,7 +38,7 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ forecast, isToday = 
     <div className="rounded-lg border-2 p-4 transition-all hover:shadow-md" style={{
       backgroundColor: isToday
         ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgb(239, 246, 255)')
-        : currentTheme.colors.background,
+        : currentTheme.colors.background.primary,
       borderColor: isToday
         ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)')
         : currentTheme.colors.border.primary,

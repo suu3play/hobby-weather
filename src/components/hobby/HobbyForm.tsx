@@ -281,7 +281,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                     onClick={() => selectHobbySuggestion(suggestion)}
                     className="text-left p-2 rounded border transition-colors"
                     style={{
-                      backgroundColor: currentTheme.colors.background,
+                      backgroundColor: currentTheme.colors.background.primary,
                       borderColor: currentTheme.colors.border.primary,
                       color: currentTheme.colors.text.primary
                     }}
@@ -290,7 +290,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                       e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = currentTheme.colors.background;
+                      e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
                       e.currentTarget.style.borderColor = currentTheme.colors.border.primary;
                     }}
                   >
@@ -422,7 +422,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                     : (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)'),
                   backgroundColor: isSelected
                     ? (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.2)' : 'rgb(243, 244, 246)')
-                    : currentTheme.colors.background,
+                    : currentTheme.colors.background.primary,
                   color: isSelected
                     ? (currentTheme.mode === 'dark' ? 'rgba(156, 163, 175, 0.7)' : 'rgb(156, 163, 175)')
                     : currentTheme.colors.text.primary,
@@ -437,7 +437,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                 onMouseLeave={(e) => {
                   if (!isSelected) {
                     e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)';
-                    e.currentTarget.style.backgroundColor = currentTheme.colors.background;
+                    e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
                   }
                 }}
               >
@@ -469,7 +469,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                     : (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)'),
                   backgroundColor: isSelected
                     ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(239, 246, 255)')
-                    : currentTheme.colors.background,
+                    : currentTheme.colors.background.primary,
                   color: isSelected
                     ? (currentTheme.mode === 'dark' ? 'rgb(147, 197, 253)' : 'rgb(29, 78, 216)')
                     : currentTheme.colors.text.primary
@@ -483,7 +483,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
                 onMouseLeave={(e) => {
                   if (!isSelected) {
                     e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)';
-                    e.currentTarget.style.backgroundColor = currentTheme.colors.background;
+                    e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
                   }
                 }}
               >

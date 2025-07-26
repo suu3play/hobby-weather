@@ -156,7 +156,7 @@ export const WeatherDisplay: React.FC = () => {
             {/* Stats */}
             {currentWeather && forecast && (
                 <div className="rounded-lg shadow-md border p-6" style={{
-                    backgroundColor: currentTheme.colors.background,
+                    backgroundColor: currentTheme.colors.background.primary,
                     borderColor: currentTheme.colors.border.primary
                 }}>
                     <h3 className="text-lg font-semibold mb-4" style={{

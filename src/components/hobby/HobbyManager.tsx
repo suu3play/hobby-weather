@@ -168,7 +168,7 @@ export const HobbyManager: React.FC = () => {
 
             {/* Main Content */}
             <div className="rounded-lg shadow-sm border" style={{
-                backgroundColor: currentTheme.colors.background,
+                backgroundColor: currentTheme.colors.background.primary,
                 borderColor: currentTheme.mode === 'dark' ? 'rgba(75, 85, 99, 0.3)' : 'rgb(229, 231, 235)'
             }}>
                 <div className="p-6">

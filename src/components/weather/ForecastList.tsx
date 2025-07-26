@@ -24,7 +24,7 @@ export const ForecastList: React.FC<ForecastListProps> = ({ forecast, className 
 
   return (
     <div className={`rounded-lg shadow-md border ${className}`} style={{
-      backgroundColor: currentTheme.colors.background,
+      backgroundColor: currentTheme.colors.background.primary,
       borderColor: currentTheme.colors.border.primary
     }}>
       {/* Header */}

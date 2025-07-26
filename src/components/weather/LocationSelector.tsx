@@ -47,7 +47,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     try {
       const results = await weatherService.searchLocation(searchQuery);
       setSearchResults(results);
-      
+
       if (results.length === 0) {
         setSearchError('該当する場所が見つかりませんでした');
       }
@@ -69,7 +69,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         isDefault: true,
         type: searchResult.type
       };
-      
+
       // Add optional properties only if they exist
       if (searchResult.address) {
         locationData.address = searchResult.address;
@@ -79,10 +79,10 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       }
 
       await databaseService.saveLocation(locationData);
-      
+
       // Get the saved location with ID
       const savedLocation = await databaseService.getDefaultLocation();
-      
+
       if (savedLocation) {
         onLocationSelect(savedLocation);
         await loadSavedLocations();
@@ -142,7 +142,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   return (
     <div className="rounded-lg shadow-md border p-6" style={{
-      backgroundColor: currentTheme.colors.background,
+      backgroundColor: currentTheme.colors.background.primary,
       borderColor: currentTheme.colors.border.primary
     }}>
       {/* Current Location Display */}
@@ -182,7 +182,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           >
             {isLoading ? '取得中...' : '📍 現在地'}
           </button>
-          
+
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
@@ -242,7 +242,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                     onClick={() => handleLocationSelect(result)}
                     className="w-full text-left p-3 border rounded-md transition-colors"
                     style={{
-                      backgroundColor: currentTheme.colors.background,
+                      backgroundColor: currentTheme.colors.background.primary,
                       borderColor: currentTheme.colors.border.primary,
                       color: currentTheme.colors.text.primary
                     }}
@@ -251,7 +251,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                       e.currentTarget.style.borderColor = currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = currentTheme.colors.background;
+                      e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
                       e.currentTarget.style.borderColor = currentTheme.colors.border.primary;
                     }}
                   >
@@ -266,15 +266,15 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                             {getLocationTypeLabel(result.type)}
                           </span>
                         </div>
-                        
+
                         {result.category && (
                           <p className="text-xs text-blue-600 mt-1">{result.category}</p>
                         )}
-                        
+
                         {result.address && (
                           <p className="text-xs text-gray-500 mt-1 truncate">{result.address}</p>
                         )}
-                        
+
                         <div className="flex items-center justify-between mt-2">
                           <p className="text-xs text-gray-500">
                             {result.country ?? 'JP'} ({result.lat.toFixed(4)}, {result.lon.toFixed(4)})
@@ -304,7 +304,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                     style={{
                       backgroundColor: currentLocation?.id === location.id
                         ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(239, 246, 255)')
-                        : currentTheme.colors.background,
+                        : currentTheme.colors.background.primary,
                       borderColor: currentLocation?.id === location.id
                         ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.5)' : 'rgb(147, 197, 253)')
                         : currentTheme.colors.border.primary,
@@ -318,7 +318,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                     }}
                     onMouseLeave={(e) => {
                       if (currentLocation?.id !== location.id) {
-                        e.currentTarget.style.backgroundColor = currentTheme.colors.background;
+                        e.currentTarget.style.backgroundColor = currentTheme.colors.background.primary;
                         e.currentTarget.style.borderColor = currentTheme.colors.border.primary;
                       }
                     }}
@@ -342,15 +342,15 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                               </span>
                             )}
                           </div>
-                          
+
                           {location.category && (
                             <p className="text-xs text-blue-600 mt-1">{location.category}</p>
                           )}
-                          
+
                           {location.address && (
                             <p className="text-xs text-gray-500 mt-1 truncate">{location.address}</p>
                           )}
-                          
+
                           <p className="text-xs text-gray-500 mt-1">
                             ({location.lat.toFixed(4)}, {location.lon.toFixed(4)})
                           </p>
