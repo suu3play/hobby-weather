@@ -8,6 +8,7 @@ import {
   getWeatherConditionLabel
 } from '../../hooks/useHobby';
 import { HOBBY_CATEGORIES, TIME_OF_DAY_OPTIONS, type HobbySuggestion } from '../../data/hobbySuggestions';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface HobbyFormProps {
   hobby?: Hobby;
@@ -22,6 +23,7 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
   onCancel,
   isLoading = false
 }) => {
+  const { currentTheme } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -163,13 +165,24 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {errors.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div 
+          className="border rounded-md p-4"
+          style={{
+            backgroundColor: currentTheme.mode === 'dark' 
+              ? 'rgba(239, 68, 68, 0.1)' 
+              : 'rgb(254, 242, 242)',
+            borderColor: currentTheme.colors.error
+          }}
+        >
           <div className="flex">
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
+              <h3 
+                className="text-sm font-medium"
+                style={{ color: currentTheme.colors.error }}
+              >
                 入力エラーがあります
               </h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="mt-2 text-sm" style={{ color: currentTheme.colors.error }}>
                 <ul className="list-disc list-inside space-y-1">
                   {errors.map((error, index) => (
                     <li key={index}>{error}</li>
@@ -251,15 +264,25 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       </div>
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          趣味名 <span className="text-red-500">*</span>
+        <label 
+          htmlFor="name" 
+          className="block text-sm font-medium"
+          style={{ color: currentTheme.colors.text.secondary }}
+        >
+          趣味名 <span style={{ color: currentTheme.colors.error }}>*</span>
         </label>
         <input
           type="text"
           id="name"
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-2"
+          style={{
+            backgroundColor: currentTheme.colors.surface.secondary,
+            borderColor: currentTheme.colors.border.primary,
+            color: currentTheme.colors.text.primary,
+            border: `1px solid ${currentTheme.colors.border.primary}`
+          }}
           placeholder="例: ランニング"
           maxLength={50}
           required
@@ -267,7 +290,11 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+        <label 
+          htmlFor="description" 
+          className="block text-sm font-medium"
+          style={{ color: currentTheme.colors.text.secondary }}
+        >
           説明
         </label>
         <textarea
@@ -275,7 +302,13 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-2"
+          style={{
+            backgroundColor: currentTheme.colors.surface.secondary,
+            borderColor: currentTheme.colors.border.primary,
+            color: currentTheme.colors.text.primary,
+            border: `1px solid ${currentTheme.colors.border.primary}`
+          }}
           placeholder="趣味の詳細や楽しみ方について..."
           maxLength={200}
         />
@@ -285,8 +318,11 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          希望天気 <span className="text-red-500">*</span>
+        <label 
+          className="block text-sm font-medium mb-3"
+          style={{ color: currentTheme.colors.text.secondary }}
+        >
+          希望天気 <span style={{ color: currentTheme.colors.error }}>*</span>
         </label>
         
         {/* Selected weather conditions */}
@@ -393,14 +429,23 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-80 transition-opacity"
+          style={{
+            backgroundColor: currentTheme.colors.surface.primary,
+            borderColor: currentTheme.colors.border.primary,
+            color: currentTheme.colors.text.secondary
+          }}
         >
           キャンセル
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: currentTheme.colors.primary,
+            color: currentTheme.colors.text.inverse
+          }}
         >
           {isLoading ? '保存中...' : (hobby ? '更新' : '作成')}
         </button>
