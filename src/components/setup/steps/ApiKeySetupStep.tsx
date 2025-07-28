@@ -36,11 +36,11 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
     setError(null);
 
     try {
-      // API Keyを保存
+      // APIキーを保存
       const settings = { openWeatherApiKey: apiKey.trim() };
       localStorage.setItem('hobby-weather-api-settings', JSON.stringify(settings));
       
-      // WeatherServiceのAPI Keyを更新
+      // WeatherServiceのAPIキーを更新
       const { weatherService } = await import('../../../services/weather.service');
       weatherService.refreshApiKey();
       

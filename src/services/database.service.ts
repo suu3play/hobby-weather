@@ -13,7 +13,7 @@ export class DatabaseService {
     constructor(database?: HobbyWeatherDatabase) {
         this.db = database || db;
     }
-    // Hobby operations
+    // 趣味関連操作
     async createHobby(
         hobby: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'>
     ): Promise<number> {
@@ -42,7 +42,7 @@ export class DatabaseService {
         await this.db.hobbies.delete(id);
     }
 
-    // Weather data operations
+    // 天気データ操作
     async saveWeatherData(
         weatherData: Omit<WeatherData, 'id'>
     ): Promise<number> {
@@ -66,7 +66,7 @@ export class DatabaseService {
     async saveWeatherForecast(
         forecast: Omit<WeatherForecast, 'id'>
     ): Promise<number> {
-        // Delete existing forecast for same location
+        // 同じ場所の既存の予報を削除
         await this.db.weatherForecasts
             .where('[lat+lon]')
             .equals([forecast.lat, forecast.lon])
@@ -88,12 +88,12 @@ export class DatabaseService {
             .first();
     }
 
-    // Location operations
+    // 場所関連操作
     async saveLocation(
         location: Omit<Location, 'id' | 'createdAt'>
     ): Promise<number> {
         if (location.isDefault) {
-            // Set all other locations as non-default
+            // 他のすべての場所を非デフォルトに設定
             await this.db.locations
                 .filter((loc) => loc.isDefault === true)
                 .modify({ isDefault: false });
@@ -120,7 +120,7 @@ export class DatabaseService {
         changes: Partial<Location>
     ): Promise<number> {
         if (changes.isDefault) {
-            // Set all other locations as non-default
+            // 他のすべての場所を非デフォルトに設定
             await this.db.locations
                 .filter((loc) => loc.isDefault === true)
                 .modify({ isDefault: false });
@@ -132,7 +132,7 @@ export class DatabaseService {
         await this.db.locations.delete(id);
     }
 
-    // Settings operations
+    // 設定関連操作
     async getSettings(): Promise<AppSettings | undefined> {
         return await this.db.settings.toCollection().first();
     }
@@ -154,7 +154,7 @@ export class DatabaseService {
         }
     }
 
-    // Utility operations
+    // ユーティリティ操作
     async clearAllData(): Promise<void> {
         await this.db.hobbies.clear();
         await this.db.weatherData.clear();
@@ -187,10 +187,10 @@ export class DatabaseService {
             settings?: AppSettings & { id?: number };
         };
 
-        // Clear existing data
+        // 既存データをクリア
         await this.clearAllData();
 
-        // Import hobbies
+        // 趣味をインポート
         if (data.hobbies && Array.isArray(data.hobbies)) {
             for (const hobby of data.hobbies) {
                 const { id, ...hobbyData } = hobby;
@@ -198,7 +198,7 @@ export class DatabaseService {
             }
         }
 
-        // Import locations
+        // 場所をインポート
         if (data.locations && Array.isArray(data.locations)) {
             for (const location of data.locations) {
                 const { id, ...locationData } = location;
@@ -206,7 +206,7 @@ export class DatabaseService {
             }
         }
 
-        // Import settings
+        // 設定をインポート
         if (data.settings) {
             const { id, ...settingsData } = data.settings;
             await this.updateSettings(settingsData);
