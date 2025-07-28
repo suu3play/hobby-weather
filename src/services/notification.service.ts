@@ -233,7 +233,7 @@ export class NotificationService {
 
   // 通知スケジューリング
   scheduleNotification(config: NotificationConfig, payload: NotificationPayload): void {
-    // Service Workerを使用したバックグラウンド通知の実装
+    // サービスワーカーを使用したバックグラウンド通知の実装
     // 現在は即座に送信（後でスケジューリング機能を追加）
     if (config.enabled) {
       this.sendNotification(payload);
@@ -256,14 +256,14 @@ export class NotificationService {
     return this.isSupported;
   }
 
-  // Service Worker登録（後で実装）
+  // サービスワーカー登録（後で実装）
   async registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
     if (!('serviceWorker' in navigator)) {
       return null;
     }
 
     try {
-      // Service Workerファイルは後で作成
+      // サービスワーカーファイルは後で作成
       const registration = await navigator.serviceWorker.register('/sw.js');
       console.log('Service Worker registered:', registration);
       return registration;

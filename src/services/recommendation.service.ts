@@ -94,33 +94,42 @@ export class RecommendationService {
   }
 
   /**
-   * 1日のスコアを計算
+   * 趣味に対する1日のスコアを算出（0-100点）
+   * 
+   * スコア構成要素と重み付け:
+   * - 天気タイプ: 40% （最も重要な要素、趣味の適性に直結）
+   * - 気温: 25% （体感に大きく影響、活動の快適性を左右）
+   * - 降水確率: 20% （屋外活動に重要、屋内活動には影響少）
+   * - 風速: 10% （一部の活動に影響、スポーツ系で重要）
+   * - UV指数: 5% （長時間屋外活動時のみ考慮）
+   * 
+   * 重み付けは実際の利用パターンやフィードバックに基づいて調整可能
    */
   private calculateDayScore(hobby: Hobby, forecast: DailyForecast): { score: number; breakdown: Record<string, number> } {
     let score = 0;
     const breakdown: Record<string, number> = {};
 
-    // 天気タイプスコア (40%)
+    // 天気タイプスコア (40%) - 趣味の適性に最も重要
     const weatherScore = this.calculateWeatherScore(hobby, forecast);
     score += weatherScore * 0.4;
     breakdown['weather'] = weatherScore;
 
-    // 気温スコア (25%)
+    // 気温スコア (25%) - 快適性に大きく影響
     const temperatureScore = this.calculateTemperatureScore(hobby, forecast);
     score += temperatureScore * 0.25;
     breakdown['temperature'] = temperatureScore;
 
-    // 降水確率スコア (20%)
+    // 降水確率スコア (20%) - 屋外活動の実行可能性を判断
     const precipitationScore = this.calculatePrecipitationScore(hobby, forecast);
     score += precipitationScore * 0.2;
     breakdown['precipitation'] = precipitationScore;
 
-    // 風速スコア (10%)
+    // 風速スコア (10%) - 一部活動への影響を考慮
     const windScore = this.calculateWindScore(hobby, forecast);
     score += windScore * 0.1;
     breakdown['wind'] = windScore;
 
-    // UVスコア (5%)
+    // UV指数スコア (5%)
     const uvScore = this.calculateUVScore(hobby, forecast);
     score += uvScore * 0.05;
     breakdown['uv'] = uvScore;
@@ -134,7 +143,7 @@ export class RecommendationService {
   private calculateWeatherScore(hobby: Hobby, forecast: DailyForecast): number {
     if (!hobby.preferredWeather || hobby.preferredWeather.length === 0) return 50;
 
-    // WeatherCondition配列の場合の処理
+    // 天気条件配列の場合の処理
     const weatherConditions = hobby.preferredWeather;
     const matchingCondition = weatherConditions.find(w => w.condition === forecast.weatherType);
     
@@ -143,7 +152,17 @@ export class RecommendationService {
       return Math.min(100, matchingCondition.weight * 10);
     }
 
-    // 部分マッチング
+    /**
+     * 天気タイプ間の互換性マッピング
+     * 
+     * 設計思想:
+     * - 'clouds'（曇り）の趣味は'clear'（晴れ）でも部分的に適用可能
+     * - 'drizzle'（霧雨）は'rain'（雨）の軽い版として扱う
+     * - 'mist'系の天気は視界に影響するが部分的に互換性あり
+     * 
+     * この互換性により、完全一致しない場合でも部分スコア（60点）を付与
+     * 完全不適合でも最低限のスコア（20点）を保証してユーザビリティを向上
+     */
     const compatibleWeather: Record<WeatherType, WeatherType[]> = {
       clear: ['clear'],
       clouds: ['clouds', 'clear'],
@@ -165,18 +184,26 @@ export class RecommendationService {
 
   /**
    * 気温スコア計算
+   * 
+   * アルゴリズム:
+   * 1. 趣味の活動時間帯（朝/昼/夕/夜）に応じて対象気温を選択
+   * 2. 趣味に設定された適温範囲（デフォルト10-30℃）と比較
+   * 3. 範囲内なら100点、範囲外なら距離に応じて5点/℃で減点
+   * 
+   * 例: 散歩（15-25℃設定）で気温30℃の場合
+   * → 距離5℃ × 5点 = 25点減点 → 75点
    */
   private calculateTemperatureScore(hobby: Hobby, forecast: DailyForecast): number {
     // 活動時間帯に基づいた気温を使用
     const targetTemp = this.getTargetTemperature(hobby, forecast);
     
-    // デフォルト範囲: 10-30度
+    // デフォルト範囲: 10-30度（一般的な屋外活動に適した範囲）
     const minTemp = hobby.minTemperature ?? 10;
     const maxTemp = hobby.maxTemperature ?? 30;
 
     if (targetTemp >= minTemp && targetTemp <= maxTemp) return 100;
 
-    // 範囲外の場合は距離に応じて減点
+    // 範囲外の場合は距離に応じて減点（1℃あたり5点減点）
     const distance = Math.min(
       Math.abs(targetTemp - minTemp),
       Math.abs(targetTemp - maxTemp)
@@ -187,6 +214,18 @@ export class RecommendationService {
 
   /**
    * 降水確率スコア計算
+   * 
+   * 屋外活動と屋内活動で異なる評価基準を適用:
+   * 
+   * 屋外活動（散歩、スポーツ等）:
+   * - 10%以下: 100点（安心して活動可能）
+   * - 30%以下: 70点（注意すれば可能）
+   * - 50%以下: 40点（リスクあり）
+   * - 50%超: 10点（推奨しない）
+   * 
+   * 屋内活動（読書、料理等）:
+   * - より雨に寛容な評価
+   * - 移動時の影響のみ考慮
    */
   private calculatePrecipitationScore(hobby: Hobby, forecast: DailyForecast): number {
     const popPercent = forecast.pop * 100;
@@ -199,7 +238,7 @@ export class RecommendationService {
       return 10;
     }
 
-    // 屋内活動は雨の影響が少ない
+    // 屋内活動は雨の影響が少ない（移動時の影響のみ）
     if (popPercent <= 20) return 100;
     if (popPercent <= 50) return 80;
     if (popPercent <= 80) return 60;

@@ -59,6 +59,14 @@ export class WeatherService {
     return 'clear'; // Default fallback
   }
 
+  /**
+   * OpenWeatherMap APIへのリクエストを実行
+   * 
+   * API制限事項:
+   * - 無料プラン: 1,000 calls/day, 60 calls/minute
+   * - レートリミット超過時は429ステータスコードを返す
+   * - キャッシュ機能でAPI呼び出しを最小化
+   */
   private async makeRequest<T>(url: string): Promise<T> {
     if (!this.apiKey) {
       throw new Error('API key not configured');
@@ -74,8 +82,16 @@ export class WeatherService {
     return response.json();
   }
 
+  /**
+   * 現在の天気情報を取得
+   * 
+   * キャッシュ戦略:
+   * - デフォルトでは6時間キャッシュを使用
+   * - forceRefresh=trueでキャッシュをバイパスして最新データを取得
+   * - API呼び出し回数を減らしてレートリミットを回避
+   */
   async getCurrentWeather(lat: number, lon: number, forceRefresh = false): Promise<WeatherData> {
-    // Check cache first unless forced refresh
+    // 強制更新でない限りまずキャッシュをチェック
     if (!forceRefresh) {
       const cached = await databaseService.getWeatherData(lat, lon);
       if (cached) {
@@ -122,7 +138,11 @@ export class WeatherService {
       }
     }
 
-    // OneCall API is paid service since June 2023, use 5-day forecast instead
+    /**
+     * OneCall APIは2023年6月から有料サービスに変更
+     * 代わりに5日間予報APIを使用して日別データを集約
+     * 3時間ごとのデータを日別にグループ化して処理
+     */
     const url = `${this.baseUrl}/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric&lang=ja`;
     const response: OpenWeatherMapForecastResponse = await this.makeRequest(url);
 
@@ -131,7 +151,10 @@ export class WeatherService {
       throw new Error('Invalid forecast response format');
     }
 
-    // Group forecasts by date and calculate daily aggregates
+    /**
+     * 3時間ごとの予報データを日別にグループ化
+     * 最高最低気温、時間帯別気温、平均湿度などを計算
+     */
     const dailyData = new Map<string, any[]>();
     
     response.list.forEach((item) => {
@@ -154,7 +177,8 @@ export class WeatherService {
         const pressures = items.map(item => item.main.pressure);
         const winds = items.map(item => item.wind.speed);
         
-        // Use the most common weather condition for the day
+        // 一日の中間時刻の天気情報を代表値として使用
+        // より精度を高める場合は最頻値を使用することも可能
         const weather = items[Math.floor(items.length / 2)]?.weather?.[0];
         if (!weather) {
           throw new Error('Invalid weather data in forecast');
@@ -213,6 +237,14 @@ export class WeatherService {
       console.warn('OpenWeatherMap search failed:', error);
     }
 
+    /**
+     * Nominatim APIで店舗・ランドマーク検索
+     * 
+     * 特徴:
+     * - OpenStreetMapデータベースを使用した無料サービス
+     * - 店舗、レストラン、観光地などの詳細な場所検索が可能
+     * - 使用ポリシー: 1秒に1リクエストまで
+     */
     // Nominatim API（店舗・ランドマーク検索）
     try {
       const nominatimResults = await this.searchLocationNominatim(query);
@@ -221,10 +253,21 @@ export class WeatherService {
       console.warn('Nominatim search failed:', error);
     }
 
-    // 重複除去と結果の統合
+    /**
+     * 複数のAPIからの結果を統合し重複を除去
+     * 同じ座標や名前の結果をマージしてユーザーに提示
+     */
     return this.deduplicateLocations(results);
   }
 
+  /**
+   * OpenWeatherMap Geocoding APIで都市名検索
+   * 
+   * 特徴:
+   * - 主に都市、省、国名での検索に適している
+   * - 結果は3件までに制限してAPI呼び出しを最小化
+   * - 国コードや経緯度情報を含む結果を返す
+   */
   private async searchLocationOpenWeather(query: string): Promise<LocationSearchResult[]> {
     if (!this.apiKey) {
       throw new Error('API key not configured');
@@ -239,6 +282,7 @@ export class WeatherService {
 
     const locations = await response.json();
     
+    // OpenWeatherMapのレスポンスを統一フォーマットに変換
     return locations.map((location: any) => ({
       name: location.name,
       lat: location.lat,
