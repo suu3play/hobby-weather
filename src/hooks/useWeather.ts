@@ -82,7 +82,7 @@ export const useWeather = (): UseWeatherReturn => {
     try {
       const position: GeolocationPosition = await geolocationService.getCurrentPosition();
       
-      // Get location name
+      // 場所名を取得
       const locationName = await weatherService.getLocationByCoords(position.lat, position.lon);
       
       const location: Omit<Location, 'id' | 'createdAt'> = {
@@ -92,7 +92,7 @@ export const useWeather = (): UseWeatherReturn => {
         isDefault: true
       };
 
-      // Save as default location
+      // デフォルトの場所として保存
       await databaseService.saveLocation(location);
       
       const savedLocation = await databaseService.getDefaultLocation();
@@ -102,7 +102,7 @@ export const useWeather = (): UseWeatherReturn => {
         isLocationLoading: false
       });
 
-      // Fetch weather for current location
+      // 現在の場所の天気を取得
       if (savedLocation) {
         await fetchWeatherData(savedLocation.lat, savedLocation.lon, true);
       }
@@ -117,12 +117,12 @@ export const useWeather = (): UseWeatherReturn => {
   const setLocation = useCallback(async (location: Location) => {
     updateState({ location });
     
-    // Update as default location if not already set
+    // まだ設定されていない場合はデフォルトの場所として更新
     if (!location.isDefault && location.id) {
       await databaseService.updateLocation(location.id, { isDefault: true });
     }
 
-    // Fetch weather for the new location
+    // 新しい場所の天気を取得
     await fetchWeatherData(location.lat, location.lon, true);
   }, [updateState, fetchWeatherData]);
 
@@ -132,7 +132,7 @@ export const useWeather = (): UseWeatherReturn => {
     }
   }, [state.location, fetchWeatherData]);
 
-  // Initialize with default location
+  // デフォルトの場所で初期化
   useEffect(() => {
     const initialize = async () => {
       const defaultLocation = await loadDefaultLocation();

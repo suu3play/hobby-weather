@@ -90,7 +90,7 @@ export interface DailyForecast {
   weatherDescription: string;
   cloudiness: number;
   uvIndex: number;
-  pop: number; // Probability of precipitation
+  pop: number; // 降水確率
 }
 
 export type LocationType = 'city' | 'landmark' | 'business' | 'address';
@@ -135,9 +135,9 @@ export interface AppSettings {
   windSpeedUnit: 'kmh' | 'mph' | 'ms';
   language: 'ja' | 'en';
   notificationsEnabled: boolean;
-  cacheExpiration: number; // hours
+  cacheExpiration: number; // 時間
   updatedAt: Date;
 }
 
-// Re-export notification types
+// 通知タイプの再エクスポート
 export * from './notification';

@@ -61,7 +61,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   const handleLocationSelect = async (searchResult: LocationSearchResult) => {
     try {
-      // Save location to database
+      // データベースに場所を保存
       const locationData: Omit<Location, 'id' | 'createdAt'> = {
         name: searchResult.name,
         lat: searchResult.lat,
@@ -70,7 +70,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         type: searchResult.type
       };
 
-      // Add optional properties only if they exist
+      // 存在する場合のみオプションプロパティを追加
       if (searchResult.address) {
         locationData.address = searchResult.address;
       }
@@ -80,7 +80,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
       await databaseService.saveLocation(locationData);
 
-      // Get the saved location with ID
+      // IDを持つ保存された場所を取得
       const savedLocation = await databaseService.getDefaultLocation();
 
       if (savedLocation) {
@@ -88,7 +88,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         await loadSavedLocations();
       }
 
-      // Clear search
+      // 検索をクリア
       setSearchQuery('');
       setSearchResults([]);
       setIsExpanded(false);
@@ -145,7 +145,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       backgroundColor: currentTheme.colors.background.primary,
       borderColor: currentTheme.colors.border.primary
     }}>
-      {/* Current Location Display */}
+      {/* 現在の場所表示 */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold mb-1" style={{
@@ -192,10 +192,10 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         </div>
       </div>
 
-      {/* Expanded Location Selector */}
+      {/* 展開された場所選択 */}
       {isExpanded && (
         <div className="border-t border-gray-200 pt-4">
-          {/* Search */}
+          {/* 検索 */}
           <div className="mb-4">
             <label htmlFor="location-search" className="block text-sm font-medium text-gray-700 mb-2">
               場所を検索
@@ -220,7 +220,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
             </div>
           </div>
 
-          {/* Search Error */}
+          {/* 検索エラー */}
           {searchError && (
             <div className="mb-4 rounded-md p-3" style={{
               backgroundColor: currentTheme.mode === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgb(254, 242, 242)',
@@ -231,7 +231,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
             </div>
           )}
 
-          {/* Search Results */}
+          {/* 検索結果 */}
           {searchResults.length > 0 && (
             <div className="mb-4">
               <h4 className="text-sm font-medium text-gray-700 mb-2">検索結果</h4>
@@ -291,7 +291,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
             </div>
           )}
 
-          {/* Saved Locations */}
+          {/* 保存済みの場所 */}
           {savedLocations.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">保存済みの場所</h4>
