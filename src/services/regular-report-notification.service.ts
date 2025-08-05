@@ -374,7 +374,10 @@ export class RegularReportNotificationService {
         if (h.data && h.data['topHobbies'] && Array.isArray(h.data['topHobbies'])) {
           (h.data['topHobbies'] as any[]).forEach((hobby: any) => {
             if (hobby && typeof hobby === 'object' && 'name' in hobby) {
-              hobbyCount[hobby.name] = (hobbyCount[hobby.name] || 0) + 1;
+              const hobbyData = hobby as Record<string, unknown>;
+              if (typeof hobbyData['name'] === 'string') {
+                hobbyCount[hobbyData['name'] as string] = (hobbyCount[hobbyData['name'] as string] || 0) + 1;
+              }
             }
           });
         }
