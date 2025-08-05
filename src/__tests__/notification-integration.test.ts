@@ -163,8 +163,11 @@ describe('通知システム統合テスト', () => {
   describe('エラーハンドリングテスト', () => {
     it('通知許可がない場合は送信に失敗する', async () => {
       // 許可を拒否状態に設定
-      const originalPermission = (globalThis.Notification as any).permission;
-      (globalThis.Notification as any).permission = 'denied';
+      const originalPermission = (globalThis.Notification as typeof Notification).permission;
+      Object.defineProperty(globalThis.Notification, 'permission', {
+        value: 'denied',
+        configurable: true
+      });
 
       const service = new NotificationService();
       const payload: NotificationPayload = {
@@ -177,7 +180,10 @@ describe('通知システム統合テスト', () => {
       expect(result).toBe(false);
 
       // 元の状態に戻す
-      (globalThis.Notification as any).permission = originalPermission;
+      Object.defineProperty(globalThis.Notification, 'permission', {
+        value: originalPermission,
+        configurable: true
+      });
     });
 
     it('不正な通知ペイロードでもエラーにならない', async () => {
@@ -203,7 +209,7 @@ describe('通知システム統合テスト', () => {
     it('Service Worker非対応環境でも正常に動作する', async () => {
       // Service Workerを一時的に無効化
       const originalServiceWorker = globalThis.navigator?.serviceWorker;
-      delete (globalThis.navigator as any).serviceWorker;
+      delete (globalThis.navigator as unknown as Record<string, unknown>)['serviceWorker'];
 
       const service = new NotificationService();
       const registration = await service.registerServiceWorker();
@@ -212,7 +218,7 @@ describe('通知システム統合テスト', () => {
 
       // 元に戻す
       if (originalServiceWorker) {
-        (globalThis.navigator as any).serviceWorker = originalServiceWorker;
+        (globalThis.navigator as unknown as Record<string, unknown>)['serviceWorker'] = originalServiceWorker;
       }
     });
   });

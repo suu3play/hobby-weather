@@ -4,7 +4,7 @@ import {
     getWeatherConditionIcon,
     getWeatherConditionLabel,
 } from '../../hooks/useHobby';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface HobbyListProps {
     hobbies: Hobby[];

@@ -5,7 +5,9 @@ import type { NotificationPayload } from '../types/notification';
 // Global mocks
 Object.defineProperty(globalThis, 'Notification', {
     value: class MockNotification {
-        constructor(_title: string, _options?: NotificationOptions) {}
+        constructor() {
+            // Mock implementation
+        }
         static permission: NotificationPermission = 'granted';
         static requestPermission = vi.fn().mockResolvedValue('granted');
         close = vi.fn();
@@ -205,7 +207,7 @@ describe('通知システム 品質メトリクス', () => {
     it('エラー境界が適切に処理される', async () => {
         // Notification APIを無効にしてテスト
         const originalNotification = globalThis.Notification;
-        delete (globalThis as any).Notification;
+        delete (globalThis as Record<string, unknown>)['Notification'];
 
         const service = new NotificationService();
         expect(service.isNotificationSupported()).toBe(false);
@@ -219,7 +221,7 @@ describe('通知システム 品質メトリクス', () => {
         expect(result).toBe(false);
 
         // 復元
-        (globalThis as any).Notification = originalNotification;
+        (globalThis as Record<string, unknown>)['Notification'] = originalNotification;
     });
 
     it('入力値の妥当性チェックが機能する', () => {

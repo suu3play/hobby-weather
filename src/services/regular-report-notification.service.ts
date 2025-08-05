@@ -119,7 +119,7 @@ export class RegularReportNotificationService {
     const summary = this.generateSummary(topRecommendations, period);
 
     // 天気概要の生成
-    const weatherSummary = this.generateWeatherSummary(forecast, period);
+    const weatherSummary = this.generateWeatherSummary(forecast);
 
     // 統計概要の生成
     const statisticsSummary = await this.generateStatisticsSummary(recommendations);
@@ -168,7 +168,7 @@ export class RegularReportNotificationService {
   }
 
   // 天気概要の生成
-  private generateWeatherSummary(forecast: WeatherForecast, _period: ReportPeriod): string {
+  private generateWeatherSummary(forecast: WeatherForecast): string {
     const currentWeather = forecast.forecasts?.[0];
     if (!currentWeather) return '天気データを取得できませんでした。';
     
@@ -361,7 +361,12 @@ export class RegularReportNotificationService {
 
       // 平均スコアを計算
       const scores = history
-        .map(h => (h.data && h.data['topHobbies'] && Array.isArray(h.data['topHobbies']) && h.data['topHobbies'][0] && typeof h.data['topHobbies'][0] === 'object' && 'score' in h.data['topHobbies'][0]) ? (h.data['topHobbies'][0] as any).score : 0)
+        .map(h => {
+          if (h.data && h.data['topHobbies'] && Array.isArray(h.data['topHobbies']) && h.data['topHobbies'][0] && typeof h.data['topHobbies'][0] === 'object' && 'score' in h.data['topHobbies'][0]) {
+            return (h.data['topHobbies'][0] as { score: number }).score;
+          }
+          return 0;
+        })
         .filter(score => score > 0);
       
       const averageScore = scores.length > 0 
@@ -372,9 +377,12 @@ export class RegularReportNotificationService {
       const hobbyCount: Record<string, number> = {};
       history.forEach(h => {
         if (h.data && h.data['topHobbies'] && Array.isArray(h.data['topHobbies'])) {
-          (h.data['topHobbies'] as any[]).forEach((hobby: any) => {
+          (h.data['topHobbies'] as unknown[]).forEach((hobby: unknown) => {
             if (hobby && typeof hobby === 'object' && 'name' in hobby) {
-              hobbyCount[hobby.name] = (hobbyCount[hobby.name] || 0) + 1;
+              const hobbyData = hobby as Record<string, unknown>;
+              if (typeof hobbyData.name === 'string') {
+                hobbyCount[hobbyData.name] = (hobbyCount[hobbyData.name] || 0) + 1;
+              }
             }
           });
         }

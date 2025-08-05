@@ -20,8 +20,8 @@ describe('useHobby', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock default empty responses
-    (databaseService.getAllHobbies as any).mockResolvedValue([]);
-    (databaseService.getActiveHobbies as any).mockResolvedValue([]);
+    vi.mocked(databaseService.getAllHobbies).mockResolvedValue([]);
+    vi.mocked(databaseService.getActiveHobbies).mockResolvedValue([]);
   });
 
   it('should initialize with default state', async () => {
@@ -54,8 +54,8 @@ describe('useHobby', () => {
 
     const mockActiveHobbies: Hobby[] = mockHobbies.slice(0, 1);
 
-    (databaseService.getAllHobbies as any).mockResolvedValue(mockHobbies);
-    (databaseService.getActiveHobbies as any).mockResolvedValue(mockActiveHobbies);
+    vi.mocked(databaseService.getAllHobbies).mockResolvedValue(mockHobbies);
+    vi.mocked(databaseService.getActiveHobbies).mockResolvedValue(mockActiveHobbies);
 
     const { result } = renderHook(() => useHobby());
 
@@ -76,9 +76,9 @@ describe('useHobby', () => {
       isActive: true
     };
 
-    (databaseService.createHobby as any).mockResolvedValue(1);
-    (databaseService.getAllHobbies as any).mockResolvedValue([]);
-    (databaseService.getActiveHobbies as any).mockResolvedValue([]);
+    vi.mocked(databaseService.createHobby).mockResolvedValue(1);
+    vi.mocked(databaseService.getAllHobbies).mockResolvedValue([]);
+    vi.mocked(databaseService.getActiveHobbies).mockResolvedValue([]);
 
     const { result } = renderHook(() => useHobby());
 
@@ -94,9 +94,9 @@ describe('useHobby', () => {
   it('should update an existing hobby', async () => {
     const updates = { name: '更新された趣味' };
 
-    (databaseService.updateHobby as any).mockResolvedValue(1);
-    (databaseService.getAllHobbies as any).mockResolvedValue([]);
-    (databaseService.getActiveHobbies as any).mockResolvedValue([]);
+    vi.mocked(databaseService.updateHobby).mockResolvedValue(1);
+    vi.mocked(databaseService.getAllHobbies).mockResolvedValue([]);
+    vi.mocked(databaseService.getActiveHobbies).mockResolvedValue([]);
 
     const { result } = renderHook(() => useHobby());
 
@@ -108,9 +108,9 @@ describe('useHobby', () => {
   });
 
   it('should delete a hobby', async () => {
-    (databaseService.deleteHobby as any).mockResolvedValue(undefined);
-    (databaseService.getAllHobbies as any).mockResolvedValue([]);
-    (databaseService.getActiveHobbies as any).mockResolvedValue([]);
+    vi.mocked(databaseService.deleteHobby).mockResolvedValue(undefined);
+    vi.mocked(databaseService.getAllHobbies).mockResolvedValue([]);
+    vi.mocked(databaseService.getActiveHobbies).mockResolvedValue([]);
 
     const { result } = renderHook(() => useHobby());
 
@@ -131,9 +131,9 @@ describe('useHobby', () => {
       updatedAt: new Date()
     };
 
-    (databaseService.getAllHobbies as any).mockResolvedValue([mockHobby]);
-    (databaseService.getActiveHobbies as any).mockResolvedValue([mockHobby]);
-    (databaseService.updateHobby as any).mockResolvedValue(1);
+    vi.mocked(databaseService.getAllHobbies).mockResolvedValue([mockHobby]);
+    vi.mocked(databaseService.getActiveHobbies).mockResolvedValue([mockHobby]);
+    vi.mocked(databaseService.updateHobby).mockResolvedValue(1);
 
     const { result } = renderHook(() => useHobby());
 
@@ -151,7 +151,7 @@ describe('useHobby', () => {
 
   it('should handle errors', async () => {
     const error = new Error('Database error');
-    (databaseService.getAllHobbies as any).mockRejectedValue(error);
+    vi.mocked(databaseService.getAllHobbies).mockRejectedValue(error);
 
     const { result } = renderHook(() => useHobby());
 

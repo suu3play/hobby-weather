@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 import type { ThemeMode } from '../../types/theme';
 
 interface ThemeToggleProps {

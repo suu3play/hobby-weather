@@ -1,7 +1,7 @@
 import React from 'react';
 import type { HobbyRecommendation } from '../../services/recommendation.service';
 import { getWeatherConditionIcon, getWeatherConditionLabel } from '../../hooks/useHobby';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 // おすすめ詳細モーダルのプロパティ
 interface RecommendationDetailModalProps {

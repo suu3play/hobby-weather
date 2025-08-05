@@ -3,7 +3,11 @@ import { GeolocationService } from './geolocation.service';
 
 describe('GeolocationService', () => {
   let service: GeolocationService;
-  let mockGeolocation: any;
+  let mockGeolocation: {
+    getCurrentPosition: ReturnType<typeof vi.fn>;
+    watchPosition: ReturnType<typeof vi.fn>;
+    clearWatch: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     service = new GeolocationService();
@@ -34,7 +38,7 @@ describe('GeolocationService', () => {
         }
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((successCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((successCallback: (position: GeolocationPosition) => void) => {
         successCallback(mockPosition);
       });
 
@@ -51,7 +55,7 @@ describe('GeolocationService', () => {
         message: 'User denied the request for Geolocation.'
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((_: Function, errorCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
         errorCallback(mockError);
       });
 
@@ -67,7 +71,7 @@ describe('GeolocationService', () => {
         message: 'Position unavailable.'
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((_: Function, errorCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
         errorCallback(mockError);
       });
 
@@ -83,7 +87,7 @@ describe('GeolocationService', () => {
         message: 'Timeout expired.'
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((_: Function, errorCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
         errorCallback(mockError);
       });
 
@@ -139,13 +143,13 @@ describe('GeolocationService', () => {
       const originalGeolocation = globalThis.navigator.geolocation;
       
       // Delete the geolocation property
-      delete (globalThis.navigator as any).geolocation;
+      delete (globalThis.navigator as { geolocation?: Geolocation }).geolocation;
 
       service = new GeolocationService();
       expect(service.isGeolocationSupported()).toBe(false);
       
       // Restore for other tests
-      (globalThis.navigator as any).geolocation = originalGeolocation;
+      (globalThis.navigator as { geolocation?: Geolocation }).geolocation = originalGeolocation;
     });
   });
 

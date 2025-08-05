@@ -84,16 +84,16 @@ const createMockRecommendation = (hobby: Hobby, score: number): ScoredRecommenda
 
 describe('HighScoreNotificationService', () => {
   let service: HighScoreNotificationService;
-  let mockDatabaseService: any;
-  let mockRecommendationService: any;
-  let mockWeatherService: any;
-  let mockConfigService: any;
+  let mockDatabaseService: { getActiveHobbies: ReturnType<typeof vi.fn> };
+  let mockRecommendationService: { generateRecommendations: ReturnType<typeof vi.fn> };
+  let mockWeatherService: { getWeatherForecast: ReturnType<typeof vi.fn> };
+  let mockConfigService: { getNotificationHistory: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.clearAllMocks();
     
     // シングルトンインスタンスをリセット
-    (HighScoreNotificationService as any).instance = undefined;
+    (HighScoreNotificationService as unknown as { instance?: HighScoreNotificationService }).instance = undefined;
     
     // DatabaseService のモック
     mockDatabaseService = {
@@ -124,7 +124,7 @@ describe('HighScoreNotificationService', () => {
 
   afterEach(() => {
     // シングルトンインスタンスをクリーンアップ
-    (HighScoreNotificationService as any).instance = undefined;
+    (HighScoreNotificationService as unknown as { instance?: HighScoreNotificationService }).instance = undefined;
   });
 
   describe('evaluateAndCreateNotification', () => {

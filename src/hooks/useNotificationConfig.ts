@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { NotificationConfigService } from '../services/notification-config.service';
 import type { 
   NotificationConfig, 
@@ -35,7 +35,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const configService = new NotificationConfigService();
+  const configService = useMemo(() => new NotificationConfigService(), []);
 
   // 初期データの読み込み
   const loadData = useCallback(async () => {
@@ -58,7 +58,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [configService]);
 
   // 設定の作成
   const createConfig = useCallback(async (config: Omit<NotificationConfig, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -70,7 +70,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setError(err instanceof Error ? err.message : '通知設定の作成に失敗しました');
       console.error('通知設定作成エラー:', err);
     }
-  }, [loadData]);
+  }, [configService, loadData]);
 
   // 設定の更新
   const updateConfig = useCallback(async (id: number, changes: Partial<NotificationConfig>) => {
@@ -82,7 +82,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setError(err instanceof Error ? err.message : '通知設定の更新に失敗しました');
       console.error('通知設定更新エラー:', err);
     }
-  }, [loadData]);
+  }, [configService, loadData]);
 
   // 設定の削除
   const deleteConfig = useCallback(async (id: number) => {
@@ -94,7 +94,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setError(err instanceof Error ? err.message : '通知設定の削除に失敗しました');
       console.error('通知設定削除エラー:', err);
     }
-  }, [loadData]);
+  }, [configService, loadData]);
 
   // 設定の有効/無効切り替え
   const toggleConfig = useCallback(async (id: number) => {
@@ -106,7 +106,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setError(err instanceof Error ? err.message : '通知設定の切り替えに失敗しました');
       console.error('通知設定切り替えエラー:', err);
     }
-  }, [loadData]);
+  }, [configService, loadData]);
 
   // グローバル設定の更新
   const updateSettings = useCallback(async (newSettings: Partial<NotificationSettings>) => {
@@ -118,7 +118,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setError(err instanceof Error ? err.message : 'グローバル設定の更新に失敗しました');
       console.error('グローバル設定更新エラー:', err);
     }
-  }, [loadData]);
+  }, [configService, loadData]);
 
   // 設定一覧の再読み込み
   const refreshConfigs = useCallback(async () => {
@@ -130,7 +130,7 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setError(err instanceof Error ? err.message : '通知設定の再読み込みに失敗しました');
       console.error('通知設定再読み込みエラー:', err);
     }
-  }, []);
+  }, [configService]);
 
   // 履歴の再読み込み
   const refreshHistory = useCallback(async () => {
@@ -142,12 +142,12 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setError(err instanceof Error ? err.message : '通知履歴の再読み込みに失敗しました');
       console.error('通知履歴再読み込みエラー:', err);
     }
-  }, []);
+  }, [configService]);
 
   // 統計情報の取得
   const getStats = useCallback(async (days: number = 7) => {
     return await configService.getNotificationStats(days);
-  }, []);
+  }, [configService]);
 
   // 初回読み込み
   useEffect(() => {

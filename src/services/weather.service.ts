@@ -155,7 +155,7 @@ export class WeatherService {
      * 3時間ごとの予報データを日別にグループ化
      * 最高最低気温、時間帯別気温、平均湿度などを計算
      */
-    const dailyData = new Map<string, any[]>();
+    const dailyData = new Map<string, unknown[]>();
     
     response.list.forEach((item) => {
       const date = new Date(item.dt * 1000).toDateString();
@@ -171,15 +171,37 @@ export class WeatherService {
     const dailyForecasts: DailyForecast[] = Array.from(dailyData.entries())
       .slice(0, 7)
       .map(([dateString, items]) => {
-        const temps = items.map(item => item.main.temp);
-        const feelsLike = items.map(item => item.main.feels_like);
-        const humidities = items.map(item => item.main.humidity);
-        const pressures = items.map(item => item.main.pressure);
-        const winds = items.map(item => item.wind.speed);
+        const temps = items.map(item => {
+          const data = item as Record<string, unknown>;
+          const main = data.main as Record<string, unknown>;
+          return typeof main.temp === 'number' ? main.temp : 0;
+        });
+        const feelsLike = items.map(item => {
+          const data = item as Record<string, unknown>;
+          const main = data.main as Record<string, unknown>;
+          return typeof main.feels_like === 'number' ? main.feels_like : 0;
+        });
+        const humidities = items.map(item => {
+          const data = item as Record<string, unknown>;
+          const main = data.main as Record<string, unknown>;
+          return typeof main.humidity === 'number' ? main.humidity : 0;
+        });
+        const pressures = items.map(item => {
+          const data = item as Record<string, unknown>;
+          const main = data.main as Record<string, unknown>;
+          return typeof main.pressure === 'number' ? main.pressure : 0;
+        });
+        const winds = items.map(item => {
+          const data = item as Record<string, unknown>;
+          const wind = data.wind as Record<string, unknown>;
+          return typeof wind.speed === 'number' ? wind.speed : 0;
+        });
         
         // 一日の中間時刻の天気情報を代表値として使用
         // より精度を高める場合は最頻値を使用することも可能
-        const weather = items[Math.floor(items.length / 2)]?.weather?.[0];
+        const midItem = items[Math.floor(items.length / 2)] as Record<string, unknown>;
+        const weatherArray = midItem?.weather as unknown[];
+        const weather = Array.isArray(weatherArray) && weatherArray.length > 0 ? weatherArray[0] as Record<string, unknown> : null;
         if (!weather) {
           throw new Error('Invalid weather data in forecast');
         }
@@ -189,26 +211,29 @@ export class WeatherService {
           temperature: {
             min: Math.min(...temps),
             max: Math.max(...temps),
-            morning: items.find(item => new Date(item.dt * 1000).getHours() === 6)?.main.temp ?? temps[0] ?? 0,
-            day: items.find(item => new Date(item.dt * 1000).getHours() === 12)?.main.temp ?? temps[Math.floor(temps.length / 2)] ?? 0,
-            evening: items.find(item => new Date(item.dt * 1000).getHours() === 18)?.main.temp ?? temps[temps.length - 1] ?? 0,
-            night: items.find(item => new Date(item.dt * 1000).getHours() === 0)?.main.temp ?? temps[0] ?? 0
+            morning: this.getTemperatureAtHour(items, 6) ?? temps[0] ?? 0,
+            day: this.getTemperatureAtHour(items, 12) ?? temps[Math.floor(temps.length / 2)] ?? 0,
+            evening: this.getTemperatureAtHour(items, 18) ?? temps[temps.length - 1] ?? 0,
+            night: this.getTemperatureAtHour(items, 0) ?? temps[0] ?? 0
           },
           feelsLike: {
-            morning: items.find(item => new Date(item.dt * 1000).getHours() === 6)?.main.feels_like ?? feelsLike[0] ?? 0,
-            day: items.find(item => new Date(item.dt * 1000).getHours() === 12)?.main.feels_like ?? feelsLike[Math.floor(feelsLike.length / 2)] ?? 0,
-            evening: items.find(item => new Date(item.dt * 1000).getHours() === 18)?.main.feels_like ?? feelsLike[feelsLike.length - 1] ?? 0,
-            night: items.find(item => new Date(item.dt * 1000).getHours() === 0)?.main.feels_like ?? feelsLike[0] ?? 0
+            morning: this.getFeelsLikeAtHour(items, 6) ?? feelsLike[0] ?? 0,
+            day: this.getFeelsLikeAtHour(items, 12) ?? feelsLike[Math.floor(feelsLike.length / 2)] ?? 0,
+            evening: this.getFeelsLikeAtHour(items, 18) ?? feelsLike[feelsLike.length - 1] ?? 0,
+            night: this.getFeelsLikeAtHour(items, 0) ?? feelsLike[0] ?? 0
           },
           humidity: Math.round(humidities.reduce((a, b) => a + b, 0) / humidities.length),
           pressure: Math.round(pressures.reduce((a, b) => a + b, 0) / pressures.length),
           windSpeed: Math.round((winds.reduce((a, b) => a + b, 0) / winds.length) * 10) / 10,
-          windDirection: items[Math.floor(items.length / 2)]?.wind?.deg ?? 0,
-          weatherType: this.mapWeatherCondition(weather.main),
-          weatherDescription: weather.description,
-          cloudiness: items[Math.floor(items.length / 2)]?.clouds?.all ?? 0,
+          windDirection: this.getWindDirection(items) ?? 0,
+          weatherType: this.mapWeatherCondition(typeof weather?.main === 'string' ? weather.main : 'clear'),
+          weatherDescription: typeof weather?.description === 'string' ? weather.description : 'unknown',
+          cloudiness: this.getCloudiness(items) ?? 0,
           uvIndex: 0, // 5-day forecast doesn't include UV index
-          pop: Math.max(...items.map(item => item.pop ?? 0))
+          pop: Math.max(...items.map(item => {
+            const data = item as Record<string, unknown>;
+            return typeof data.pop === 'number' ? data.pop : 0;
+          }))
         };
       });
 
@@ -283,12 +308,12 @@ export class WeatherService {
     const locations = await response.json();
     
     // OpenWeatherMapのレスポンスを統一フォーマットに変換
-    return locations.map((location: any) => ({
-      name: location.name,
-      lat: location.lat,
-      lon: location.lon,
+    return locations.map((location: Record<string, unknown>) => ({
+      name: typeof location['name'] === 'string' ? location['name'] : 'Unknown',
+      lat: typeof location['lat'] === 'number' ? location['lat'] : 0,
+      lon: typeof location['lon'] === 'number' ? location['lon'] : 0,
       type: 'city' as LocationType,
-      country: location.country,
+      country: typeof location['country'] === 'string' ? location['country'] : 'Unknown',
       source: 'openweather' as const
     }));
   }
@@ -315,16 +340,16 @@ export class WeatherService {
 
     const locations = await response.json();
 
-    return locations.map((location: any) => {
+    return locations.map((location: Record<string, unknown>) => {
       const type = this.classifyLocationType(location);
       const category = this.extractLocationCategory(location);
       
       return {
-        name: location.display_name.split(',')[0], // 最初の部分を名前として使用
-        lat: parseFloat(location.lat),
-        lon: parseFloat(location.lon),
+        name: String(location['display_name']).split(',')[0], // 最初の部分を名前として使用
+        lat: parseFloat(String(location['lat'])),
+        lon: parseFloat(String(location['lon'])),
         type,
-        address: location.display_name,
+        address: String(location['display_name']),
         category,
         country: 'JP',
         source: 'nominatim' as const
@@ -332,9 +357,9 @@ export class WeatherService {
     });
   }
 
-  private classifyLocationType(location: any): LocationType {
-    const placeType = location.type || location.class;
-    const category = location.category;
+  private classifyLocationType(location: Record<string, unknown>): LocationType {
+    const placeType = location['type'] || location['class'];
+    const category = location['category'];
 
     // 店舗・商業施設
     if (category === 'amenity' || category === 'shop' || category === 'tourism') {
@@ -360,7 +385,7 @@ export class WeatherService {
     return 'address';
   }
 
-  private extractLocationCategory(location: any): string | undefined {
+  private extractLocationCategory(location: Record<string, unknown>): string | undefined {
     const amenityTypes: Record<string, string> = {
       restaurant: 'レストラン',
       cafe: 'カフェ',
@@ -402,19 +427,26 @@ export class WeatherService {
       mobile_phone: '携帯電話店'
     };
 
-    if (location.tags?.amenity) {
-      return amenityTypes[location.tags.amenity] ?? location.tags.amenity;
+    const tags = location['tags'] as Record<string, unknown>;
+    if (tags?.['amenity']) {
+      const amenityValue = tags['amenity'];
+      if (typeof amenityValue === 'string') {
+        return amenityTypes[amenityValue] ?? amenityValue;
+      }
     }
 
-    if (location.tags?.shop) {
-      return shopTypes[location.tags.shop] ?? location.tags.shop;
+    if (tags?.['shop']) {
+      const shopValue = tags['shop'];
+      if (typeof shopValue === 'string') {
+        return shopTypes[shopValue] ?? shopValue;
+      }
     }
 
-    if (location.tags?.tourism) {
+    if (tags?.['tourism']) {
       return '観光地';
     }
 
-    if (location.tags?.leisure) {
+    if (tags?.['leisure']) {
       return 'レジャー施設';
     }
 
@@ -508,6 +540,56 @@ export class WeatherService {
     };
 
     return descriptionMap[weatherType] ?? '不明';
+  }
+
+  // ヘルパーメソッド：指定時刻の気温を取得
+  private getTemperatureAtHour(items: unknown[], hour: number): number | null {
+    const item = items.find(item => {
+      const data = item as Record<string, unknown>;
+      if (typeof data.dt === 'number') {
+        return new Date(data.dt * 1000).getHours() === hour;
+      }
+      return false;
+    });
+    
+    if (item) {
+      const data = item as Record<string, unknown>;
+      const main = data.main as Record<string, unknown>;
+      return typeof main.temp === 'number' ? main.temp : null;
+    }
+    return null;
+  }
+
+  // ヘルパーメソッド：指定時刻の体感温度を取得
+  private getFeelsLikeAtHour(items: unknown[], hour: number): number | null {
+    const item = items.find(item => {
+      const data = item as Record<string, unknown>;
+      if (typeof data.dt === 'number') {
+        return new Date(data.dt * 1000).getHours() === hour;
+      }
+      return false;
+    });
+    
+    if (item) {
+      const data = item as Record<string, unknown>;
+      const main = data.main as Record<string, unknown>;
+      return typeof main.feels_like === 'number' ? main.feels_like : null;
+    }
+    return null;
+  }
+
+  // ヘルパーメソッド：風向を取得
+  private getWindDirection(items: unknown[]): number | null {
+    const midItem = items[Math.floor(items.length / 2)] as Record<string, unknown>;
+    const wind = midItem?.wind as Record<string, unknown>;
+    return typeof wind?.deg === 'number' ? wind.deg : null;
+  }
+
+  // ヘルパーメソッド：雲量を取得
+  private getCloudiness(items: unknown[]): number | null {
+    const midItem = items[Math.floor(items.length / 2)] as Record<string, unknown>;
+    const clouds = midItem?.clouds as Record<string, unknown>;
+    return typeof clouds?.all === 'number' ? clouds.all : null;
   }
 }
 

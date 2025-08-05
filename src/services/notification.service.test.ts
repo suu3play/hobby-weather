@@ -80,25 +80,25 @@ describe('NotificationService', () => {
     });
 
     it('Notificationがない場合はサポートされていない', () => {
-      delete (globalThis as any).Notification;
-      delete (globalThis.window as any).Notification;
+      delete (globalThis as Record<string, unknown>)['Notification'];
+      delete (globalThis.window as Record<string, unknown>)['Notification'];
       const service = new NotificationService();
       
       expect(service.isNotificationSupported()).toBe(false);
       
       // 元に戻す
-      (globalThis as any).Notification = mockNotification;
-      (globalThis.window as any).Notification = mockNotification;
+      (globalThis as Record<string, unknown>)['Notification'] = mockNotification;
+      (globalThis.window as Record<string, unknown>)['Notification'] = mockNotification;
     });
 
     it('serviceWorkerがない場合はサポートされていない', () => {
-      delete (globalThis.navigator as any).serviceWorker;
+      delete (globalThis.navigator as Record<string, unknown>)['serviceWorker'];
       const service = new NotificationService();
       
       expect(service.isNotificationSupported()).toBe(false);
       
       // 元に戻す
-      (globalThis.navigator as any).serviceWorker = mockServiceWorker;
+      (globalThis.navigator as Record<string, unknown>)['serviceWorker'] = mockServiceWorker;
     });
   });
 
@@ -182,8 +182,8 @@ describe('NotificationService', () => {
     });
 
     it('サポートされていない場合は失敗を返す', async () => {
-      delete (globalThis as any).Notification;
-      delete (globalThis.window as any).Notification;
+      delete (globalThis as Record<string, unknown>)['Notification'];
+      delete (globalThis.window as Record<string, unknown>)['Notification'];
       const service = new NotificationService();
       
       const permission = await service.requestPermission();
@@ -195,8 +195,8 @@ describe('NotificationService', () => {
       });
       
       // 元に戻す
-      (globalThis as any).Notification = mockNotification;
-      (globalThis.window as any).Notification = mockNotification;
+      (globalThis as Record<string, unknown>)['Notification'] = mockNotification;
+      (globalThis.window as Record<string, unknown>)['Notification'] = mockNotification;
     });
 
     it('エラー時は適切に処理される', async () => {
@@ -413,14 +413,14 @@ describe('NotificationService', () => {
     });
 
     it('Service Workerがサポートされていない場合', async () => {
-      delete (globalThis.navigator as any).serviceWorker;
+      delete (globalThis.navigator as Record<string, unknown>)['serviceWorker'];
       
       const registration = await notificationService.registerServiceWorker();
       
       expect(registration).toBe(null);
       
       // 元に戻す
-      (globalThis.navigator as any).serviceWorker = mockServiceWorker;
+      (globalThis.navigator as Record<string, unknown>)['serviceWorker'] = mockServiceWorker;
     });
 
     it('Service Worker登録が失敗する', async () => {

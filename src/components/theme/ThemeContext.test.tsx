@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ThemeProvider, useTheme } from '../../contexts/ThemeContext';
+import { ThemeProvider } from '../../contexts/ThemeContext.tsx';
+import { useTheme } from '../../hooks/useTheme';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // テスト用コンポーネント
@@ -205,11 +206,11 @@ describe('ThemeContext', () => {
     await waitFor(() => {
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'hobby-weather-theme-config',
-        expect.stringContaining('\"mode\":\"dark\"')
+        expect.stringContaining('"mode":"dark"')
       );
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'hobby-weather-theme-config',
-        expect.stringContaining('\"highContrast\":true')
+        expect.stringContaining('"highContrast":true')
       );
     });
   });

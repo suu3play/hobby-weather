@@ -62,7 +62,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
         isLoading: false
       }));
     }
-  }, []); // 依存関係を削除してuseCallback内でstateを参照
+  }, [state.filters]); // state.filtersを依存配列に追加
 
   /**
    * フィルターを更新
@@ -108,7 +108,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
     if (!lastParams) return;
     
     await generateRecommendations(lastParams.hobbies, lastParams.forecast, state.filters);
-  }, [lastParams, state.filters]);
+  }, [lastParams, state.filters, generateRecommendations]);
 
   /**
    * エラーをクリア
@@ -122,7 +122,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
     if (lastParams && !state.isLoading) {
       generateRecommendations(lastParams.hobbies, lastParams.forecast, state.filters);
     }
-  }, [state.filters]); // generateRecommendationsとlastParamsの依存関係を削除
+  }, [state.filters, generateRecommendations, lastParams, state.isLoading]); // 必要な依存関係を追加
 
   return {
     ...state,

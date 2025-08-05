@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNotificationConfig } from '../../hooks/useNotificationConfig';
 import { useNotification } from '../../hooks/useNotification';
 import { NotificationPermissionPrompt } from './NotificationPermissionPrompt';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 import type { NotificationConfig, TimeRange } from '../../types/notification';
 
 interface NotificationSettingsProps {

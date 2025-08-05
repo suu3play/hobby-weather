@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Location, LocationSearchResult, LocationType } from '../../types';
 import { weatherService } from '../../services/weather.service';
 import { databaseService } from '../../services/database.service';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface LocationSelectorProps {
   currentLocation: Location | null;

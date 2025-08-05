@@ -53,7 +53,7 @@ describe('API Key Test Functions', () => {
         })
       };
       
-      (fetch as any).mockResolvedValue(mockResponse);
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
       const result = await testApiConnection();
 
@@ -82,7 +82,7 @@ describe('API Key Test Functions', () => {
         })
       };
       
-      (fetch as any).mockResolvedValue(mockResponse);
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
       const result = await testApiConnection();
 
@@ -107,7 +107,7 @@ describe('API Key Test Functions', () => {
       });
 
       // fetch でネットワークエラーをモック
-      (fetch as any).mockRejectedValue(new Error('Network error'));
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'));
 
       const result = await testApiConnection();
 
@@ -132,7 +132,7 @@ describe('API Key Test Functions', () => {
         })
       };
       
-      (fetch as any).mockResolvedValue(mockResponse);
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
       const result = await testApiConnection();
 

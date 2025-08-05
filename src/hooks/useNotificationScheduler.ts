@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { NotificationSchedulerService } from '../services/notification-scheduler.service';
 
 interface ScheduledTask {
@@ -28,7 +28,7 @@ export function useNotificationScheduler(): UseNotificationSchedulerReturn {
   const [allTasks, setAllTasks] = useState<ScheduledTask[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const scheduler = NotificationSchedulerService.getInstance();
+  const scheduler = useMemo(() => NotificationSchedulerService.getInstance(), []);
 
   // スケジューラー状態の更新
   const updateStatus = useCallback(() => {

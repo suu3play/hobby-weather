@@ -18,7 +18,7 @@ interface DiagnosticResults {
   };
   apiConnection: {
     success: boolean;
-    data?: any;
+    data?: unknown;
     status?: number;
     error?: string;
   };
@@ -54,6 +54,17 @@ export const ApiKeyDiagnostics: React.FC = () => {
 
   const getStatusColor = (success: boolean) => {
     return success ? 'text-green-600' : 'text-red-600';
+  };
+
+  // 型ガード関数：データから安全に値を取得
+  const getDataValue = (data: unknown, key: string): string => {
+    if (data && typeof data === 'object' && key in data) {
+      const value = (data as Record<string, unknown>)[key];
+      if (typeof value === 'string' || typeof value === 'number') {
+        return String(value);
+      }
+    }
+    return '不明';
   };
 
   return (
@@ -187,14 +198,14 @@ export const ApiKeyDiagnostics: React.FC = () => {
                   {results.apiConnection.status && (
                     <p>HTTPステータス: {results.apiConnection.status}</p>
                   )}
-                  {results.apiConnection.success && results.apiConnection.data && (
+                  {results.apiConnection.success && results.apiConnection.data ? (
                     <div>
                       <p>テストデータ:</p>
-                      <p className="ml-2">都市: {results.apiConnection.data.city}</p>
-                      <p className="ml-2">天気: {results.apiConnection.data.weather}</p>
-                      <p className="ml-2">気温: {results.apiConnection.data.temperature}°C</p>
+                      <p className="ml-2">都市: {getDataValue(results.apiConnection.data, 'city')}</p>
+                      <p className="ml-2">天気: {getDataValue(results.apiConnection.data, 'weather')}</p>
+                      <p className="ml-2">気温: {getDataValue(results.apiConnection.data, 'temperature')}°C</p>
                     </div>
-                  )}
+                  ) : null}
                   {results.apiConnection.error && (
                     <p className="text-red-600">エラー: {results.apiConnection.error}</p>
                   )}

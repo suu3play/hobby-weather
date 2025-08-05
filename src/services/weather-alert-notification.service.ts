@@ -326,7 +326,7 @@ export class WeatherAlertNotificationService {
       });
 
       return recentAlerts.some(alert => 
-        alert.data && (alert.data as any).alertType === alertType
+        alert.data && (alert.data as Record<string, unknown>)['alertType'] === alertType
       );
     } catch (error) {
       console.error('クールダウンチェックエラー:', error);

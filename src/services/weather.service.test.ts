@@ -26,14 +26,14 @@ describe('WeatherService', () => {
     it('should map weather conditions correctly', () => {
       const service = new WeatherService();
       
-      expect((service as any).mapWeatherCondition('Clear')).toBe('clear');
-      expect((service as any).mapWeatherCondition('Clouds')).toBe('clouds');
-      expect((service as any).mapWeatherCondition('Rain')).toBe('rain');
-      expect((service as any).mapWeatherCondition('Drizzle')).toBe('drizzle');
-      expect((service as any).mapWeatherCondition('Thunderstorm')).toBe('thunderstorm');
-      expect((service as any).mapWeatherCondition('Snow')).toBe('snow');
-      expect((service as any).mapWeatherCondition('Mist')).toBe('mist');
-      expect((service as any).mapWeatherCondition('Unknown')).toBe('clear');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Clear')).toBe('clear');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Clouds')).toBe('clouds');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Rain')).toBe('rain');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Drizzle')).toBe('drizzle');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Thunderstorm')).toBe('thunderstorm');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Snow')).toBe('snow');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Mist')).toBe('mist');
+      expect((service as unknown as { mapWeatherCondition: (condition: string) => string }).mapWeatherCondition('Unknown')).toBe('clear');
     });
   });
 
@@ -71,7 +71,7 @@ describe('WeatherService', () => {
         cod: 200
       };
 
-      (globalThis.fetch as any).mockResolvedValueOnce({
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse
       });
@@ -98,7 +98,7 @@ describe('WeatherService', () => {
       vi.stubEnv('VITE_OPENWEATHER_API_KEY', 'invalid-key');
       service = new WeatherService();
       
-      (globalThis.fetch as any).mockResolvedValueOnce({
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: false,
         json: async () => ({ cod: 401, message: 'Invalid API key' })
       });
@@ -169,7 +169,7 @@ describe('WeatherService', () => {
         ]
       };
 
-      (globalThis.fetch as any).mockResolvedValueOnce({
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse
       });
@@ -198,7 +198,7 @@ describe('WeatherService', () => {
         }
       ];
 
-      (globalThis.fetch as any).mockResolvedValueOnce({
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse
       });
@@ -227,7 +227,7 @@ describe('WeatherService', () => {
         }
       ];
 
-      (globalThis.fetch as any).mockResolvedValueOnce({
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse
       });
@@ -241,7 +241,7 @@ describe('WeatherService', () => {
       vi.stubEnv('VITE_OPENWEATHER_API_KEY', 'test-api-key');
       service = new WeatherService();
       
-      (globalThis.fetch as any).mockResolvedValueOnce({
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => []
       });

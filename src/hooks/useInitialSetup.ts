@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useHobby } from './useHobby';
 import { useWeather } from './useWeather';
 
@@ -49,7 +49,7 @@ export const useInitialSetup = () => {
   };
 
   // 初期設定状態を更新
-  const updateSetupState = () => {
+  const updateSetupState = useCallback(() => {
     const hasApiKey = checkApiKeySettings();
     const hasLocation = !!location;
     const hasHobbies = hobbies.length > 0;
@@ -80,14 +80,14 @@ export const useInitialSetup = () => {
       isLoading: hobbiesLoading || weatherLoading,
       currentStep
     });
-  };
+  }, [hobbies, location, hobbiesLoading, weatherLoading]);
 
   // 初期化時とデータ変更時に設定状態を更新
   useEffect(() => {
     if (!hobbiesLoading && !weatherLoading) {
       updateSetupState();
     }
-  }, [hobbies, location, hobbiesLoading, weatherLoading]);
+  }, [hobbies, location, hobbiesLoading, weatherLoading, updateSetupState]);
 
   // ステップ情報を取得
   const getStepInfo = (): SetupStepInfo[] => {

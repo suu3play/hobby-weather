@@ -1,7 +1,7 @@
 import React from 'react';
 import type { WeatherData } from '../../types';
 import { weatherService } from '../../services/weather.service';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface WeatherCardProps {
     weather: WeatherData;

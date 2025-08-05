@@ -88,9 +88,9 @@ describe('useWeather', () => {
       cachedAt: new Date()
     };
 
-    (databaseService.getDefaultLocation as any).mockResolvedValue(mockLocation);
-    (weatherService.getCurrentWeather as any).mockResolvedValue(mockWeather);
-    (weatherService.getWeatherForecast as any).mockResolvedValue(mockForecast);
+    vi.mocked(databaseService.getDefaultLocation).mockResolvedValue(mockLocation);
+    vi.mocked(weatherService.getCurrentWeather).mockResolvedValue(mockWeather);
+    vi.mocked(weatherService.getWeatherForecast).mockResolvedValue(mockForecast);
 
     const { result } = renderHook(() => useWeather());
 
@@ -121,12 +121,12 @@ describe('useWeather', () => {
       createdAt: new Date()
     };
 
-    (geolocationService.getCurrentPosition as any).mockResolvedValue(mockPosition);
-    (weatherService.getLocationByCoords as any).mockResolvedValue(mockLocationName);
-    (databaseService.saveLocation as any).mockResolvedValue(1);
-    (databaseService.getDefaultLocation as any).mockResolvedValue(mockSavedLocation);
-    (weatherService.getCurrentWeather as any).mockResolvedValue({});
-    (weatherService.getWeatherForecast as any).mockResolvedValue({});
+    vi.mocked(geolocationService.getCurrentPosition).mockResolvedValue(mockPosition);
+    vi.mocked(weatherService.getLocationByCoords).mockResolvedValue(mockLocationName);
+    vi.mocked(databaseService.saveLocation).mockResolvedValue(1);
+    vi.mocked(databaseService.getDefaultLocation).mockResolvedValue(mockSavedLocation);
+    vi.mocked(weatherService.getCurrentWeather).mockResolvedValue({});
+    vi.mocked(weatherService.getWeatherForecast).mockResolvedValue({});
 
     const { result } = renderHook(() => useWeather());
 
@@ -141,7 +141,7 @@ describe('useWeather', () => {
 
   it('should handle geolocation error', async () => {
     const mockError = new Error('位置情報の取得に失敗しました');
-    (geolocationService.getCurrentPosition as any).mockRejectedValue(mockError);
+    vi.mocked(geolocationService.getCurrentPosition).mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useWeather());
 
@@ -163,9 +163,9 @@ describe('useWeather', () => {
       createdAt: new Date()
     };
 
-    (databaseService.getDefaultLocation as any).mockResolvedValue(mockLocation);
-    (weatherService.getCurrentWeather as any).mockResolvedValue({});
-    (weatherService.getWeatherForecast as any).mockResolvedValue({});
+    vi.mocked(databaseService.getDefaultLocation).mockResolvedValue(mockLocation);
+    vi.mocked(weatherService.getCurrentWeather).mockResolvedValue({});
+    vi.mocked(weatherService.getWeatherForecast).mockResolvedValue({});
 
     const { result } = renderHook(() => useWeather());
 
@@ -210,8 +210,8 @@ describe('useWeather', () => {
 
     const mockError = new Error('API error');
 
-    (databaseService.getDefaultLocation as any).mockResolvedValue(mockLocation);
-    (weatherService.getCurrentWeather as any).mockRejectedValue(mockError);
+    vi.mocked(databaseService.getDefaultLocation).mockResolvedValue(mockLocation);
+    vi.mocked(weatherService.getCurrentWeather).mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useWeather());
 

@@ -194,6 +194,7 @@ export class DatabaseService {
         if (data.hobbies && Array.isArray(data.hobbies)) {
             for (const hobby of data.hobbies) {
                 const { id, ...hobbyData } = hobby;
+                void id; // 未使用変数の警告を抑制
                 await this.createHobby(hobbyData);
             }
         }
@@ -202,6 +203,7 @@ export class DatabaseService {
         if (data.locations && Array.isArray(data.locations)) {
             for (const location of data.locations) {
                 const { id, ...locationData } = location;
+                void id; // 未使用変数の警告を抑制
                 await this.saveLocation(locationData);
             }
         }
@@ -209,6 +211,7 @@ export class DatabaseService {
         // 設定をインポート
         if (data.settings) {
             const { id, ...settingsData } = data.settings;
+            void id; // 未使用変数の警告を抑制
             await this.updateSettings(settingsData);
         }
     }

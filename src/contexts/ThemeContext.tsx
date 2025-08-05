@@ -1,10 +1,9 @@
 import React, {
-    createContext,
-    useContext,
     useEffect,
     useState,
     useCallback,
 } from 'react';
+import { ThemeContext } from './ThemeContext';
 import type {
     ThemeContextType,
     ThemeConfig,
@@ -19,8 +18,6 @@ import {
     applyThemeToDocument,
     createMediaQueryListener,
 } from '../utils/theme';
-
-const ThemeContext = createContext<ThemeContextType | null>(null);
 
 interface ThemeProviderProps {
     children: React.ReactNode;
@@ -124,10 +121,3 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     );
 };
 
-export const useTheme = (): ThemeContextType => {
-    const context = useContext(ThemeContext);
-    if (!context) {
-        throw new Error('useTheme must be used within a ThemeProvider');
-    }
-    return context;
-};

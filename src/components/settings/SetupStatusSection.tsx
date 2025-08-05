@@ -2,7 +2,7 @@ import React from 'react';
 import { useInitialSetup } from '../../hooks/useInitialSetup';
 import { useHobby } from '../../hooks/useHobby';
 import { useWeather } from '../../hooks/useWeather';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 export const SetupStatusSection: React.FC = () => {
     const { setupState } = useInitialSetup();

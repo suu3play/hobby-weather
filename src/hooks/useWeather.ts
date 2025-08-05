@@ -127,8 +127,9 @@ export const useWeather = (): UseWeatherReturn => {
   }, [updateState, fetchWeatherData]);
 
   const refreshWeather = useCallback(async () => {
-    if (state.location) {
-      await fetchWeatherData(state.location.lat, state.location.lon, true);
+    const currentLocation = state.location;
+    if (currentLocation) {
+      await fetchWeatherData(currentLocation.lat, currentLocation.lon, true);
     }
   }, [state.location, fetchWeatherData]);
 

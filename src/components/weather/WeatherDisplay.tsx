@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWeather } from '../../hooks/useWeather';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 import { WeatherCard } from './WeatherCard';
 import { ForecastList } from './ForecastList';
 import { LocationSelector } from './LocationSelector';

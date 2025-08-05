@@ -26,6 +26,14 @@ export interface ScoredRecommendation {
   reasons: string[];
 }
 
+// 通知データ内の趣味推薦
+interface NotificationRecommendation {
+  hobbyId?: number | string;
+  name?: string;
+  hobbyName?: string;
+  score?: number;
+}
+
 export interface HighScoreNotificationResult {
   notificationSent: boolean;
   recommendations: ScoredRecommendation[];
@@ -228,8 +236,8 @@ export class HighScoreNotificationService {
       // いずれかの趣味が最近通知されていたらクールダウン中
       for (const notification of recentNotifications) {
         if (notification.data && notification.data['recommendations'] && Array.isArray(notification.data['recommendations'])) {
-          const notifiedHobbyIds = (notification.data['recommendations'] as any[]).map(
-            (rec: any) => rec.hobbyId || rec.name
+          const notifiedHobbyIds = (notification.data['recommendations'] as NotificationRecommendation[]).map(
+            (rec: NotificationRecommendation) => rec.hobbyId || rec.name
           );
           
           const hasOverlap = hobbyIds.some(id => notifiedHobbyIds.includes(id));
@@ -302,7 +310,7 @@ export class HighScoreNotificationService {
 
       // スコアの平均を計算
       const scores = history
-        .map(h => (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations']) && h.data['recommendations'][0] && typeof h.data['recommendations'][0] === 'object' && 'score' in h.data['recommendations'][0]) ? (h.data['recommendations'][0] as any).score : 0)
+        .map(h => (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations']) && h.data['recommendations'][0] && typeof h.data['recommendations'][0] === 'object' && 'score' in h.data['recommendations'][0]) ? (h.data['recommendations'][0] as NotificationRecommendation).score || 0 : 0)
         .filter(score => score > 0);
       
       const averageScore = scores.length > 0 
@@ -313,7 +321,7 @@ export class HighScoreNotificationService {
       const hobbyCount: Record<string, number> = {};
       history.forEach(h => {
         if (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations'])) {
-          (h.data['recommendations'] as any[]).forEach((rec: any) => {
+          (h.data['recommendations'] as NotificationRecommendation[]).forEach((rec: NotificationRecommendation) => {
             const hobbyName = rec.name || rec.hobbyName; // \u30b3\u30f3\u30d1\u30c1\u30d3\u30ea\u30c6\u30a3\u306e\u305f\u3081\u4e21\u65b9\u3092\u30b5\u30dd\u30fc\u30c8
             if (hobbyName) {
               hobbyCount[hobbyName] = (hobbyCount[hobbyName] || 0) + 1;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInitialSetup } from '../../hooks/useInitialSetup';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 export const SetupResetSection: React.FC = () => {
     const { refreshSetupState } = useInitialSetup();

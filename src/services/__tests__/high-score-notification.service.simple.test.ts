@@ -150,8 +150,8 @@ describe('HighScoreNotificationService - 基本機能', () => {
     it('天気タイプが正しく日本語に変換される', () => {
       const service = HighScoreNotificationService.getInstance();
       
-      // private method にアクセスするため any でキャスト
-      const getWeatherDescription = (service as any).getWeatherDescription;
+      // private method にアクセスするため
+      const getWeatherDescription = (service as { getWeatherDescription: (weatherType: string) => string }).getWeatherDescription;
       
       expect(getWeatherDescription('clear')).toBe('晴れ');
       expect(getWeatherDescription('clouds')).toBe('曇り');

@@ -116,7 +116,7 @@ export class GeolocationService {
     try {
       const permission = await navigator.permissions.query({ name: 'geolocation' });
       return permission.state;
-    } catch (error) {
+    } catch {
       // Permission query failed, try to get position to check permission
       try {
         await this.getCurrentPosition();

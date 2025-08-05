@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Hobby } from '../../types';
 import { useHobby } from '../../hooks/useHobby';
 import { useRecommendation } from '../../hooks/useRecommendation';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 import { HobbyForm } from './HobbyForm';
 import { HobbyList } from './HobbyList';
 import { RecommendationFilters } from '../recommendation/RecommendationFilters';

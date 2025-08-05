@@ -1,7 +1,7 @@
 import React from 'react';
 import type { DailyForecast } from '../../types';
 import { weatherService } from '../../services/weather.service';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface ForecastCardProps {
     forecast: DailyForecast;

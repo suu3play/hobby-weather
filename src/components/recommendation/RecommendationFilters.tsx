@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { RecommendationFilters as RecommendationFiltersType } from '../../services/recommendation.service';
 import type { WeatherType } from '../../types';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface RecommendationFiltersProps {
     filters: RecommendationFiltersType;

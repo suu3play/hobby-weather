@@ -16,7 +16,7 @@ describe('DatabaseService', () => {
     class TestDatabase extends HobbyWeatherDatabase {
       constructor(name: string) {
         super();
-        // @ts-ignore - temporary workaround for readonly property
+        // @ts-expect-error - temporary workaround for readonly property
         this.name = name;
       }
     }
@@ -41,7 +41,7 @@ describe('DatabaseService', () => {
     try {
       await testDb.close();
       await testDb.delete();
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   });
@@ -201,7 +201,7 @@ describe('DatabaseService', () => {
 
       expect(parsed.hobbies).toHaveLength(1);
       expect(parsed.locations).toHaveLength(1);
-      const exportedHobby = parsed.hobbies.find((h: any) => h.name === 'テスト趣味');
+      const exportedHobby = parsed.hobbies.find((h: { name: string }) => h.name === 'テスト趣味');
       expect(exportedHobby).toBeDefined();
       expect(exportedHobby?.name).toBe('テスト趣味');
 

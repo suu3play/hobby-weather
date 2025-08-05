@@ -1,7 +1,7 @@
 import React from 'react';
 import type { HobbyRecommendation } from '../../services/recommendation.service';
 import { weatherService } from '../../services/weather.service';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 // おすすめカードのプロパティ
 interface RecommendationCardProps {

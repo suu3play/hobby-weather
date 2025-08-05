@@ -351,7 +351,7 @@ export class NotificationSchedulerService {
 
         // タイプ別のペイロード生成
         switch (config.type) {
-            case 'high-score':
+            case 'high-score': {
                 // 高スコア通知の動的評価
                 const highScoreResult =
                     await this.highScoreService.evaluateAndCreateNotification();
@@ -426,8 +426,9 @@ export class NotificationSchedulerService {
                     };
                 }
                 break;
+            }
 
-            case 'weather-alert':
+            case 'weather-alert': {
                 // 天気急変アラートの動的評価
                 const weatherAlerts =
                     await this.weatherAlertService.evaluateWeatherAlerts();
@@ -441,7 +442,7 @@ export class NotificationSchedulerService {
                             activeAlert.severity,
                             activeAlert.alertType,
                             activeAlert.message,
-                            activeAlert.details
+                            activeAlert.details as unknown as Record<string, unknown>
                         );
                 } else {
                     // アクティブなアラートがない場合はダミーまたはスキップ
@@ -452,8 +453,9 @@ export class NotificationSchedulerService {
                     };
                 }
                 break;
+            }
 
-            case 'regular-report':
+            case 'regular-report': {
                 // 定期レポートの動的生成
                 const reportResult =
                     await this.regularReportService.generateRegularReport();
@@ -488,6 +490,7 @@ export class NotificationSchedulerService {
                     };
                 }
                 break;
+            }
         }
 
         return payload;

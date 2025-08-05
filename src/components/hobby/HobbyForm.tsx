@@ -8,7 +8,7 @@ import {
   getWeatherConditionLabel
 } from '../../hooks/useHobby';
 import { HOBBY_CATEGORIES, TIME_OF_DAY_OPTIONS, type HobbySuggestion } from '../../data/hobbySuggestions';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface HobbyFormProps {
   hobby?: Hobby;

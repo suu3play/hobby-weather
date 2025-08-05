@@ -2,7 +2,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // 実際のコンポーネントではなく、モックされたコンポーネントを使用
-const createMockNotificationPermissionPrompt = (mockHook: any) => {
+const createMockNotificationPermissionPrompt = (mockHook: () => {
+  permission: { granted: boolean; denied: boolean; default: boolean };
+  isSupported: boolean;
+  isLoading: boolean;
+  requestPermission: () => Promise<{ granted: boolean; denied: boolean; default: boolean }>;
+  sendTestNotification: () => Promise<boolean>;
+}) => {
   return function NotificationPermissionPrompt({ 
     onPermissionGranted, 
     onPermissionDenied,
@@ -122,12 +128,25 @@ const createMockNotificationPermissionPrompt = (mockHook: any) => {
   };
 };
 
+// Mock関数の型定義
+type MockUseNotificationFunction = () => {
+  permission: { granted: boolean; denied: boolean; default: boolean };
+  isSupported: boolean;
+  isLoading: boolean;
+  requestPermission: () => Promise<{ granted: boolean; denied: boolean; default: boolean }>;
+  sendTestNotification: () => Promise<boolean>;
+};
+
 describe('NotificationPermissionPrompt', () => {
-  let mockUseNotification: any;
-  let NotificationPermissionPrompt: any;
+  let mockUseNotification: MockUseNotificationFunction;
+  let NotificationPermissionPrompt: React.ComponentType<{
+    onPermissionGranted?: () => void;
+    onPermissionDenied?: () => void;
+    className?: string;
+  }>;
 
   beforeEach(() => {
-    mockUseNotification = vi.fn();
+    mockUseNotification = vi.fn() as MockUseNotificationFunction;
     NotificationPermissionPrompt = createMockNotificationPermissionPrompt(mockUseNotification);
   });
 
