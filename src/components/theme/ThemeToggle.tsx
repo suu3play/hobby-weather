@@ -37,7 +37,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   }, [isOpen, config.mode, variant, modes]);
 
   // キーボードナビゲーション用のハンドラー
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent): void => {
     if (variant === 'button') {
       return;
     }
@@ -95,8 +95,6 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
           setIsOpen(false);
         }
         break;
-      default:
-        break;
     }
   }, [variant, isOpen, focusedIndex, modes, setMode]);
 
@@ -112,6 +110,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
+    return undefined;
   }, [isOpen]);
 
   // 現在のテーマの説明テキスト

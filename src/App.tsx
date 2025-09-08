@@ -69,7 +69,7 @@ function App() {
                 return;
         }
 
-        setActiveTab(tabs[nextIndex].id);
+        const nextTab = tabs[nextIndex]; if (nextTab) { setActiveTab(nextTab.id); }
         
         // フォーカスを新しいタブに移動
         if (navRef.current && navRef.current.children[nextIndex]) {
