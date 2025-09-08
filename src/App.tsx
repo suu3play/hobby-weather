@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { HobbyManager } from './components/hobby/HobbyManager';
 import { WeatherDisplay } from './components/weather/WeatherDisplay';
 import { RecommendationDashboard } from './components/recommendation/RecommendationDashboard';
@@ -15,6 +15,7 @@ function App() {
     const [activeTab, setActiveTab] = useState<TabType>('recommendations');
     const { setupState } = useInitialSetup();
     const [showSetupFlow, setShowSetupFlow] = useState(false);
+    const navRef = useRef<HTMLElement>(null);
 
     // セットアップ完了状態の監視
     React.useEffect(() => {
@@ -33,12 +34,49 @@ function App() {
     }, []);
 
     // タブの設定
-    const tabs = [
+    const tabs = React.useMemo(() => [
         { id: 'recommendations' as TabType, label: 'おすすめ', icon: '🎯' },
         { id: 'weather' as TabType, label: '天気', icon: '🌤️' },
         { id: 'hobbies' as TabType, label: '趣味管理', icon: '🎨' },
         { id: 'settings' as TabType, label: '設定', icon: '⚙️' },
-    ];
+    ], []);
+
+    // キーボードナビゲーション用のハンドラー
+    const handleKeyboardNavigation = useCallback((event: React.KeyboardEvent) => {
+        if (!navRef.current) return;
+
+        const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+        let nextIndex = currentIndex;
+
+        switch (event.key) {
+            case 'ArrowLeft':
+                event.preventDefault();
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : tabs.length - 1;
+                break;
+            case 'ArrowRight':
+                event.preventDefault();
+                nextIndex = currentIndex < tabs.length - 1 ? currentIndex + 1 : 0;
+                break;
+            case 'Home':
+                event.preventDefault();
+                nextIndex = 0;
+                break;
+            case 'End':
+                event.preventDefault();
+                nextIndex = tabs.length - 1;
+                break;
+            default:
+                return;
+        }
+
+        const nextTab = tabs[nextIndex]; if (nextTab) { setActiveTab(nextTab.id); }
+        
+        // フォーカスを新しいタブに移動
+        if (navRef.current && navRef.current.children[nextIndex]) {
+            const tabButton = navRef.current.children[nextIndex] as HTMLButtonElement;
+            tabButton.focus();
+        }
+    }, [activeTab, tabs]);
 
     // 初期セットアップが完了していない場合、セットアップフローを表示
     if (showSetupFlow) {
@@ -68,7 +106,7 @@ function App() {
                         <div className="flex items-center space-x-3">
                             <img
                                 src={myLogo}
-                                alt="ロゴ"
+                                alt="趣味予報アプリのロゴ"
                                 className="w-12 h-12"
                             />
                             <h1 className="text-xl font-bold text-text-primary">
@@ -84,18 +122,30 @@ function App() {
                             <ThemeToggle variant="button" />
 
                             {/* ナビゲーションタブ */}
-                            <nav className="flex space-x-1">
+                            <nav 
+                                ref={navRef}
+                                className="flex space-x-1" 
+                                role="tablist" 
+                                aria-label="メインナビゲーション"
+                                onKeyDown={handleKeyboardNavigation}
+                            >
                                 {tabs.map((tab) => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${
+                                        role="tab"
+                                        aria-selected={activeTab === tab.id}
+                                        aria-controls={`${tab.id}-panel`}
+                                        id={`${tab.id}-tab`}
+                                        tabIndex={activeTab === tab.id ? 0 : -1}
+                                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-primary ${
                                             activeTab === tab.id
                                                 ? 'bg-primary-100 text-primary-700 border border-primary-200'
                                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
                                         }`}
+                                        aria-label={`${tab.label}を表示`}
                                     >
-                                        <span>{tab.icon}</span>
+                                        <span aria-hidden="true">{tab.icon}</span>
                                         <span>{tab.label}</span>
                                     </button>
                                 ))}
@@ -108,12 +158,44 @@ function App() {
             {/* メインコンテンツ */}
             <main className="pt-16 py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {activeTab === 'recommendations' && (
-                        <RecommendationDashboard />
-                    )}
-                    {activeTab === 'weather' && <WeatherDisplay />}
-                    {activeTab === 'hobbies' && <HobbyManager />}
-                    {activeTab === 'settings' && <SettingsPage />}
+                    <div 
+                        id="recommendations-panel" 
+                        role="tabpanel" 
+                        tabIndex={0} 
+                        aria-labelledby="recommendations-tab"
+                        hidden={activeTab !== 'recommendations'}
+                    >
+                        {activeTab === 'recommendations' && (
+                            <RecommendationDashboard />
+                        )}
+                    </div>
+                    <div 
+                        id="weather-panel" 
+                        role="tabpanel" 
+                        tabIndex={0} 
+                        aria-labelledby="weather-tab"
+                        hidden={activeTab !== 'weather'}
+                    >
+                        {activeTab === 'weather' && <WeatherDisplay />}
+                    </div>
+                    <div 
+                        id="hobbies-panel" 
+                        role="tabpanel" 
+                        tabIndex={0} 
+                        aria-labelledby="hobbies-tab"
+                        hidden={activeTab !== 'hobbies'}
+                    >
+                        {activeTab === 'hobbies' && <HobbyManager />}
+                    </div>
+                    <div 
+                        id="settings-panel" 
+                        role="tabpanel" 
+                        tabIndex={0} 
+                        aria-labelledby="settings-tab"
+                        hidden={activeTab !== 'settings'}
+                    >
+                        {activeTab === 'settings' && <SettingsPage />}
+                    </div>
                 </div>
             </main>
 
