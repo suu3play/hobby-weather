@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="512" height="512" fill="#3b82f6" rx="64"/>
+  
+  <!-- 太陽 -->
+  <circle cx="180" cy="150" r="50" fill="#fef3c7"/>
+  <circle cx="180" cy="150" r="40" fill="#fde047"/>
+  
+  <!-- 雲 -->
+  <g fill="#e5e7eb">
+    <circle cx="300" cy="180" r="35"/>
+    <circle cx="340" cy="170" r="28"/>
+    <circle cx="320" cy="200" r="25"/>
+  </g>
+  
+  <!-- アプリタイトル「趣」の簡略化表現 -->
+  <g fill="#ffffff" font-family="Arial, sans-serif" font-size="120" font-weight="bold" text-anchor="middle">
+    <text x="256" y="350" dominant-baseline="middle">趣</text>
+  </g>
+  
+  <!-- 装飾的な要素 -->
+  <g fill="#ffffff" opacity="0.7">
+    <circle cx="100" cy="400" r="8"/>
+    <circle cx="400" cy="350" r="6"/>
+    <circle cx="450" cy="450" r="10"/>
+  </g>
+</svg>

@@ -12,6 +12,19 @@ export class NotificationService {
   constructor() {
     this.isSupported = 'Notification' in window && 'serviceWorker' in navigator;
     this.permission = this.getPermissionState();
+    this.initializePWANotifications();
+  }
+
+  // PWA通知の初期化
+  private async initializePWANotifications(): Promise<void> {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      try {
+        await navigator.serviceWorker.ready;
+        console.log('Service Worker準備完了 - PWA通知利用可能');
+      } catch (error) {
+        console.warn('Service Worker初期化エラー:', error);
+      }
+    }
   }
 
   static getInstance(): NotificationService {
