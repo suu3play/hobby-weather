@@ -2,6 +2,8 @@ import React, { useState, useRef, useCallback, Suspense, lazy } from 'react';
 import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
 import { useInitialSetup } from './hooks/useInitialSetup';
 import { ThemeToggle } from './components/theme/ThemeToggle';
+import { InstallPrompt } from './components/pwa/InstallPrompt';
+import { OfflineIndicator } from './components/pwa/OfflineIndicator';
 import myLogo from './assets/hobbyWeather.png';
 
 // 動的インポートによるコード分割
@@ -109,6 +111,10 @@ function App() {
 
     return (
         <div className="min-h-screen bg-background-primary">
+            {/* PWAコンポーネント */}
+            <InstallPrompt />
+            <OfflineIndicator />
+            
             {/* ヘッダー */}
             <header className="fixed top-0 left-0 right-0 bg-surface-primary shadow-sm border-b border-border-primary z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
