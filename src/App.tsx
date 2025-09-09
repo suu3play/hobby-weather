@@ -1,15 +1,25 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { HobbyManager } from './components/hobby/HobbyManager';
-import { WeatherDisplay } from './components/weather/WeatherDisplay';
-import { RecommendationDashboard } from './components/recommendation/RecommendationDashboard';
-import { SettingsPage } from './components/settings/SettingsPage';
+import React, { useState, useRef, useCallback, Suspense, lazy } from 'react';
 import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
 import { useInitialSetup } from './hooks/useInitialSetup';
 import { ThemeToggle } from './components/theme/ThemeToggle';
 import myLogo from './assets/hobbyWeather.png';
 
+// 動的インポートによるコード分割
+const HobbyManager = lazy(() => import('./components/hobby/HobbyManager').then(module => ({ default: module.HobbyManager })));
+const WeatherDisplay = lazy(() => import('./components/weather/WeatherDisplay').then(module => ({ default: module.WeatherDisplay })));
+const RecommendationDashboard = lazy(() => import('./components/recommendation/RecommendationDashboard').then(module => ({ default: module.RecommendationDashboard })));
+const SettingsPage = lazy(() => import('./components/settings/SettingsPage').then(module => ({ default: module.SettingsPage })));
+
 // アプリケーションのメインタブ
 type TabType = 'weather' | 'hobbies' | 'recommendations' | 'settings';
+
+// ローディングコンポーネント
+const LoadingSpinner = () => (
+    <div className="flex items-center justify-center py-12">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-3"></div>
+        <span className="text-text-secondary">読み込み中...</span>
+    </div>
+);
 
 function App() {
     const [activeTab, setActiveTab] = useState<TabType>('recommendations');
@@ -166,7 +176,9 @@ function App() {
                         hidden={activeTab !== 'recommendations'}
                     >
                         {activeTab === 'recommendations' && (
-                            <RecommendationDashboard />
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <RecommendationDashboard />
+                            </Suspense>
                         )}
                     </div>
                     <div 
@@ -176,7 +188,11 @@ function App() {
                         aria-labelledby="weather-tab"
                         hidden={activeTab !== 'weather'}
                     >
-                        {activeTab === 'weather' && <WeatherDisplay />}
+                        {activeTab === 'weather' && (
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <WeatherDisplay />
+                            </Suspense>
+                        )}
                     </div>
                     <div 
                         id="hobbies-panel" 
@@ -185,7 +201,11 @@ function App() {
                         aria-labelledby="hobbies-tab"
                         hidden={activeTab !== 'hobbies'}
                     >
-                        {activeTab === 'hobbies' && <HobbyManager />}
+                        {activeTab === 'hobbies' && (
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <HobbyManager />
+                            </Suspense>
+                        )}
                     </div>
                     <div 
                         id="settings-panel" 
@@ -194,7 +214,11 @@ function App() {
                         aria-labelledby="settings-tab"
                         hidden={activeTab !== 'settings'}
                     >
-                        {activeTab === 'settings' && <SettingsPage />}
+                        {activeTab === 'settings' && (
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <SettingsPage />
+                            </Suspense>
+                        )}
                     </div>
                 </div>
             </main>
