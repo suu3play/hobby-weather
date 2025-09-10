@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WeatherService } from './weather.service';
-import type { OpenWeatherMapCurrentResponse, OpenWeatherMapOneCallResponse } from '../types/api';
+import type { OpenWeatherMapCurrentResponse, OpenWeatherMapForecastResponse } from '../types/api';
 
 // Mock database service
 vi.mock('./database.service', () => ({
@@ -112,61 +112,43 @@ describe('WeatherService', () => {
     it('should fetch and parse forecast data', async () => {
       vi.stubEnv('VITE_OPENWEATHER_API_KEY', 'test-api-key');
       service = new WeatherService();
-      const mockResponse: OpenWeatherMapOneCallResponse = {
-        lat: 35.6762,
-        lon: 139.6503,
-        timezone: 'Asia/Tokyo',
-        timezone_offset: 32400,
-        current: {
-          dt: 1640995200,
-          sunrise: 1640989800,
-          sunset: 1641024600,
-          temp: 25.5,
-          feels_like: 27.2,
-          pressure: 1013,
-          humidity: 65,
-          dew_point: 18.5,
-          uvi: 5.2,
-          clouds: 0,
-          visibility: 10000,
-          wind_speed: 3.5,
-          wind_deg: 180,
-          weather: [{ id: 800, main: 'Clear', description: '晴天', icon: '01d' }]
-        },
-        daily: [
+      const mockResponse: OpenWeatherMapForecastResponse = {
+        cod: '200',
+        message: 0,
+        cnt: 40,
+        list: [
           {
             dt: 1640995200,
-            sunrise: 1640989800,
-            sunset: 1641024600,
-            moonrise: 1641000000,
-            moonset: 1641040000,
-            moon_phase: 0.5,
-            summary: '晴れの日',
-            temp: {
-              day: 25.5,
-              min: 20.0,
-              max: 28.0,
-              night: 22.0,
-              eve: 26.0,
-              morn: 21.0
+            main: {
+              temp: 25.5,
+              feels_like: 27.2,
+              temp_min: 20.0,
+              temp_max: 28.0,
+              pressure: 1013,
+              sea_level: 1013,
+              grnd_level: 1010,
+              humidity: 65,
+              temp_kf: 0
             },
-            feels_like: {
-              day: 27.2,
-              night: 23.5,
-              eve: 27.8,
-              morn: 22.3
-            },
-            pressure: 1013,
-            humidity: 65,
-            dew_point: 18.5,
-            wind_speed: 3.5,
-            wind_deg: 180,
             weather: [{ id: 800, main: 'Clear', description: '晴天', icon: '01d' }],
-            clouds: 0,
-            pop: 0.1,
-            uvi: 5.2
+            clouds: { all: 0 },
+            wind: { speed: 3.5, deg: 180, gust: 4.2 },
+            visibility: 10000,
+            pop: 0.2,
+            sys: { pod: 'd' },
+            dt_txt: '2024-01-01 12:00:00'
           }
-        ]
+        ],
+        city: {
+          id: 1850147,
+          name: 'Tokyo',
+          coord: { lat: 35.6762, lon: 139.6503 },
+          country: 'JP',
+          population: 8336599,
+          timezone: 32400,
+          sunrise: 1640989800,
+          sunset: 1641024600
+        }
       };
 
       (globalThis.fetch as any).mockResolvedValueOnce({
