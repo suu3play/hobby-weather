@@ -179,7 +179,7 @@ export class NotificationService {
     severity: 'low' | 'medium' | 'high' | 'urgent',
     alertType: string,
     message: string,
-    details?: any
+    details?: Record<string, unknown>
   ): NotificationPayload {
     const severityIcons = {
       low: '🌤️',

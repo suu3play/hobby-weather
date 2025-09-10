@@ -155,7 +155,7 @@ export class WeatherService {
      * 3時間ごとの予報データを日別にグループ化
      * 最高最低気温、時間帯別気温、平均湿度などを計算
      */
-    const dailyData = new Map<string, any[]>();
+    const dailyData = new Map<string, OpenWeatherMapForecastResponse['list']>();
     
     response.list.forEach((item) => {
       const date = new Date(item.dt * 1000).toDateString();
@@ -283,7 +283,7 @@ export class WeatherService {
     const locations = await response.json();
     
     // OpenWeatherMapのレスポンスを統一フォーマットに変換
-    return locations.map((location: any) => ({
+    return locations.map((location: { name: string; lat: number; lon: number; country: string }) => ({
       name: location.name,
       lat: location.lat,
       lon: location.lon,
@@ -315,7 +315,7 @@ export class WeatherService {
 
     const locations = await response.json();
 
-    return locations.map((location: any) => {
+    return locations.map((location: { display_name: string; lat: string; lon: string; type?: string; class?: string }) => {
       const type = this.classifyLocationType(location);
       const category = this.extractLocationCategory(location);
       
@@ -332,7 +332,7 @@ export class WeatherService {
     });
   }
 
-  private classifyLocationType(location: any): LocationType {
+  private classifyLocationType(location: { type?: string; class?: string; category?: string }): LocationType {
     const placeType = location.type || location.class;
     const category = location.category;
 
@@ -360,7 +360,7 @@ export class WeatherService {
     return 'address';
   }
 
-  private extractLocationCategory(location: any): string | undefined {
+  private extractLocationCategory(location: { type?: string; class?: string; amenity?: string; leisure?: string; tourism?: string }): string | undefined {
     const amenityTypes: Record<string, string> = {
       restaurant: 'レストラン',
       cafe: 'カフェ',

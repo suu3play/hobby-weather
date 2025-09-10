@@ -193,7 +193,7 @@ export class DatabaseService {
         // 趣味をインポート
         if (data.hobbies && Array.isArray(data.hobbies)) {
             for (const hobby of data.hobbies) {
-                const { id, ...hobbyData } = hobby;
+                const { id: _, ...hobbyData } = hobby;
                 await this.createHobby(hobbyData);
             }
         }
@@ -201,14 +201,14 @@ export class DatabaseService {
         // 場所をインポート
         if (data.locations && Array.isArray(data.locations)) {
             for (const location of data.locations) {
-                const { id, ...locationData } = location;
+                const { id: _, ...locationData } = location;
                 await this.saveLocation(locationData);
             }
         }
 
         // 設定をインポート
         if (data.settings) {
-            const { id, ...settingsData } = data.settings;
+            const { id: _, ...settingsData } = data.settings;
             await this.updateSettings(settingsData);
         }
     }
