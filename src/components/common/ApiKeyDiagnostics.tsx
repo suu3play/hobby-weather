@@ -3,6 +3,14 @@ import {
   runDiagnostics 
 } from '../../services/api-key-test';
 
+// API接続データの型定義
+interface ApiConnectionData {
+  city?: string;
+  weather?: string;
+  temperature?: number;
+  [key: string]: unknown;
+}
+
 // 診断結果の型定義
 interface DiagnosticResults {
   environment: {
@@ -18,7 +26,7 @@ interface DiagnosticResults {
   };
   apiConnection: {
     success: boolean;
-    data?: Record<string, unknown>;
+    data?: ApiConnectionData;
     status?: number;
     error?: string;
   };
@@ -190,9 +198,9 @@ export const ApiKeyDiagnostics: React.FC = () => {
                   {results.apiConnection.success && results.apiConnection.data && (
                     <div>
                       <p>テストデータ:</p>
-                      <p className="ml-2">都市: {results.apiConnection.data.city}</p>
-                      <p className="ml-2">天気: {results.apiConnection.data.weather}</p>
-                      <p className="ml-2">気温: {results.apiConnection.data.temperature}°C</p>
+                      <p className="ml-2">都市: {String(results.apiConnection.data.city || 'N/A')}</p>
+                      <p className="ml-2">天気: {String(results.apiConnection.data.weather || 'N/A')}</p>
+                      <p className="ml-2">気温: {String(results.apiConnection.data.temperature || 'N/A')}°C</p>
                     </div>
                   )}
                   {results.apiConnection.error && (
