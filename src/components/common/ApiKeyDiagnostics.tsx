@@ -18,7 +18,7 @@ interface DiagnosticResults {
   };
   apiConnection: {
     success: boolean;
-    data?: any;
+    data?: Record<string, unknown>;
     status?: number;
     error?: string;
   };
