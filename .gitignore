@@ -29,3 +29,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test coverage
+coverage/
+.nyc_output
+
+# E2E test results
+test-results/
+playwright-report/
+playwright/.cache/

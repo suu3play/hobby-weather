@@ -16,7 +16,7 @@ describe('DatabaseService', () => {
     class TestDatabase extends HobbyWeatherDatabase {
       constructor(name: string) {
         super();
-        // @ts-ignore - temporary workaround for readonly property
+        // @ts-expect-error - temporary workaround for readonly property
         this.name = name;
       }
     }

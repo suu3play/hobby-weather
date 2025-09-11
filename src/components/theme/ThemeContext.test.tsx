@@ -205,11 +205,11 @@ describe('ThemeContext', () => {
     await waitFor(() => {
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'hobby-weather-theme-config',
-        expect.stringContaining('\"mode\":\"dark\"')
+        expect.stringContaining('"mode":"dark"')
       );
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'hobby-weather-theme-config',
-        expect.stringContaining('\"highContrast\":true')
+        expect.stringContaining('"highContrast":true')
       );
     });
   });

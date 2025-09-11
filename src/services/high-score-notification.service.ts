@@ -228,8 +228,8 @@ export class HighScoreNotificationService {
       // いずれかの趣味が最近通知されていたらクールダウン中
       for (const notification of recentNotifications) {
         if (notification.data && notification.data['recommendations'] && Array.isArray(notification.data['recommendations'])) {
-          const notifiedHobbyIds = (notification.data['recommendations'] as any[]).map(
-            (rec: any) => rec.hobbyId || rec.name
+          const notifiedHobbyIds = (notification.data['recommendations'] as Array<{ hobbyId?: string; name?: string }>).map(
+            (rec) => rec.hobbyId || rec.name
           );
           
           const hasOverlap = hobbyIds.some(id => notifiedHobbyIds.includes(id));

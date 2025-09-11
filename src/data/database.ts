@@ -120,7 +120,7 @@ export class HobbyWeatherDatabase extends Dexie {
     });
 
     this.hobbies.hook('updating', (modifications) => {
-      (modifications as any).updatedAt = new Date();
+      (modifications as Record<string, unknown>).updatedAt = new Date();
     });
 
     this.locations.hook('creating', (_, obj) => {
@@ -132,7 +132,7 @@ export class HobbyWeatherDatabase extends Dexie {
     });
 
     this.settings.hook('updating', (modifications) => {
-      (modifications as any).updatedAt = new Date();
+      (modifications as Record<string, unknown>).updatedAt = new Date();
     });
 
     this.notificationConfigs.hook('creating', (_, obj) => {
@@ -141,7 +141,7 @@ export class HobbyWeatherDatabase extends Dexie {
     });
 
     this.notificationConfigs.hook('updating', (modifications) => {
-      (modifications as any).updatedAt = new Date();
+      (modifications as Record<string, unknown>).updatedAt = new Date();
     });
 
     this.notificationSettings.hook('creating', (_, obj) => {
@@ -149,7 +149,7 @@ export class HobbyWeatherDatabase extends Dexie {
     });
 
     this.notificationSettings.hook('updating', (modifications) => {
-      (modifications as any).updatedAt = new Date();
+      (modifications as Record<string, unknown>).updatedAt = new Date();
     });
   }
 

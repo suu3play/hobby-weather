@@ -249,7 +249,7 @@ export class NotificationConfigService {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        let query = this.db.notificationHistory
+        const query = this.db.notificationHistory
             .where('sentAt')
             .between(today, tomorrow, false, true);
 

@@ -5,7 +5,11 @@ import type { NotificationPayload } from '../types/notification';
 // Global mocks
 Object.defineProperty(globalThis, 'Notification', {
     value: class MockNotification {
-        constructor(_title: string, _options?: NotificationOptions) {}
+        constructor(title: string, options?: NotificationOptions) {
+            // Mock implementation - parameters used for instantiation
+            void title;
+            void options;
+        }
         static permission: NotificationPermission = 'granted';
         static requestPermission = vi.fn().mockResolvedValue('granted');
         close = vi.fn();

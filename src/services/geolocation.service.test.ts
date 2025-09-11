@@ -34,7 +34,7 @@ describe('GeolocationService', () => {
         }
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((successCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((successCallback: (position: GeolocationPosition) => void) => {
         successCallback(mockPosition);
       });
 
@@ -51,7 +51,7 @@ describe('GeolocationService', () => {
         message: 'User denied the request for Geolocation.'
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((_: Function, errorCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
         errorCallback(mockError);
       });
 
@@ -67,7 +67,7 @@ describe('GeolocationService', () => {
         message: 'Position unavailable.'
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((_: Function, errorCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
         errorCallback(mockError);
       });
 
@@ -83,7 +83,7 @@ describe('GeolocationService', () => {
         message: 'Timeout expired.'
       };
 
-      mockGeolocation.getCurrentPosition.mockImplementation((_: Function, errorCallback: Function) => {
+      mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
         errorCallback(mockError);
       });
 

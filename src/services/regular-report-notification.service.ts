@@ -168,7 +168,9 @@ export class RegularReportNotificationService {
   }
 
   // 天気概要の生成
-  private generateWeatherSummary(forecast: WeatherForecast, _period: ReportPeriod): string {
+  private generateWeatherSummary(forecast: WeatherForecast, period: ReportPeriod): string {
+    // periodパラメータは将来の期間別分析に使用予定
+    void period;
     const currentWeather = forecast.forecasts?.[0];
     if (!currentWeather) return '天気データを取得できませんでした。';
     
