@@ -325,8 +325,12 @@ export class WeatherAlertNotificationService {
         since: cutoffTime
       });
 
+      interface AlertData {
+        alertType: string;
+      }
+
       return recentAlerts.some(alert => 
-        alert.data && (alert.data as any).alertType === alertType
+        alert.data && (alert.data as AlertData).alertType === alertType
       );
     } catch (error) {
       console.error('クールダウンチェックエラー:', error);
