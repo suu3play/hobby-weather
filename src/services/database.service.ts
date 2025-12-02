@@ -193,7 +193,6 @@ export class DatabaseService {
         // 趣味をインポート
         if (data.hobbies && Array.isArray(data.hobbies)) {
             for (const hobby of data.hobbies) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id: _id, ...hobbyData } = hobby;
                 await this.createHobby(hobbyData);
             }
@@ -202,7 +201,6 @@ export class DatabaseService {
         // 場所をインポート
         if (data.locations && Array.isArray(data.locations)) {
             for (const location of data.locations) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id: _id, ...locationData } = location;
                 await this.saveLocation(locationData);
             }
@@ -210,7 +208,6 @@ export class DatabaseService {
 
         // 設定をインポート
         if (data.settings) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id: _id2, ...settingsData } = data.settings;
             await this.updateSettings(settingsData);
         }
