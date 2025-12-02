@@ -362,8 +362,21 @@ export class RegularReportNotificationService {
       }
 
       // 平均スコアを計算
+      interface HobbyData {
+        score: number;
+        name: string;
+      }
+
       const scores = history
-        .map(h => (h.data && h.data['topHobbies'] && Array.isArray(h.data['topHobbies']) && h.data['topHobbies'][0] && typeof h.data['topHobbies'][0] === 'object' && 'score' in h.data['topHobbies'][0]) ? (h.data['topHobbies'][0] as any).score : 0)
+        .map(h => {
+          if (h.data && h.data['topHobbies'] && Array.isArray(h.data['topHobbies'])) {
+            const firstHobby = h.data['topHobbies'][0];
+            if (firstHobby && typeof firstHobby === 'object' && 'score' in firstHobby) {
+              return (firstHobby as HobbyData).score;
+            }
+          }
+          return 0;
+        })
         .filter(score => score > 0);
       
       const averageScore = scores.length > 0 
@@ -374,17 +387,16 @@ export class RegularReportNotificationService {
       const hobbyCount: Record<string, number> = {};
       history.forEach(h => {
         if (h.data && h.data['topHobbies'] && Array.isArray(h.data['topHobbies'])) {
-          (h.data['topHobbies'] as any[]).forEach((hobby: any) => {
+          h.data['topHobbies'].forEach((hobby: unknown) => {
             if (hobby && typeof hobby === 'object' && 'name' in hobby) {
-              const hobbyData = hobby as Record<string, unknown>;
-              if (typeof hobbyData['name'] === 'string') {
-                hobbyCount[hobbyData['name'] as string] = (hobbyCount[hobbyData['name'] as string] || 0) + 1;
+              const hobbyData = hobby as HobbyData;
+              if (typeof hobbyData.name === 'string') {
+                hobbyCount[hobbyData.name] = (hobbyCount[hobbyData.name] || 0) + 1;
               }
             }
           });
         }
       });
-
       const mostFrequentEntry = Object.entries(hobbyCount)
         .sort(([,a], [,b]) => b - a)[0];
 

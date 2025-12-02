@@ -402,19 +402,33 @@ export class WeatherService {
       mobile_phone: '携帯電話店'
     };
 
-    if (location.tags?.amenity) {
-      return amenityTypes[location.tags.amenity] ?? location.tags.amenity;
+    interface LocationWithTags {
+      type?: string;
+      class?: string;
+      amenity?: string;
+      leisure?: string;
+      tourism?: string;
+      tags?: {
+        amenity?: string;
+        shop?: string;
+        tourism?: string;
+      };
     }
 
-    if (location.tags?.shop) {
-      return shopTypes[location.tags.shop] ?? location.tags.shop;
+    const tags = (location as LocationWithTags).tags;
+    if (tags?.amenity) {
+      return amenityTypes[tags.amenity] ?? tags.amenity;
     }
 
-    if (location.tags?.tourism) {
+    if (tags?.shop) {
+      return shopTypes[tags.shop] ?? tags.shop;
+    }
+
+    if (tags?.tourism) {
       return '観光地';
     }
 
-    if (location.tags?.leisure) {
+    if (tags?.leisure) {
       return 'レジャー施設';
     }
 

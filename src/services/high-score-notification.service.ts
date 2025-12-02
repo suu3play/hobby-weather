@@ -232,7 +232,7 @@ export class HighScoreNotificationService {
             (rec) => rec.hobbyId || rec.name
           );
           
-          const hasOverlap = hobbyIds.some(id => notifiedHobbyIds.includes(id));
+          const hasOverlap = hobbyIds.some(id => notifiedHobbyIds.includes(String(id)));
           if (hasOverlap) {
             return false;
           }
@@ -301,8 +301,22 @@ export class HighScoreNotificationService {
       }
 
       // スコアの平均を計算
+      interface RecommendationData {
+        score: number;
+        name?: string;
+        hobbyName?: string;
+      }
+
       const scores = history
-        .map(h => (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations']) && h.data['recommendations'][0] && typeof h.data['recommendations'][0] === 'object' && 'score' in h.data['recommendations'][0]) ? (h.data['recommendations'][0] as any).score : 0)
+        .map(h => {
+          if (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations'])) {
+            const firstRec = h.data['recommendations'][0];
+            if (firstRec && typeof firstRec === 'object' && 'score' in firstRec) {
+              return (firstRec as RecommendationData).score;
+            }
+          }
+          return 0;
+        })
         .filter(score => score > 0);
       
       const averageScore = scores.length > 0 
@@ -313,10 +327,13 @@ export class HighScoreNotificationService {
       const hobbyCount: Record<string, number> = {};
       history.forEach(h => {
         if (h.data && h.data['recommendations'] && Array.isArray(h.data['recommendations'])) {
-          (h.data['recommendations'] as any[]).forEach((rec: any) => {
-            const hobbyName = rec.name || rec.hobbyName; // \u30b3\u30f3\u30d1\u30c1\u30d3\u30ea\u30c6\u30a3\u306e\u305f\u3081\u4e21\u65b9\u3092\u30b5\u30dd\u30fc\u30c8
-            if (hobbyName) {
-              hobbyCount[hobbyName] = (hobbyCount[hobbyName] || 0) + 1;
+          h.data['recommendations'].forEach((rec: unknown) => {
+            if (rec && typeof rec === 'object' && ('name' in rec || 'hobbyName' in rec)) {
+              const recData = rec as RecommendationData;
+              const hobbyName = recData.name || recData.hobbyName; // コンパチビリティのため両方をサポート
+              if (hobbyName) {
+                hobbyCount[hobbyName] = (hobbyCount[hobbyName] || 0) + 1;
+              }
             }
           });
         }
