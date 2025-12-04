@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useHobby } from './useHobby';
 import { useWeather } from './useWeather';
 
@@ -49,17 +49,17 @@ export const useInitialSetup = () => {
   };
 
   // 初期設定状態を更新
-  const updateSetupState = () => {
+  const updateSetupState = useCallback(() => {
     const hasApiKey = checkApiKeySettings();
     const hasLocation = !!location;
     const hasHobbies = hobbies.length > 0;
-    
+
     // ローカルストレージから完了状態を確認
     const setupCompleted = localStorage.getItem('hobby-weather-setup-completed') === 'true';
-    
+
     // 完了状態の判定（API Keyと場所は必須、趣味は推奨）
     const isCompleted = setupCompleted || (hasApiKey && hasLocation);
-    
+
     // 現在のステップを決定
     let currentStep: SetupStep = 'completed';
     if (isCompleted) {
@@ -80,14 +80,14 @@ export const useInitialSetup = () => {
       isLoading: hobbiesLoading || weatherLoading,
       currentStep
     });
-  };
+  }, [hobbies, location, hobbiesLoading, weatherLoading]);
 
   // 初期化時とデータ変更時に設定状態を更新
   useEffect(() => {
     if (!hobbiesLoading && !weatherLoading) {
       updateSetupState();
     }
-  }, [hobbies, location, hobbiesLoading, weatherLoading]);
+  }, [hobbies, location, hobbiesLoading, weatherLoading, updateSetupState]);
 
   // ステップ情報を取得
   const getStepInfo = (): SetupStepInfo[] => {

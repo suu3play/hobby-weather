@@ -106,7 +106,7 @@ export const useHobby = (): UseHobbyReturn => {
     }
 
     await updateHobby(id, { isActive: !hobby.isActive });
-  }, [state.hobbies, updateHobby]);
+  }, [state.hobbies, updateHobby, updateState]);
 
   const refreshHobbies = useCallback(async () => {
     await loadHobbies();

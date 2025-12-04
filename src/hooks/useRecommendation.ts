@@ -41,7 +41,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const filtersToUse = customFilters || state.filters;
+      const filtersToUse = customFilters !== undefined ? customFilters : state.filters;
       const recommendations = await recommendationService.generateRecommendations(
         hobbies,
         forecast,
@@ -62,7 +62,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
         isLoading: false
       }));
     }
-  }, []); // 依存関係を削除してuseCallback内でstateを参照
+  }, [state.filters]);
 
   /**
    * フィルターを更新
@@ -106,9 +106,9 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
    */
   const refreshRecommendations = useCallback(async () => {
     if (!lastParams) return;
-    
+
     await generateRecommendations(lastParams.hobbies, lastParams.forecast, state.filters);
-  }, [lastParams, state.filters]);
+  }, [lastParams, state.filters, generateRecommendations]);
 
   /**
    * エラーをクリア
@@ -122,7 +122,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
     if (lastParams && !state.isLoading) {
       generateRecommendations(lastParams.hobbies, lastParams.forecast, state.filters);
     }
-  }, [state.filters]); // generateRecommendationsとlastParamsの依存関係を削除
+  }, [state.filters, generateRecommendations, lastParams, state.isLoading]);
 
   return {
     ...state,
