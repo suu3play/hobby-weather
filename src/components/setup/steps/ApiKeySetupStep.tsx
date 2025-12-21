@@ -21,7 +21,9 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
           setSuccess(true);
         }
       } catch (error) {
-        console.error('Failed to parse saved API settings:', error);
+        if (import.meta.env.DEV) {
+          console.error('Failed to parse saved API settings:', error);
+        }
       }
     }
   }, []);
@@ -51,7 +53,9 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
         onComplete();
       }, 1000);
     } catch (error) {
-      console.error('API Key保存エラー:', error);
+      if (import.meta.env.DEV) {
+        console.error('API Key保存エラー:', error);
+      }
       setError('API Keyの保存に失敗しました。もう一度お試しください。');
     } finally {
       setIsLoading(false);

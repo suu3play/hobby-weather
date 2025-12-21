@@ -52,7 +52,9 @@ export const SetupResetSection: React.FC = () => {
             // 状態を更新
             refreshSetupState();
         } catch (error) {
-            console.error('Failed to reset setup info:', error);
+            if (import.meta.env.DEV) {
+                console.error('Failed to reset setup info:', error);
+            }
             setResetMessage({
                 type: 'error',
                 text: 'セットアップ情報のリセットに失敗しました。',

@@ -38,7 +38,9 @@ export function useNotification(): UseNotificationReturn {
       setPermission(newPermission);
       return newPermission;
     } catch (error) {
-      console.error('通知許可要求エラー:', error);
+      if (import.meta.env.DEV) {
+        console.error('通知許可要求エラー:', error);
+      }
       return undefined;
     } finally {
       setIsLoading(false);

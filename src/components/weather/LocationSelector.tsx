@@ -34,7 +34,9 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       const locations = await databaseService.getAllLocations();
       setSavedLocations(locations);
     } catch (error) {
-      console.error('Failed to load saved locations:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to load saved locations:', error);
+      }
     }
   };
 

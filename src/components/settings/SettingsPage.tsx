@@ -24,7 +24,9 @@ export const SettingsPage: React.FC = () => {
         const parsed = JSON.parse(savedSettings);
         setApiSettings(parsed);
       } catch (error) {
-        console.error('Failed to parse saved API settings:', error);
+        if (import.meta.env.DEV) {
+          console.error('Failed to parse saved API settings:', error);
+        }
       }
     }
   }, []);
@@ -43,7 +45,9 @@ export const SettingsPage: React.FC = () => {
       
       setMessage({ type: 'success', text: 'API Key設定を保存しました。次回のAPI呼び出しから新しいキーが使用されます。' });
     } catch (error) {
-      console.error('API Key設定保存エラー:', error);
+      if (import.meta.env.DEV) {
+        console.error('API Key設定保存エラー:', error);
+      }
       setMessage({ type: 'error', text: 'API Key設定の保存に失敗しました' });
     } finally {
       setIsLoading(false);
