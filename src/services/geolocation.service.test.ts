@@ -26,12 +26,19 @@ describe('GeolocationService', () => {
 
   describe('getCurrentPosition', () => {
     it('should get current position successfully', async () => {
-      const mockPosition = {
+      const mockPosition: GeolocationPosition = {
         coords: {
           latitude: 35.6762,
           longitude: 139.6503,
-          accuracy: 10
-        }
+          accuracy: 10,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+          toJSON: () => ({})
+        },
+        timestamp: Date.now(),
+        toJSON: () => ({})
       };
 
       mockGeolocation.getCurrentPosition.mockImplementation((successCallback: (position: GeolocationPosition) => void) => {
@@ -46,9 +53,12 @@ describe('GeolocationService', () => {
     });
 
     it('should handle permission denied error', async () => {
-      const mockError = {
+      const mockError: GeolocationPositionError = {
         code: 1,
-        message: 'User denied the request for Geolocation.'
+        message: 'User denied the request for Geolocation.',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3
       };
 
       mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
@@ -62,9 +72,12 @@ describe('GeolocationService', () => {
     });
 
     it('should handle position unavailable error', async () => {
-      const mockError = {
+      const mockError: GeolocationPositionError = {
         code: 2,
-        message: 'Position unavailable.'
+        message: 'Position unavailable.',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3
       };
 
       mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {
@@ -78,9 +91,12 @@ describe('GeolocationService', () => {
     });
 
     it('should handle timeout error', async () => {
-      const mockError = {
+      const mockError: GeolocationPositionError = {
         code: 3,
-        message: 'Timeout expired.'
+        message: 'Timeout expired.',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3
       };
 
       mockGeolocation.getCurrentPosition.mockImplementation((_: (position: GeolocationPosition) => void, errorCallback: (error: GeolocationPositionError) => void) => {

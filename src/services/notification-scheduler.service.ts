@@ -442,7 +442,9 @@ export class NotificationSchedulerService {
                             activeAlert.severity,
                             activeAlert.alertType,
                             activeAlert.message,
-                            activeAlert.details
+                            activeAlert.details.length > 0
+                                ? { items: activeAlert.details } as Record<string, unknown>
+                                : undefined
                         );
                 } else {
                     // アクティブなアラートがない場合はダミーまたはスキップ
