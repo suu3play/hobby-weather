@@ -43,7 +43,9 @@ export const useInitialSetup = () => {
       const parsed = JSON.parse(savedSettings);
       return !!(parsed.openWeatherApiKey && parsed.openWeatherApiKey.trim());
     } catch (error) {
-      console.error('Failed to check API key settings:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to check API key settings:', error);
+      }
       return false;
     }
   };

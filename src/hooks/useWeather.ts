@@ -49,7 +49,9 @@ export const useWeather = (): UseWeatherReturn => {
         return defaultLocation;
       }
     } catch (error) {
-      console.warn('Failed to load default location:', error);
+      if (import.meta.env.DEV) {
+        console.warn('Failed to load default location:', error);
+      }
     }
     return null;
   }, [updateState]);

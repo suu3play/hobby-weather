@@ -49,7 +49,9 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
       setStats(statsData);
       setShowStats(true);
     } catch (error) {
-      console.error('統計情報の読み込みに失敗:', error);
+      if (import.meta.env.DEV) {
+        console.error('統計情報の読み込みに失敗:', error);
+      }
     }
   };
 

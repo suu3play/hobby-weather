@@ -14,7 +14,7 @@ const updateSW = registerSW({
     }
   },
   onOfflineReady() {
-    console.log('アプリがオフラインで利用可能になりました')
+    // アプリがオフラインで利用可能になりました
   },
 })
 

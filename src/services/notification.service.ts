@@ -20,9 +20,10 @@ export class NotificationService {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       try {
         await navigator.serviceWorker.ready;
-        console.log('Service Worker準備完了 - PWA通知利用可能');
       } catch (error) {
-        console.warn('Service Worker初期化エラー:', error);
+        if (import.meta.env.DEV) {
+          console.warn('Service Worker初期化エラー:', error);
+        }
       }
     }
   }
@@ -63,7 +64,9 @@ export class NotificationService {
       };
       return this.permission;
     } catch (error) {
-      console.error('通知許可の取得に失敗:', error);
+      if (import.meta.env.DEV) {
+        console.error('通知許可の取得に失敗:', error);
+      }
       return { granted: false, denied: true, default: false };
     }
   }
@@ -71,7 +74,9 @@ export class NotificationService {
   // 通知送信
   async sendNotification(payload: NotificationPayload): Promise<boolean> {
     if (!this.permission.granted) {
-      console.warn('通知権限が許可されていません');
+      if (import.meta.env.DEV) {
+        console.warn('通知権限が許可されていません');
+      }
       return false;
     }
 
@@ -95,12 +100,16 @@ export class NotificationService {
       };
 
       notification.onerror = (error) => {
-        console.error('通知送信エラー:', error);
+        if (import.meta.env.DEV) {
+          console.error('通知送信エラー:', error);
+        }
       };
 
       return true;
     } catch (error) {
-      console.error('通知送信に失敗:', error);
+      if (import.meta.env.DEV) {
+        console.error('通知送信に失敗:', error);
+      }
       return false;
     }
   }
@@ -278,10 +287,11 @@ export class NotificationService {
     try {
       // サービスワーカーファイルは後で作成
       const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registered:', registration);
       return registration;
     } catch (error) {
-      console.error('Service Worker registration failed:', error);
+      if (import.meta.env.DEV) {
+        console.error('Service Worker registration failed:', error);
+      }
       return null;
     }
   }

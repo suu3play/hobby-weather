@@ -151,7 +151,9 @@ export class HighScoreNotificationService {
       };
 
     } catch (error) {
-      console.error('高スコア通知の評価中にエラー:', error);
+      if (import.meta.env.DEV) {
+        console.error('高スコア通知の評価中にエラー:', error);
+      }
       return {
         notificationSent: false,
         recommendations: [],
@@ -241,7 +243,9 @@ export class HighScoreNotificationService {
 
       return true;
     } catch (error) {
-      console.error('クールダウンチェックエラー:', error);
+      if (import.meta.env.DEV) {
+        console.error('クールダウンチェックエラー:', error);
+      }
       // エラー時は通知を許可（安全側に倒す）
       return true;
     }
@@ -267,15 +271,12 @@ export class HighScoreNotificationService {
 
   // デバッグ用：強制的に高スコア通知を評価
   async forceEvaluateHighScore(): Promise<HighScoreNotificationResult> {
-    console.log('高スコア通知を強制評価中...');
-    
     const result = await this.evaluateAndCreateNotification({
       minScore: 60, // 閾値を下げてテスト
       topN: 5,
       cooldownHours: 0 // クールダウンを無効化
     });
 
-    console.log('強制評価結果:', result);
     return result;
   }
 
@@ -354,7 +355,9 @@ export class HighScoreNotificationService {
       };
 
     } catch (error) {
-      console.error('高スコア統計の取得エラー:', error);
+      if (import.meta.env.DEV) {
+        console.error('高スコア統計の取得エラー:', error);
+      }
       return {
         totalHighScoreNotifications: 0,
         averageScore: 0,

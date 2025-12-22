@@ -19,7 +19,6 @@ export const InstallPrompt: React.FC = () => {
     const handleAppInstalled = () => {
       setDeferredPrompt(null);
       setShowInstallPrompt(false);
-      console.log('PWAがインストールされました');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -35,14 +34,8 @@ export const InstallPrompt: React.FC = () => {
     if (!deferredPrompt) return;
 
     deferredPrompt.prompt();
-    const choiceResult = await deferredPrompt.userChoice;
-    
-    if (choiceResult.outcome === 'accepted') {
-      console.log('ユーザーがインストールを選択しました');
-    } else {
-      console.log('ユーザーがインストールを拒否しました');
-    }
-    
+    await deferredPrompt.userChoice;
+
     setDeferredPrompt(null);
     setShowInstallPrompt(false);
   };

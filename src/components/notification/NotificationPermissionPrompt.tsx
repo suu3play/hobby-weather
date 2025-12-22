@@ -26,7 +26,7 @@ export function NotificationPermissionPrompt({
 
   const handleTestNotification = async () => {
     const success = await sendTestNotification();
-    if (!success) {
+    if (!success && import.meta.env.DEV) {
       console.error('テスト通知の送信に失敗しました');
     }
   };

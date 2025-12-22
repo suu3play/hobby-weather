@@ -54,7 +54,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setHistory(historyData);
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知設定の読み込みに失敗しました');
-      console.error('通知設定読み込みエラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('通知設定読み込みエラー:', err);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +70,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       await loadData(); // データを再読み込み
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知設定の作成に失敗しました');
-      console.error('通知設定作成エラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('通知設定作成エラー:', err);
+      }
     }
   }, [loadData, configService]);
 
@@ -80,7 +84,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       await loadData(); // データを再読み込み
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知設定の更新に失敗しました');
-      console.error('通知設定更新エラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('通知設定更新エラー:', err);
+      }
     }
   }, [loadData, configService]);
 
@@ -92,7 +98,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       await loadData(); // データを再読み込み
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知設定の削除に失敗しました');
-      console.error('通知設定削除エラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('通知設定削除エラー:', err);
+      }
     }
   }, [loadData, configService]);
 
@@ -104,7 +112,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       await loadData(); // データを再読み込み
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知設定の切り替えに失敗しました');
-      console.error('通知設定切り替えエラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('通知設定切り替えエラー:', err);
+      }
     }
   }, [loadData, configService]);
 
@@ -116,7 +126,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       await loadData(); // データを再読み込み
     } catch (err) {
       setError(err instanceof Error ? err.message : 'グローバル設定の更新に失敗しました');
-      console.error('グローバル設定更新エラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('グローバル設定更新エラー:', err);
+      }
     }
   }, [loadData, configService]);
 
@@ -128,7 +140,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setConfigs(configsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知設定の再読み込みに失敗しました');
-      console.error('通知設定再読み込みエラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('通知設定再読み込みエラー:', err);
+      }
     }
   }, [configService]);
 
@@ -140,7 +154,9 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
       setHistory(historyData);
     } catch (err) {
       setError(err instanceof Error ? err.message : '通知履歴の再読み込みに失敗しました');
-      console.error('通知履歴再読み込みエラー:', err);
+      if (import.meta.env.DEV) {
+        console.error('通知履歴再読み込みエラー:', err);
+      }
     }
   }, [configService]);
 

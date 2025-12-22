@@ -45,7 +45,9 @@ export const ApiKeyDiagnostics: React.FC = () => {
       const diagnosticResults = await runDiagnostics();
       setResults(diagnosticResults);
     } catch (error) {
-      console.error('診断実行エラー:', error);
+      if (import.meta.env.DEV) {
+        console.error('診断実行エラー:', error);
+      }
     } finally {
       setIsLoading(false);
     }

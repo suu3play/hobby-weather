@@ -36,7 +36,9 @@ export const loadThemeConfig = (): ThemeConfig => {
       };
     }
   } catch (error) {
-    console.warn('Failed to load theme config from localStorage:', error);
+    if (import.meta.env.DEV) {
+      console.warn('Failed to load theme config from localStorage:', error);
+    }
   }
   return getDefaultThemeConfig();
 };
@@ -45,7 +47,9 @@ export const saveThemeConfig = (config: ThemeConfig): void => {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(config));
   } catch (error) {
-    console.warn('Failed to save theme config to localStorage:', error);
+    if (import.meta.env.DEV) {
+      console.warn('Failed to save theme config to localStorage:', error);
+    }
   }
 };
 

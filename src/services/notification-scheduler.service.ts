@@ -53,7 +53,6 @@ export class NotificationSchedulerService {
     async start(): Promise<void> {
         if (this.isRunning) return;
 
-        console.log('通知スケジューラーを開始します');
         this.isRunning = true;
 
         // 既存の設定からタスクを復元
@@ -67,7 +66,6 @@ export class NotificationSchedulerService {
     stop(): void {
         if (!this.isRunning) return;
 
-        console.log('通知スケジューラーを停止します');
         this.isRunning = false;
 
         // すべてのタイマーをクリア
@@ -88,7 +86,9 @@ export class NotificationSchedulerService {
                 }
             }
         } catch (error) {
-            console.error('既存設定の読み込みに失敗:', error);
+            if (import.meta.env.DEV) {
+                console.error('既存設定の読み込みに失敗:', error);
+            }
         }
     }
 
@@ -173,8 +173,6 @@ export class NotificationSchedulerService {
     // タスクの実行
     private async executeTask(task: ScheduledTask): Promise<void> {
         try {
-            console.log(`タスク実行: ${task.config.title}`);
-
             // 通知可能かチェック
             const canNotify =
                 await this.configService.isNotificationTimeAllowed(task.config);
@@ -182,9 +180,7 @@ export class NotificationSchedulerService {
                 await this.configService.hasReachedDailyLimit(task.config.type);
 
             if (!canNotify || hasReachedLimit) {
-                console.log(
-                    `通知スキップ: ${task.config.title} (時間外またはレート制限)`
-                );
+                // 通知スキップ
             } else {
                 // 通知を送信
                 const success = await this.notificationService.sendNotification(
@@ -206,7 +202,9 @@ export class NotificationSchedulerService {
             // 次回実行をスケジュール
             await this.scheduleNextRun(task);
         } catch (error) {
-            console.error(`タスク実行エラー: ${task.config.title}`, error);
+            if (import.meta.env.DEV) {
+                console.error(`タスク実行エラー: ${task.config.title}`, error);
+            }
         } finally {
             // 現在のタスクを削除
             this.unscheduleTask(task.id);
@@ -404,10 +402,12 @@ export class NotificationSchedulerService {
                                 );
                         }
                     } catch (error) {
-                        console.error(
-                            '天気情報の取得に失敗、フォールバック通知を使用:',
-                            error
-                        );
+                        if (import.meta.env.DEV) {
+                            console.error(
+                                '天気情報の取得に失敗、フォールバック通知を使用:',
+                                error
+                            );
+                        }
                         payload =
                             this.notificationService.createHighScoreNotification(
                                 '趣味活動',
