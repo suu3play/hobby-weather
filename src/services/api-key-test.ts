@@ -35,7 +35,7 @@ export async function checkWeatherServiceApiKey() {
     const { weatherService } = await import('./weather.service');
     
     // プライベートプロパティにアクセスできるように型キャスト
-    const service = weatherService as { apiKey?: string };
+    const service = weatherService as unknown as { apiKey?: string };
     
     console.log('WeatherService apiKey:', service.apiKey);
     console.log('WeatherService apiKey type:', typeof service.apiKey);
@@ -149,7 +149,7 @@ export async function runDiagnostics() {
     environment: envCheck,
     weatherService: serviceCheck,
     apiConnection: connectionCheck,
-    recommendations: []
+    recommendations: [] as string[]
   };
   
   // 推奨事項の生成
@@ -183,7 +183,7 @@ export async function runDiagnostics() {
   }
   
   console.log('推奨事項:');
-  results.recommendations.forEach((rec: string) => console.log(rec));
+  results.recommendations.forEach((rec) => console.log(rec));
   
   return results;
 }

@@ -412,6 +412,7 @@ export class WeatherService {
         amenity?: string;
         shop?: string;
         tourism?: string;
+        leisure?: string;
       };
     }
 

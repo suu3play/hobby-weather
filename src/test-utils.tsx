@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, type RenderOptions } from '@testing-library/react';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
