@@ -49,7 +49,7 @@ export const WeatherDisplay: React.FC = () => {
                                 エラーが発生しました
                             </h3>
                             <div className="mt-1 text-sm text-red-700">
-                                {error || locationError}
+                                {[error, locationError].filter(Boolean).join(' / ')}
                             </div>
                             <div className="mt-2">
                                 <button

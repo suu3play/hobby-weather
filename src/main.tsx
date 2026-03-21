@@ -10,7 +10,7 @@ import { registerSW } from 'virtual:pwa-register'
 const updateSW = registerSW({
   onNeedRefresh() {
     if (confirm('新しいバージョンが利用可能です。アプリを再読み込みしますか？')) {
-      updateSW(true).catch(() => {})
+      updateSW(true).catch(console.error)
     }
   },
   onOfflineReady() {

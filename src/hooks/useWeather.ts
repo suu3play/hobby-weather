@@ -41,9 +41,10 @@ export const useWeather = (): UseWeatherReturn => {
     updateState({ error: null, locationError: null });
   }, [updateState]);
 
-  const loadDefaultLocation = useCallback(async () => {
+  const loadDefaultLocation = useCallback(async (isCancelled?: () => boolean) => {
     try {
       const defaultLocation = await databaseService.getDefaultLocation();
+      if (isCancelled?.()) return null;
       if (defaultLocation) {
         updateState({ location: defaultLocation });
         return defaultLocation;
@@ -56,7 +57,8 @@ export const useWeather = (): UseWeatherReturn => {
     return null;
   }, [updateState]);
 
-  const fetchWeatherData = useCallback(async (lat: number, lon: number, forceRefresh = false) => {
+  const fetchWeatherData = useCallback(async (lat: number, lon: number, forceRefresh = false, isCancelled?: () => boolean) => {
+    if (isCancelled?.()) return;
     updateState({ isLoading: true, error: null });
 
     try {
@@ -65,12 +67,14 @@ export const useWeather = (): UseWeatherReturn => {
         weatherService.getWeatherForecast(lat, lon, forceRefresh)
       ]);
 
+      if (isCancelled?.()) return;
       updateState({
         currentWeather,
         forecast,
         isLoading: false
       });
     } catch (error) {
+      if (isCancelled?.()) return;
       updateState({
         error: error instanceof Error ? error.message : '天気情報の取得に失敗しました',
         isLoading: false
@@ -118,14 +122,20 @@ export const useWeather = (): UseWeatherReturn => {
 
   const setLocation = useCallback(async (location: Location) => {
     updateState({ location });
-    
-    // まだ設定されていない場合はデフォルトの場所として更新
-    if (!location.isDefault && location.id) {
-      await databaseService.updateLocation(location.id, { isDefault: true });
-    }
 
-    // 新しい場所の天気を取得
-    await fetchWeatherData(location.lat, location.lon, true);
+    try {
+      // まだ設定されていない場合はデフォルトの場所として更新
+      if (!location.isDefault && location.id) {
+        await databaseService.updateLocation(location.id, { isDefault: true });
+      }
+
+      // 新しい場所の天気を取得
+      await fetchWeatherData(location.lat, location.lon, true);
+    } catch (error) {
+      updateState({
+        locationError: error instanceof Error ? error.message : '位置情報の設定に失敗しました'
+      });
+    }
   }, [updateState, fetchWeatherData]);
 
   const refreshWeather = useCallback(async () => {
@@ -137,12 +147,13 @@ export const useWeather = (): UseWeatherReturn => {
   // デフォルトの場所で初期化
   useEffect(() => {
     let cancelled = false;
+    const isCancelled = () => cancelled;
 
     const initialize = async () => {
-      const defaultLocation = await loadDefaultLocation();
+      const defaultLocation = await loadDefaultLocation(isCancelled);
       if (cancelled) return;
       if (defaultLocation) {
-        await fetchWeatherData(defaultLocation.lat, defaultLocation.lon);
+        await fetchWeatherData(defaultLocation.lat, defaultLocation.lon, false, isCancelled);
       }
     };
 

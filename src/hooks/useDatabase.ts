@@ -20,10 +20,28 @@ export const useDatabase = () => {
   };
 
   useEffect(() => {
-    initialize();
+    let initialized = false;
+
+    const init = async () => {
+      setError(null);
+      setIsInitialized(false);
+      try {
+        await db.open();
+        await db.initializeDefaultData();
+        await db.clearExpiredCache();
+        initialized = true;
+        setIsInitialized(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Database initialization failed');
+      }
+    };
+
+    init();
 
     return () => {
-      db.close();
+      if (initialized) {
+        db.close();
+      }
     };
   }, []);
 

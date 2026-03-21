@@ -233,7 +233,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
                                 視界
                             </p>
                             <p className="text-lg font-semibold text-purple-700">
-                                {(weather.visibility / 1000).toFixed(1)} km
+                                {weather.visibility == null || weather.visibility <= 0 ? 'データなし' : `${(weather.visibility / 1000).toFixed(1)} km`}
                             </p>
                         </div>
                     </div>

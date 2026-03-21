@@ -102,14 +102,19 @@ export const useHobby = (): UseHobbyReturn => {
   }, [updateState, loadHobbies]);
 
   const toggleHobbyActive = useCallback(async (id: number) => {
-    const hobby = state.hobbies.find(h => h.id === id);
+    let hobby: Hobby | undefined;
+    setState(prev => {
+      hobby = prev.hobbies.find(h => h.id === id);
+      return prev;
+    });
+
     if (!hobby) {
       updateState({ error: '趣味が見つかりません' });
       return;
     }
 
     await updateHobby(id, { isActive: !hobby.isActive });
-  }, [state.hobbies, updateHobby, updateState]);
+  }, [updateHobby, updateState]);
 
   const refreshHobbies = useCallback(async () => {
     await loadHobbies();
