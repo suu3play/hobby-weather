@@ -22,7 +22,9 @@ export const SettingsPage: React.FC = () => {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        setApiSettings(parsed);
+        setApiSettings({
+          openWeatherApiKey: typeof parsed?.openWeatherApiKey === 'string' ? parsed.openWeatherApiKey : ''
+        });
       } catch (error) {
         if (import.meta.env.DEV) {
           console.error('Failed to parse saved API settings:', error);
@@ -55,9 +57,14 @@ export const SettingsPage: React.FC = () => {
   };
 
   // API Key設定をクリア
-  const clearApiSettings = () => {
+  const clearApiSettings = async () => {
     setApiSettings({ openWeatherApiKey: '' });
     localStorage.removeItem('hobby-weather-api-settings');
+
+    // WeatherServiceインスタンスのAPI Keyを更新
+    const { weatherService } = await import('../../services/weather.service');
+    weatherService.refreshApiKey();
+
     setMessage({ type: 'success', text: 'API Key設定をクリアしました' });
   };
 

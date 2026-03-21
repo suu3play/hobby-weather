@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useInitialSetup } from '../../hooks/useInitialSetup';
 import { ApiKeySetupStep } from './steps/ApiKeySetupStep';
 import { LocationSetupStep } from './steps/LocationSetupStep';
@@ -9,10 +9,19 @@ import myLogo from '../../assets/hobbyWeather.png';
 export const InitialSetupFlow: React.FC = () => {
   const { setupState, stepInfo, goToNextStep, markAsCompleted, canProceed } = useInitialSetup();
   const [isAnimating, setIsAnimating] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const handleStepComplete = () => {
     setIsAnimating(true);
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       goToNextStep();
       setIsAnimating(false);
     }, 300);

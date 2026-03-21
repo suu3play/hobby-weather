@@ -14,20 +14,28 @@ export function NotificationPermissionPrompt({
   const { permission, isSupported, isLoading, requestPermission, sendTestNotification } = useNotification();
 
   const handleRequestPermission = async () => {
-    const newPermission = await requestPermission();
-    
-    // 許可状態に応じてコールバックを実行
-    if (newPermission?.granted) {
-      onPermissionGranted?.();
-    } else if (newPermission?.denied) {
-      onPermissionDenied?.();
+    try {
+      const newPermission = await requestPermission();
+
+      // 許可状態に応じてコールバックを実行
+      if (newPermission?.granted) {
+        onPermissionGranted?.();
+      } else if (newPermission?.denied) {
+        onPermissionDenied?.();
+      }
+    } catch (error) {
+      console.error('通知許可の要求中にエラーが発生しました', error);
     }
   };
 
   const handleTestNotification = async () => {
-    const success = await sendTestNotification();
-    if (!success && import.meta.env.DEV) {
-      console.error('テスト通知の送信に失敗しました');
+    try {
+      const success = await sendTestNotification();
+      if (!success && import.meta.env.DEV) {
+        console.error('テスト通知の送信に失敗しました');
+      }
+    } catch (error) {
+      console.error('テスト通知の送信中にエラーが発生しました', error);
     }
   };
 
@@ -66,6 +74,7 @@ export function NotificationPermissionPrompt({
           </div>
           <button
             onClick={handleTestNotification}
+            disabled={isLoading}
             className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
           >
             テスト送信

@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const PREVIEW_PORT = 4173;
+
 export default defineConfig({
   testDir: './e2e',
   timeout: 30 * 1000,
@@ -15,7 +17,7 @@ export default defineConfig({
     ['junit', { outputFile: 'test-results/junit-results.xml' }]
   ],
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: `http://localhost:${PREVIEW_PORT}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
@@ -44,7 +46,8 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run preview',
-    port: 4173,
+    url: 'http://localhost:4173',
+    port: PREVIEW_PORT,
     reuseExistingServer: !process.env.CI,
   },
 });

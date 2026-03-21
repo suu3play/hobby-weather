@@ -61,12 +61,13 @@ export const HobbyList: React.FC<HobbyListProps> = ({
         );
     }
 
-    const formatDate = (date: Date) => {
+    const formatDate = (date: Date | string) => {
+        const d = date instanceof Date ? date : new Date(date);
         return new Intl.DateTimeFormat('ja-JP', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
-        }).format(date);
+        }).format(d);
     };
 
     return (
@@ -128,6 +129,7 @@ export const HobbyList: React.FC<HobbyListProps> = ({
                                     </p>
                                 )}
 
+                                {hobby.preferredWeather && hobby.preferredWeather.length > 0 && (
                                 <div className="mb-3">
                                     <h4
                                         className="text-sm font-medium mb-2"
@@ -139,7 +141,7 @@ export const HobbyList: React.FC<HobbyListProps> = ({
                                         希望天気:
                                     </h4>
                                     <div className="flex flex-wrap gap-2">
-                                        {hobby.preferredWeather?.map(
+                                        {hobby.preferredWeather.map(
                                             (condition, index) => (
                                                 <div
                                                     key={index}
@@ -183,6 +185,7 @@ export const HobbyList: React.FC<HobbyListProps> = ({
                                         )}
                                     </div>
                                 </div>
+                                )}
 
                                 <div
                                     className="text-xs"

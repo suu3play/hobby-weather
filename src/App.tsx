@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, Suspense, lazy } from 'react';
+import React, { useRef, useCallback, Suspense, lazy } from 'react';
 import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
 import { useInitialSetup } from './hooks/useInitialSetup';
 import { ThemeToggle } from './components/theme/ThemeToggle';
@@ -24,26 +24,12 @@ const LoadingSpinner = () => (
 );
 
 function App() {
-    const [activeTab, setActiveTab] = useState<TabType>('recommendations');
+    const [activeTab, setActiveTab] = React.useState<TabType>('recommendations');
     const { setupState } = useInitialSetup();
-    const [showSetupFlow, setShowSetupFlow] = useState(false);
     const navRef = useRef<HTMLElement>(null);
 
-    // セットアップ完了状態の監視
-    React.useEffect(() => {
-        setShowSetupFlow(!setupState.isCompleted && !setupState.isLoading);
-    }, [setupState.isCompleted, setupState.isLoading]);
-
-    // カスタムイベントでセットアップ完了を監視
-    React.useEffect(() => {
-        const handleSetupCompleted = () => {
-            setShowSetupFlow(false);
-        };
-
-        window.addEventListener('setup-completed', handleSetupCompleted);
-        return () =>
-            window.removeEventListener('setup-completed', handleSetupCompleted);
-    }, []);
+    // setupState から直接導出することで useEffect の非同期遅延による初期描画ズレを防ぐ
+    const showSetupFlow = setupState.isLoading || !setupState.isCompleted;
 
     // タブの設定
     const tabs = React.useMemo(() => [
@@ -84,8 +70,8 @@ function App() {
         const nextTab = tabs[nextIndex]; if (nextTab) { setActiveTab(nextTab.id); }
         
         // フォーカスを新しいタブに移動
-        if (navRef.current && navRef.current.children[nextIndex]) {
-            const tabButton = navRef.current.children[nextIndex] as HTMLButtonElement;
+        if (navRef.current && navRef.current.querySelectorAll('[role="tab"]')[nextIndex]) {
+            const tabButton = navRef.current.querySelectorAll('[role="tab"]')[nextIndex] as HTMLButtonElement;
             tabButton.focus();
         }
     }, [activeTab, tabs]);
@@ -234,7 +220,7 @@ function App() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex justify-between items-center">
                         <div className="text-sm text-text-secondary">
-                            © 2025 趣味予報 - 天気に基づく趣味おすすめアプリ
+                            © {new Date().getFullYear()} 趣味予報 - 天気に基づく趣味おすすめアプリ
                         </div>
                     </div>
                 </div>

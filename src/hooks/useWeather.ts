@@ -136,14 +136,21 @@ export const useWeather = (): UseWeatherReturn => {
 
   // デフォルトの場所で初期化
   useEffect(() => {
+    let cancelled = false;
+
     const initialize = async () => {
       const defaultLocation = await loadDefaultLocation();
+      if (cancelled) return;
       if (defaultLocation) {
         await fetchWeatherData(defaultLocation.lat, defaultLocation.lon);
       }
     };
 
     initialize();
+
+    return () => {
+      cancelled = true;
+    };
   }, [loadDefaultLocation, fetchWeatherData]);
 
   return {

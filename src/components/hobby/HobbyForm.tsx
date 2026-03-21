@@ -58,7 +58,9 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    const descriptionTrimmed = formData.description.trim();
+
     // Create a proper validation object
     const validationData: Partial<Hobby> = {
       name: formData.name,
@@ -67,10 +69,10 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
       isActive: formData.isActive,
       isOutdoor: formData.isOutdoor
     };
-    
+
     // Add optional fields only if they have values
-    if (formData.description.trim()) {
-      validationData.description = formData.description.trim();
+    if (descriptionTrimmed) {
+      validationData.description = descriptionTrimmed;
     }
     if (formData.minTemperature !== undefined) {
       validationData.minTemperature = formData.minTemperature;
@@ -78,8 +80,17 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
     if (formData.maxTemperature !== undefined) {
       validationData.maxTemperature = formData.maxTemperature;
     }
-    
-    const validationErrors = validateHobby(validationData);
+
+    const temperatureErrors: string[] = [];
+    if (
+      formData.minTemperature !== undefined &&
+      formData.maxTemperature !== undefined &&
+      formData.minTemperature > formData.maxTemperature
+    ) {
+      temperatureErrors.push('最低気温は最高気温以下の値を入力してください');
+    }
+
+    const validationErrors = [...validateHobby(validationData), ...temperatureErrors];
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
@@ -98,8 +109,8 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
     };
 
     // Add optional properties only if they have values
-    if (formData.description.trim()) {
-      submitData.description = formData.description.trim();
+    if (descriptionTrimmed) {
+      submitData.description = descriptionTrimmed;
     }
     if (formData.minTemperature !== undefined) {
       submitData.minTemperature = formData.minTemperature;
@@ -274,9 +285,9 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
               {HOBBY_CATEGORIES
                 .filter(category => !selectedCategory || category.name === selectedCategory)
                 .flatMap(category => category.hobbies)
-                .map((suggestion, index) => (
+                .map((suggestion) => (
                   <button
-                    key={index}
+                    key={suggestion.name}
                     type="button"
                     onClick={() => selectHobbySuggestion(suggestion)}
                     className="text-left p-2 rounded border transition-colors"

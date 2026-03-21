@@ -35,35 +35,18 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
     const [isExpanded, setIsExpanded] = useState(false);
 
     const handleMinScoreChange = (value: string) => {
-        const minScore = value ? parseFloat(value) : undefined;
-        const update: Partial<RecommendationFiltersType> = {};
-        if (minScore !== undefined) {
-            update.minScore = minScore;
+        if (value) {
+            onFiltersChange({ minScore: parseFloat(value) });
+        } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onFiltersChange({ minScore: undefined } as any);
         }
-        onFiltersChange(update);
     };
 
     const handleDateRangeChange = (field: 'start' | 'end', value: string) => {
         if (!value) {
-            if (field === 'start') {
-                const update: Partial<RecommendationFiltersType> = {};
-                if (filters.dateRange?.end) {
-                    update.dateRange = {
-                        start: new Date(),
-                        end: filters.dateRange.end,
-                    };
-                }
-                onFiltersChange(update);
-            } else {
-                const update: Partial<RecommendationFiltersType> = {};
-                if (filters.dateRange?.start) {
-                    update.dateRange = {
-                        start: filters.dateRange.start,
-                        end: new Date(),
-                    };
-                }
-                onFiltersChange(update);
-            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onFiltersChange({ dateRange: undefined } as any);
             return;
         }
 
@@ -87,11 +70,7 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
             ? currentTypes.filter((type) => type !== weatherType)
             : [...currentTypes, weatherType];
 
-        const update: Partial<RecommendationFiltersType> = {};
-        if (newTypes.length > 0) {
-            update.weatherTypes = newTypes;
-        }
-        onFiltersChange(update);
+        onFiltersChange({ weatherTypes: newTypes });
     };
 
     const handleDayFilterChange = (

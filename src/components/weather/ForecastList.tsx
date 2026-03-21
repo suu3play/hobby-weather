@@ -95,7 +95,7 @@ export const ForecastList: React.FC<ForecastListProps> = ({
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-                        {forecast.forecasts.map((dailyForecast, index) => {
+                        {forecast.forecasts.map((dailyForecast) => {
                             const forecastDate = new Date(dailyForecast.date);
                             forecastDate.setHours(0, 0, 0, 0);
                             const isToday =
@@ -103,7 +103,7 @@ export const ForecastList: React.FC<ForecastListProps> = ({
 
                             return (
                                 <ForecastCard
-                                    key={index}
+                                    key={dailyForecast.date instanceof Date ? dailyForecast.date.toISOString() : String(dailyForecast.date)}
                                     forecast={dailyForecast}
                                     isToday={isToday}
                                 />

@@ -65,8 +65,9 @@ export const useHobby = (): UseHobbyReturn => {
     } catch (error) {
       updateState({
         error: error instanceof Error ? error.message : '趣味の作成に失敗しました',
-        isLoading: false
       });
+    } finally {
+      updateState({ isLoading: false });
     }
   }, [updateState, loadHobbies]);
 
@@ -79,8 +80,9 @@ export const useHobby = (): UseHobbyReturn => {
     } catch (error) {
       updateState({
         error: error instanceof Error ? error.message : '趣味の更新に失敗しました',
-        isLoading: false
       });
+    } finally {
+      updateState({ isLoading: false });
     }
   }, [updateState, loadHobbies]);
 
@@ -93,8 +95,9 @@ export const useHobby = (): UseHobbyReturn => {
     } catch (error) {
       updateState({
         error: error instanceof Error ? error.message : '趣味の削除に失敗しました',
-        isLoading: false
       });
+    } finally {
+      updateState({ isLoading: false });
     }
   }, [updateState, loadHobbies]);
 

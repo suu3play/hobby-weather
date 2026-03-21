@@ -17,9 +17,31 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 }) => {
   const { currentTheme } = useTheme();
   const { hobby, recommendedDays, overallScore, bestDayIndex } = recommendation;
+  if (bestDayIndex < 0 || bestDayIndex >= recommendedDays.length) {
+    console.warn(
+      `RecommendationCard: bestDayIndex (${bestDayIndex}) is out of range for recommendedDays (length: ${recommendedDays.length})`
+    );
+  }
   const bestDay = recommendedDays[bestDayIndex];
 
-  if (!bestDay) return null;
+  if (!bestDay) {
+    return (
+      <div
+        className={`rounded-lg shadow-md border p-6 ${className}`}
+        style={{
+          backgroundColor: currentTheme.colors.surface.primary,
+          borderColor: currentTheme.colors.border.primary,
+        }}
+      >
+        <p
+          className="text-sm text-center"
+          style={{ color: currentTheme.colors.text.secondary }}
+        >
+          天気予報データがありません
+        </p>
+      </div>
+    );
+  }
 
   // スコアに基づく色分け
   const getScoreColor = (score: number): string => {

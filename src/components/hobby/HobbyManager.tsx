@@ -56,6 +56,15 @@ export const HobbyManager: React.FC = () => {
         setViewMode('edit');
     };
 
+    const handleDelete = async (id: number) => {
+        try {
+            await deleteHobby(id);
+        } catch {
+            // deleteHobby がエラーを useHobby の error state にセットするため、
+            // ここでは再スローせず UI のエラー表示に委ねる
+        }
+    };
+
     const handleCancel = () => {
         setViewMode('list');
         setEditingHobby(null);
@@ -173,7 +182,7 @@ export const HobbyManager: React.FC = () => {
                         <HobbyList
                             hobbies={displayedHobbies}
                             onEdit={handleEdit}
-                            onDelete={deleteHobby}
+                            onDelete={handleDelete}
                             onToggleActive={toggleHobbyActive}
                             isLoading={isLoading}
                         />

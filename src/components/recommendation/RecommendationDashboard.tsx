@@ -52,7 +52,7 @@ export const RecommendationDashboard: React.FC = () => {
                                     エラーを閉じる
                                 </button>
                                 <button
-                                    onClick={handleRefresh}
+                                    onClick={() => { clearError(); handleRefresh(); }}
                                     className="text-sm underline text-red-700 hover:text-red-600"
                                 >
                                     再試行
@@ -93,10 +93,12 @@ export const RecommendationDashboard: React.FC = () => {
             )}
 
             {/* Recommendations */}
-            <RecommendationList
-                recommendations={recommendations}
-                isLoading={isLoading}
-            />
+            {location && forecast && (
+                <RecommendationList
+                    recommendations={recommendations}
+                    isLoading={isLoading}
+                />
+            )}
 
             {/* Help Section */}
             {recommendations.length === 0 &&

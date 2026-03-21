@@ -41,7 +41,7 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
         );
     }
 
-    if (recommendations.length === 0) {
+    if (!recommendations || recommendations.length === 0) {
         return (
             <div className={`text-center py-12 ${className}`}>
                 <div className="text-gray-400 text-6xl mb-4">🎯</div>
@@ -63,7 +63,7 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
                 {/* ヘッダー */}
                 <div className="relative mb-2">
                     {/* 推薦更新ボタン（右上） */}
-                    {canRefresh && (
+                    {canRefresh && onRefresh && (
                         <button
                             onClick={onRefresh}
                             disabled={isLoading}

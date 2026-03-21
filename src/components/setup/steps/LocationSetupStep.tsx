@@ -58,6 +58,10 @@ export const LocationSetupStep: React.FC<LocationSetupStepProps> = ({ onComplete
       const settings = JSON.parse(savedSettings);
       const apiKey = settings.openWeatherApiKey;
 
+      if (!apiKey) {
+        throw new Error('API Keyが設定されていません');
+      }
+
       const response = await fetch(
         `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(manualLocation.trim())}&limit=1&appid=${apiKey}`
       );
@@ -188,7 +192,7 @@ export const LocationSetupStep: React.FC<LocationSetupStepProps> = ({ onComplete
                       placeholder="例: 東京, Tokyo, New York"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       disabled={isSearching}
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleManualLocationSubmit();
                         }
