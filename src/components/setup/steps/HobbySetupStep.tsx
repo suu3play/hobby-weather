@@ -17,8 +17,8 @@ export const HobbySetupStep: React.FC<HobbySetupStepProps> = ({ onComplete, onSk
   }, [hobbies]);
 
   const handleCreateHobby = async (hobbyData: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'>) => {
-    await createHobby(hobbyData);
-    if (!error) {
+    const success = await createHobby(hobbyData);
+    if (success) {
       setShowForm(false);
     }
   };

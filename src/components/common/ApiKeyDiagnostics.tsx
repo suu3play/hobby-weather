@@ -183,7 +183,9 @@ export const ApiKeyDiagnostics: React.FC = () => {
                 <div className="bg-gray-100 rounded p-3 text-sm font-mono">
                   <p>設定状況: {results.environment.hasApiKey ? '✅ 設定済み' : '❌ 未設定'}</p>
                   <p>キー長: {results.environment.apiKeyLength}文字</p>
-                  <p>プレビュー: {results.environment.apiKeyPreview}</p>
+                  {import.meta.env.DEV && (
+                    <p>プレビュー: {results.environment.apiKeyPreview}</p>
+                  )}
                 </div>
               </div>
 
@@ -193,7 +195,9 @@ export const ApiKeyDiagnostics: React.FC = () => {
                 <div className="bg-gray-100 rounded p-3 text-sm font-mono">
                   <p>読み込み状況: {results.weatherService.hasApiKey ? '✅ 正常' : '❌ エラー'}</p>
                   <p>キー長: {results.weatherService.apiKeyLength}文字</p>
-                  <p>プレビュー: {results.weatherService.apiKeyPreview}</p>
+                  {import.meta.env.DEV && (
+                    <p>プレビュー: {results.weatherService.apiKeyPreview}</p>
+                  )}
                   {results.weatherService.error && (
                     <p className="text-red-600">エラー: {results.weatherService.error}</p>
                   )}

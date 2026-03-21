@@ -114,7 +114,7 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({
                 <div className="text-center mb-3">
                     <div
                         className={`text-sm font-medium ${getPrecipitationColor(
-                            forecast.pop
+                            Math.round(forecast.pop * 100)
                         )}`}
                     >
                         {Math.round(forecast.pop * 100)}%

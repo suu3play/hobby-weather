@@ -22,6 +22,12 @@
         "test:e2e:report": "playwright show-report",
         "typecheck": "tsc --noEmit"
     },
+    "browserslist": [
+      "> 0.5%",
+      "last 2 versions",
+      "not dead",
+      "not IE 11"
+    ],
     "dependencies": {
         "dexie": "^4.0.11",
         "react": "^19.1.0",

@@ -73,6 +73,8 @@ export class NotificationService {
 
   // 通知送信
   async sendNotification(payload: NotificationPayload): Promise<boolean> {
+    // リアルタイムの権限状態を取得して同期
+    this.permission = this.getPermissionState();
     if (!this.permission.granted) {
       if (import.meta.env.DEV) {
         console.warn('通知権限が許可されていません');

@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, Suspense, lazy } from 'react';
+import React, { useRef, useCallback, Suspense, lazy, Component, type ErrorInfo, type ReactNode } from 'react';
 import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
 import { useInitialSetup } from './hooks/useInitialSetup';
 import { ThemeToggle } from './components/theme/ThemeToggle';
@@ -11,6 +11,38 @@ const HobbyManager = lazy(() => import('./components/hobby/HobbyManager').then(m
 const WeatherDisplay = lazy(() => import('./components/weather/WeatherDisplay').then(module => ({ default: module.WeatherDisplay })));
 const RecommendationDashboard = lazy(() => import('./components/recommendation/RecommendationDashboard').then(module => ({ default: module.RecommendationDashboard })));
 const SettingsPage = lazy(() => import('./components/settings/SettingsPage').then(module => ({ default: module.SettingsPage })));
+
+// チャンク読み込みエラーをキャッチするErrorBoundary
+class LazyErrorBoundary extends Component<
+  { children: ReactNode; fallback?: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback?: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(_: Error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    if (import.meta.env.DEV) {
+      console.error('Lazy load error:', error, info);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? (
+        <div className="flex items-center justify-center py-12 text-text-secondary">
+          <span>コンポーネントの読み込みに失敗しました。ページを再読み込みしてください。</span>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // アプリケーションのメインタブ
 type TabType = 'weather' | 'hobbies' | 'recommendations' | 'settings';
@@ -168,9 +200,11 @@ function App() {
                         hidden={activeTab !== 'recommendations'}
                     >
                         {activeTab === 'recommendations' && (
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <RecommendationDashboard />
-                            </Suspense>
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <RecommendationDashboard />
+                                </Suspense>
+                            </LazyErrorBoundary>
                         )}
                     </div>
                     <div 
@@ -181,9 +215,11 @@ function App() {
                         hidden={activeTab !== 'weather'}
                     >
                         {activeTab === 'weather' && (
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <WeatherDisplay />
-                            </Suspense>
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <WeatherDisplay />
+                                </Suspense>
+                            </LazyErrorBoundary>
                         )}
                     </div>
                     <div 
@@ -194,9 +230,11 @@ function App() {
                         hidden={activeTab !== 'hobbies'}
                     >
                         {activeTab === 'hobbies' && (
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <HobbyManager />
-                            </Suspense>
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <HobbyManager />
+                                </Suspense>
+                            </LazyErrorBoundary>
                         )}
                     </div>
                     <div 
@@ -207,9 +245,11 @@ function App() {
                         hidden={activeTab !== 'settings'}
                     >
                         {activeTab === 'settings' && (
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <SettingsPage />
-                            </Suspense>
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <SettingsPage />
+                                </Suspense>
+                            </LazyErrorBoundary>
                         )}
                     </div>
                 </div>

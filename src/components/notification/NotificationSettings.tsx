@@ -11,7 +11,30 @@ interface NotificationSettingsProps {
 
 export function NotificationSettings({ className = "" }: NotificationSettingsProps) {
   const { currentTheme } = useTheme();
-  const { permission } = useNotification();
+  const { permission, sendTestNotification } = useNotification();
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testMessage, setTestMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleTestNotification = async () => {
+    setIsSendingTest(true);
+    setTestMessage(null);
+    try {
+      const result = await sendTestNotification();
+      if (result) {
+        setTestMessage({ type: 'success', text: 'テスト通知を送信しました' });
+      } else {
+        setTestMessage({ type: 'error', text: '通知の送信に失敗しました' });
+      }
+    } catch (error) {
+      setTestMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : '予期しないエラーが発生しました'
+      });
+    } finally {
+      setIsSendingTest(false);
+      setTimeout(() => setTestMessage(null), 3000);
+    }
+  };
   const { 
     configs, 
     settings, 
@@ -32,6 +55,7 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
   const [quietHoursEnabled, setQuietHoursEnabled] = useState(false);
   const [quietStart, setQuietStart] = useState('22:00');
   const [quietEnd, setQuietEnd] = useState('07:00');
+  const [settingsError, setSettingsError] = useState<string | null>(null);
 
   // 設定の初期化
   useEffect(() => {
@@ -55,32 +79,41 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
     }
   };
 
+  const safeUpdateSettings = async (patch: Parameters<typeof updateSettings>[0]) => {
+    setSettingsError(null);
+    try {
+      await updateSettings(patch);
+    } catch (e) {
+      setSettingsError(e instanceof Error ? e.message : '設定の更新に失敗しました');
+    }
+  };
+
   // グローバル設定の更新
   const handleGlobalToggle = async (enabled: boolean) => {
-    await updateSettings({ globalEnabled: enabled });
+    await safeUpdateSettings({ globalEnabled: enabled });
   };
 
   // 静寂時間の更新
   const handleQuietHoursChange = async () => {
-    const quietHours: TimeRange | null = quietHoursEnabled 
+    const quietHours: TimeRange | null = quietHoursEnabled
       ? { start: quietStart, end: quietEnd }
       : null;
-    
-    await updateSettings({ quietHours });
+
+    await safeUpdateSettings({ quietHours });
   };
 
   // 最大通知数の更新
   const handleMaxNotificationsChange = async (max: number) => {
-    await updateSettings({ maxDailyNotifications: max });
+    await safeUpdateSettings({ maxDailyNotifications: max });
   };
 
   // 音・振動設定の更新
   const handleSoundToggle = async (enabled: boolean) => {
-    await updateSettings({ soundEnabled: enabled });
+    await safeUpdateSettings({ soundEnabled: enabled });
   };
 
   const handleVibrationToggle = async (enabled: boolean) => {
-    await updateSettings({ vibrationEnabled: enabled });
+    await safeUpdateSettings({ vibrationEnabled: enabled });
   };
 
   if (isLoading) {
@@ -152,6 +185,13 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
   return (
     <div className={`space-y-6 ${className}`}>
+      {/* 設定更新エラー */}
+      {settingsError && (
+        <div className="border rounded-lg p-3 text-sm" style={{ borderColor: currentTheme.colors.error, color: currentTheme.colors.error }}>
+          {settingsError}
+        </div>
+      )}
+
       {/* 通知許可プロンプト */}
       <NotificationPermissionPrompt />
 
@@ -217,7 +257,13 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
                 <input
                   type="checkbox"
                   checked={quietHoursEnabled}
-                  onChange={(e) => setQuietHoursEnabled(e.target.checked)}
+                  onChange={async (e) => {
+                    setQuietHoursEnabled(e.target.checked);
+                    const quietHours: TimeRange | null = e.target.checked
+                      ? { start: quietStart, end: quietEnd }
+                      : null;
+                    await safeUpdateSettings({ quietHours });
+                  }}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -302,6 +348,38 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
                 <option value={50}>50回</option>
               </select>
             </div>
+          </div>
+
+          {/* テスト通知 */}
+          <div className="border-t pt-4">
+            <h3
+              className="text-sm font-medium mb-1"
+              style={{ color: currentTheme.colors.text.primary }}
+            >
+              通知テスト
+            </h3>
+            <p
+              className="text-sm mb-3"
+              style={{ color: currentTheme.colors.text.tertiary }}
+            >
+              通知機能が正常に動作するか確認できます
+            </p>
+            <button
+              onClick={handleTestNotification}
+              disabled={!permission.granted || isSendingTest}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                permission.granted && !isSendingTest
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isSendingTest ? '送信中...' : 'テスト通知を送信'}
+            </button>
+            {testMessage && (
+              <div className={`mt-2 text-sm ${testMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                {testMessage.text}
+              </div>
+            )}
           </div>
 
           {/* 音・振動設定 */}
