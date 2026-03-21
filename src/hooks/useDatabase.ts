@@ -6,24 +6,26 @@ export const useDatabase = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const initializeDatabase = async () => {
-      try {
-        await db.open();
-        await db.initializeDefaultData();
-        await db.clearExpiredCache();
-        setIsInitialized(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Database initialization failed');
-      }
-    };
+  const initialize = async () => {
+    setError(null);
+    setIsInitialized(false);
+    try {
+      await db.open();
+      await db.initializeDefaultData();
+      await db.clearExpiredCache();
+      setIsInitialized(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Database initialization failed');
+    }
+  };
 
-    initializeDatabase();
+  useEffect(() => {
+    initialize();
 
     return () => {
       db.close();
     };
   }, []);
 
-  return { isInitialized, error, databaseService };
+  return { isInitialized, error, databaseService, retry: initialize };
 };

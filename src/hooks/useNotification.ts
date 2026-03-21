@@ -49,7 +49,14 @@ export function useNotification(): UseNotificationReturn {
 
   // 通知送信
   const sendNotification = useCallback(async (payload: NotificationPayload): Promise<boolean> => {
-    return await notificationService.sendNotification(payload);
+    try {
+      return await notificationService.sendNotification(payload);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('通知送信エラー:', error);
+      }
+      return false;
+    }
   }, [notificationService]);
 
   // テスト通知送信

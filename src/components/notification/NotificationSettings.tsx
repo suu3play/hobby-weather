@@ -493,7 +493,7 @@ function NotificationConfigItem({
   };
 
   const handleToggle = async () => {
-    if (config.id) {
+    if (config.id !== undefined && config.id !== null) {
       await onToggle(config.id);
     }
   };

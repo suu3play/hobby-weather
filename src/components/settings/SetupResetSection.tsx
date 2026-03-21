@@ -13,25 +13,27 @@ export const SetupResetSection: React.FC = () => {
 
     // セットアップ情報をリセット
     const resetSetupInfo = async () => {
-        setIsResetting(true);
         setResetMessage(null);
 
-        try {
-            // 確認ダイアログを表示
-            const confirmed = window.confirm(
-                'セットアップ情報をリセットしますか？\n\n' +
-                    '以下の設定が削除されます：\n' +
-                    '• 初期セットアップ完了フラグ\n' +
-                    '• API Key設定\n' +
-                    '• 場所設定\n' +
-                    '• 趣味データ\n\n' +
-                    '次回起動時に初期セットアップから開始されます。'
-            );
+        // 確認ダイアログを表示
+        const confirmed = window.confirm(
+            'セットアップ情報をリセットしますか？\n\n' +
+                '以下の設定が削除されます：\n' +
+                '• 初期セットアップ完了フラグ\n' +
+                '• API Key設定\n' +
+                '• 場所設定\n' +
+                '• 趣味データ\n\n' +
+                '次回起動時に初期セットアップから開始されます。'
+        );
 
-            if (!confirmed) {
-                setIsResetting(false);
-                return;
-            }
+        if (!confirmed) {
+            setResetMessage(null);
+            return;
+        }
+
+        setIsResetting(true);
+
+        try {
 
             // ローカルストレージの設定をクリア
             localStorage.removeItem('hobby-weather-setup-completed');

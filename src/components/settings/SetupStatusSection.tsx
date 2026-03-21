@@ -10,6 +10,8 @@ export const SetupStatusSection: React.FC = () => {
     const { location } = useWeather();
     const { currentTheme } = useTheme();
 
+    if (!setupState) return null;
+
     // 場所の表示名を取得
     const getLocationDisplayName = () => {
         if (!location) return '未設定';

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useHobby } from '../../../hooks/useHobby';
 import { useWeather } from '../../../hooks/useWeather';
 
@@ -9,6 +9,15 @@ interface CompletedSetupStepProps {
 export const CompletedSetupStep: React.FC<CompletedSetupStepProps> = ({ onComplete }) => {
   const { hobbies } = useHobby();
   const { location, currentWeather, refreshWeather } = useWeather();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // 天気データがない場合は取得を試行
@@ -40,7 +49,7 @@ export const CompletedSetupStep: React.FC<CompletedSetupStepProps> = ({ onComple
     }
     
     // 少し待ってから状態を更新（アニメーション効果）
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       // 完了状態を強制的に更新
       window.dispatchEvent(new CustomEvent('setup-completed'));
     }, 300);

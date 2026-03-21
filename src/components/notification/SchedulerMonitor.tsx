@@ -19,7 +19,20 @@ export function SchedulerMonitor({ className = "" }: SchedulerMonitorProps) {
 
   const [showAllTasks, setShowAllTasks] = useState(false);
 
+  const handleStart = () => {
+    start().catch(console.error);
+  };
+
+  const handleStop = () => {
+    stop();
+  };
+
+  const handleRefresh = () => {
+    refresh();
+  };
+
   const formatDate = (date: Date) => {
+    if (!date || isNaN(date.getTime())) return '不明';
     return new Intl.DateTimeFormat('ja-JP', {
       month: 'short',
       day: 'numeric',
@@ -29,6 +42,7 @@ export function SchedulerMonitor({ className = "" }: SchedulerMonitorProps) {
   };
 
   const formatRelativeTime = (date: Date) => {
+    if (!date || isNaN(date.getTime())) return '不明';
     const now = new Date();
     const diff = date.getTime() - now.getTime();
     
@@ -69,7 +83,7 @@ export function SchedulerMonitor({ className = "" }: SchedulerMonitorProps) {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900">🕒 スケジューラー監視</h2>
         <button
-          onClick={refresh}
+          onClick={handleRefresh}
           className="text-sm text-blue-600 hover:text-blue-800"
         >
           更新
@@ -115,14 +129,14 @@ export function SchedulerMonitor({ className = "" }: SchedulerMonitorProps) {
       <div className="flex space-x-3 mb-6">
         {!isRunning ? (
           <button
-            onClick={start}
+            onClick={handleStart}
             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
           >
             スケジューラー開始
           </button>
         ) : (
           <button
-            onClick={stop}
+            onClick={handleStop}
             className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
           >
             スケジューラー停止
@@ -201,7 +215,7 @@ export function SchedulerMonitor({ className = "" }: SchedulerMonitorProps) {
       )}
 
       {/* タスクなしの場合 */}
-      {taskCount === 0 && (
+      {allTasks.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <div className="text-4xl mb-2">📭</div>
           <div className="text-sm">スケジュール済みのタスクがありません</div>

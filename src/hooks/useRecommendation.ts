@@ -38,10 +38,14 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
    * おすすめを生成
    */
   const generateRecommendations = useCallback(async (hobbies: Hobby[], forecast: WeatherForecast, customFilters?: RecommendationFilters) => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    let filtersToUse: RecommendationFilters | undefined;
+
+    setState(prev => {
+      filtersToUse = customFilters !== undefined ? customFilters : prev.filters;
+      return { ...prev, isLoading: true, error: null };
+    });
 
     try {
-      const filtersToUse = customFilters !== undefined ? customFilters : state.filters;
       const recommendations = await recommendationService.generateRecommendations(
         hobbies,
         forecast,
@@ -62,7 +66,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
         isLoading: false
       }));
     }
-  }, [state.filters]);
+  }, []);
 
   /**
    * フィルターを更新
@@ -98,6 +102,7 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
    */
   const getRecommendationsForHobby = useCallback((hobbyId: number | string): HobbyRecommendation | undefined => {
     const id = typeof hobbyId === 'string' ? parseInt(hobbyId, 10) : hobbyId;
+    if (typeof id === 'number' && isNaN(id)) return undefined;
     return state.recommendations.find(rec => rec.hobby.id === id);
   }, [state.recommendations]);
 

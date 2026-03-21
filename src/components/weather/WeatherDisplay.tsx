@@ -178,11 +178,13 @@ export const WeatherDisplay: React.FC = () => {
 
                         <div className="text-center">
                             <div className="text-2xl font-bold text-red-600">
-                                {Math.max(
-                                    ...forecast.forecasts.map(
-                                        (f) => f.temperature.max
-                                    )
-                                ).toFixed(0)}
+                                {forecast.forecasts.length > 0
+                                    ? Math.max(
+                                          ...forecast.forecasts.map(
+                                              (f) => f.temperature.max
+                                          )
+                                      ).toFixed(0)
+                                    : "--"}
                                 °C
                             </div>
                             <div className="text-sm" style={{
@@ -194,11 +196,13 @@ export const WeatherDisplay: React.FC = () => {
 
                         <div className="text-center">
                             <div className="text-2xl font-bold text-blue-600">
-                                {Math.min(
-                                    ...forecast.forecasts.map(
-                                        (f) => f.temperature.min
-                                    )
-                                ).toFixed(0)}
+                                {forecast.forecasts.length > 0
+                                    ? Math.min(
+                                          ...forecast.forecasts.map(
+                                              (f) => f.temperature.min
+                                          )
+                                      ).toFixed(0)
+                                    : "--"}
                                 °C
                             </div>
                             <div className="text-sm" style={{

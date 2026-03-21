@@ -17,6 +17,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const modes = React.useMemo(() => ['light', 'dark', 'system'] as ThemeMode[], []);
 
@@ -27,13 +28,18 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
       setFocusedIndex(currentModeIndex !== -1 ? currentModeIndex : 0);
       
       // 少し遅延してフォーカスを設定（アニメーション後）
-      setTimeout(() => {
+      focusTimerRef.current = setTimeout(() => {
         const focusableElements = menuRef.current?.querySelectorAll('button');
         if (focusableElements && focusableElements[currentModeIndex !== -1 ? currentModeIndex : 0]) {
           (focusableElements[currentModeIndex !== -1 ? currentModeIndex : 0] as HTMLButtonElement).focus();
         }
       }, 100);
     }
+    return () => {
+      if (focusTimerRef.current !== null) {
+        clearTimeout(focusTimerRef.current);
+      }
+    };
   }, [isOpen, config.mode, variant, modes]);
 
   // キーボードナビゲーション用のハンドラー

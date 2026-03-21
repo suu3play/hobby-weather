@@ -76,12 +76,14 @@ export const ThemeSettings: React.FC = () => {
         </div>
 
         {/* 現在のテーマ情報 */}
-        <div className="mt-4 p-3 bg-surface-secondary rounded-lg">
-          <div className="text-xs text-text-tertiary mb-1">現在のテーマ</div>
-          <div className="text-sm font-medium text-text-primary">
-            {currentTheme.name} - {currentTheme.mode === 'dark' ? 'ダーク' : 'ライト'}モード
+        {currentTheme && (
+          <div className="mt-4 p-3 bg-surface-secondary rounded-lg">
+            <div className="text-xs text-text-tertiary mb-1">現在のテーマ</div>
+            <div className="text-sm font-medium text-text-primary">
+              {currentTheme.name} - {currentTheme.mode === 'dark' ? 'ダーク' : 'ライト'}モード
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* アクセシビリティ設定 */}

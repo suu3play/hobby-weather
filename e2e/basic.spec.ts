@@ -31,11 +31,15 @@ test.describe('基本的な機能テスト', () => {
 
   test('レスポンシブデザインの確認', async ({ page }) => {
     await page.goto('/');
-    
+
     await page.setViewportSize({ width: 375, height: 667 });
     await expect(page.locator('body')).toBeVisible();
-    
+    await expect(page.locator('main, [role="main"], #root')).toBeVisible();
+    await expect(page.locator('h1').first()).toBeVisible();
+
     await page.setViewportSize({ width: 1024, height: 768 });
     await expect(page.locator('body')).toBeVisible();
+    await expect(page.locator('main, [role="main"], #root')).toBeVisible();
+    await expect(page.locator('h1').first()).toBeVisible();
   });
 });

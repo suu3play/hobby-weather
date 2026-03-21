@@ -25,7 +25,7 @@ interface UseNotificationConfigReturn {
     byType: Record<NotificationType, number>;
     clickRate: number;
     dismissRate: number;
-  }>;
+  } | null>;
 }
 
 export function useNotificationConfig(): UseNotificationConfigReturn {
@@ -162,7 +162,15 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
 
   // 統計情報の取得
   const getStats = useCallback(async (days: number = 7) => {
-    return await configService.getNotificationStats(days);
+    try {
+      return await configService.getNotificationStats(days);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '統計情報の取得に失敗しました');
+      if (import.meta.env.DEV) {
+        console.error('統計情報取得エラー:', err);
+      }
+      return null;
+    }
   }, [configService]);
 
   // 初回読み込み

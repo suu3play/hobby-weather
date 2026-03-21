@@ -12,6 +12,10 @@ export const InstallPrompt: React.FC = () => {
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      const dismissed = localStorage.getItem('pwa-install-dismissed');
+      if (dismissed && Date.now() - Number(dismissed) < 7 * 24 * 60 * 60 * 1000) {
+        return;
+      }
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setShowInstallPrompt(true);
     };
@@ -33,14 +37,20 @@ export const InstallPrompt: React.FC = () => {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
 
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+    try {
+      await deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
 
-    setDeferredPrompt(null);
-    setShowInstallPrompt(false);
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+    } catch (error) {
+      console.error('インストールプロンプトの表示に失敗しました:', error);
+      setDeferredPrompt(null);
+    }
   };
 
   const handleDismiss = () => {
+    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
     setShowInstallPrompt(false);
   };
 

@@ -43,9 +43,10 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
   // 時刻のフォーマット
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div 
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div
         className="rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+        onClick={(e) => e.stopPropagation()}
         style={{ backgroundColor: currentTheme.colors.surface.primary }}
       >
         {/* ヘッダー */}
@@ -86,11 +87,19 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
 
         <div className="p-6">
           {/* 趣味情報 */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div
+            className="rounded-lg p-4 mb-6"
+            style={{ backgroundColor: currentTheme.colors.surface.secondary }}
+          >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
-                  <h3 className="font-semibold text-gray-900">{hobby.name}</h3>
+                  <h3
+                    className="font-semibold"
+                    style={{ color: currentTheme.colors.text.primary }}
+                  >
+                    {hobby.name}
+                  </h3>
                   {hobby.isOutdoor && (
                     <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                       屋外活動
@@ -98,21 +107,31 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
                   )}
                 </div>
                 {hobby.description && (
-                  <p className="text-gray-600 mb-3">{hobby.description}</p>
+                  <p
+                    className="mb-3"
+                    style={{ color: currentTheme.colors.text.secondary }}
+                  >
+                    {hobby.description}
+                  </p>
                 )}
               </div>
               <div className="text-right">
                 <div className={`text-2xl font-bold ${getScoreColor(overallScore)}`}>
                   {Math.round(overallScore)}点
                 </div>
-                <p className="text-xs text-gray-600">総合スコア</p>
+                <p
+                  className="text-xs"
+                  style={{ color: currentTheme.colors.text.secondary }}
+                >
+                  総合スコア
+                </p>
               </div>
             </div>
 
             {/* 趣味の設定 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="text-gray-600">好適天気:</span>
+                <span style={{ color: currentTheme.colors.text.secondary }}>好適天気:</span>
                 <div className="mt-1">
                   {hobby.preferredWeather && hobby.preferredWeather.length > 0 ? (
                     hobby.preferredWeather.map((weather, index) => (
@@ -131,20 +150,20 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
                       </span>
                     ))
                   ) : (
-                    <span className="text-gray-400">指定なし</span>
+                    <span style={{ color: currentTheme.colors.text.tertiary }}>指定なし</span>
                   )}
                 </div>
               </div>
-              
+
               <div>
-                <span className="text-gray-600">適温範囲:</span>
+                <span style={{ color: currentTheme.colors.text.secondary }}>適温範囲:</span>
                 <p className="mt-1 font-medium">
                   {hobby.minTemperature ?? '制限なし'}°C - {hobby.maxTemperature ?? '制限なし'}°C
                 </p>
               </div>
-              
+
               <div>
-                <span className="text-gray-600">作成日:</span>
+                <span style={{ color: currentTheme.colors.text.secondary }}>作成日:</span>
                 <p className="mt-1 font-medium">
                   {new Intl.DateTimeFormat('ja-JP').format(new Date(hobby.createdAt))}
                 </p>
@@ -267,7 +286,13 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
         </div>
 
         {/* フッター */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+        <div
+          className="sticky bottom-0 border-t px-6 py-4"
+          style={{
+            backgroundColor: currentTheme.colors.surface.primary,
+            borderColor: currentTheme.colors.border.primary
+          }}
+        >
           <div className="flex justify-end">
             <button
               onClick={onClose}

@@ -59,7 +59,7 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({
                     className="font-semibold"
                     style={{ color: currentTheme.colors.text.primary }}
                 >
-                    {formatDate(forecast.date)}
+                    {formatDate(new Date(forecast.date))}
                 </h4>
                 <p
                     className="text-xs "
@@ -68,7 +68,7 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({
                     {new Intl.DateTimeFormat('ja-JP', {
                         month: 'numeric',
                         day: 'numeric',
-                    }).format(forecast.date)}
+                    }).format(new Date(forecast.date))}
                 </p>
             </div>
 

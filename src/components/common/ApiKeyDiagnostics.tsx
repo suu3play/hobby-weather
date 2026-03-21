@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   runDiagnostics 
 } from '../../services/api-key-test';
@@ -37,26 +37,29 @@ export const ApiKeyDiagnostics: React.FC = () => {
   const [results, setResults] = useState<DiagnosticResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 診断実行
-  const handleRunDiagnostics = async () => {
+  const handleRunDiagnostics = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const diagnosticResults = await runDiagnostics();
       setResults(diagnosticResults);
-    } catch (error) {
+    } catch (e) {
       if (import.meta.env.DEV) {
-        console.error('診断実行エラー:', error);
+        console.error('診断実行エラー:', e);
       }
+      setError(e instanceof Error ? e.message : '診断に失敗しました');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // コンポーネントマウント時に自動実行
   useEffect(() => {
     handleRunDiagnostics();
-  }, []);
+  }, [handleRunDiagnostics]);
 
   const getStatusIcon = (success: boolean) => {
     return success ? '✅' : '❌';
@@ -100,6 +103,14 @@ export const ApiKeyDiagnostics: React.FC = () => {
         <div className="text-center py-4">
           <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
           <p className="mt-2 text-gray-600">診断実行中...</p>
+        </div>
+      )}
+
+      {/* エラー表示 */}
+      {error && !isLoading && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 text-sm">
+          <p className="font-medium">診断に失敗しました</p>
+          <p>{error}</p>
         </div>
       )}
 
@@ -202,7 +213,7 @@ export const ApiKeyDiagnostics: React.FC = () => {
                       <p>テストデータ:</p>
                       <p className="ml-2">都市: {String(results.apiConnection.data.city || 'N/A')}</p>
                       <p className="ml-2">天気: {String(results.apiConnection.data.weather || 'N/A')}</p>
-                      <p className="ml-2">気温: {String(results.apiConnection.data.temperature || 'N/A')}°C</p>
+                      <p className="ml-2">気温: {String(results.apiConnection.data.temperature ?? 'N/A')}°C</p>
                     </div>
                   )}
                   {results.apiConnection.error && (
