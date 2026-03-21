@@ -154,30 +154,35 @@ export class HobbyWeatherDatabase extends Dexie {
   }
 
   async initializeDefaultData() {
-    const settingsCount = await this.settings.count();
-    if (settingsCount === 0) {
-      await this.settings.add({
-        temperatureUnit: 'celsius',
-        windSpeedUnit: 'kmh',
-        language: 'ja',
-        notificationsEnabled: true,
-        cacheExpiration: 6,
-        updatedAt: new Date()
-      });
-    }
+    // count チェックと add をトランザクション内でアトミックに実行し、競合状態による重複挿入を防ぐ
+    await this.transaction('rw', this.settings, async () => {
+      const settingsCount = await this.settings.count();
+      if (settingsCount === 0) {
+        await this.settings.add({
+          temperatureUnit: 'celsius',
+          windSpeedUnit: 'kmh',
+          language: 'ja',
+          notificationsEnabled: true,
+          cacheExpiration: 6,
+          updatedAt: new Date()
+        });
+      }
+    });
 
     // デフォルトの通知設定を初期化
-    const notificationSettingsCount = await this.notificationSettings.count();
-    if (notificationSettingsCount === 0) {
-      await this.notificationSettings.add({
-        globalEnabled: true,
-        quietHours: null,
-        maxDailyNotifications: 10,
-        soundEnabled: true,
-        vibrationEnabled: true,
-        updatedAt: new Date()
-      });
-    }
+    await this.transaction('rw', this.notificationSettings, async () => {
+      const notificationSettingsCount = await this.notificationSettings.count();
+      if (notificationSettingsCount === 0) {
+        await this.notificationSettings.add({
+          globalEnabled: true,
+          quietHours: null,
+          maxDailyNotifications: 10,
+          soundEnabled: true,
+          vibrationEnabled: true,
+          updatedAt: new Date()
+        });
+      }
+    });
   }
 
   async clearExpiredCache() {

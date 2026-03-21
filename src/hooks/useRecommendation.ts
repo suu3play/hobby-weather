@@ -38,18 +38,21 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
    * おすすめを生成
    */
   const generateRecommendations = useCallback(async (hobbies: Hobby[], forecast: WeatherForecast, customFilters?: RecommendationFilters) => {
-    let filtersToUse: RecommendationFilters | undefined;
+    let resolvedFilters: RecommendationFilters | undefined;
 
-    setState(prev => {
-      filtersToUse = customFilters !== undefined ? customFilters : prev.filters;
-      return { ...prev, isLoading: true, error: null };
+    await new Promise<void>(resolve => {
+      setState(prev => {
+        resolvedFilters = customFilters !== undefined ? customFilters : prev.filters;
+        resolve();
+        return { ...prev, isLoading: true, error: null };
+      });
     });
 
     try {
       const recommendations = await recommendationService.generateRecommendations(
         hobbies,
         forecast,
-        filtersToUse
+        resolvedFilters
       );
 
       setState(prev => ({
@@ -102,7 +105,10 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
    */
   const getRecommendationsForHobby = useCallback((hobbyId: number | string): HobbyRecommendation | undefined => {
     const id = typeof hobbyId === 'string' ? parseInt(hobbyId, 10) : hobbyId;
-    if (typeof id === 'number' && isNaN(id)) return undefined;
+    if (isNaN(id)) {
+      console.warn(`getRecommendationsForHobby: 不正なhobbyId "${hobbyId}" が渡されました。`);
+      return undefined;
+    }
     return state.recommendations.find(rec => rec.hobby.id === id);
   }, [state.recommendations]);
 
@@ -124,10 +130,13 @@ export function useRecommendation(): UseRecommendationState & UseRecommendationA
 
   // フィルター変更時に自動再生成
   useEffect(() => {
-    if (lastParams && !state.isLoading) {
+    if (lastParams) {
       generateRecommendations(lastParams.hobbies, lastParams.forecast, state.filters);
     }
-  }, [state.filters, generateRecommendations, lastParams, state.isLoading]);
+    // generateRecommendationsは依存配列から除外（useCallbackで安定した参照を持つため）
+    // state.isLoadingを依存配列から除外（フィルター変更時のみ再実行するため）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.filters, lastParams]);
 
   return {
     ...state,

@@ -29,15 +29,14 @@ export function useNotificationScheduler(): UseNotificationSchedulerReturn {
   const [error, setError] = useState<string | null>(null);
 
   const schedulerRef = useRef(NotificationSchedulerService.getInstance());
-  const scheduler = schedulerRef.current;
 
   // スケジューラー状態の更新
   const updateStatus = useCallback(() => {
     try {
-      const status = scheduler.getStatus();
+      const status = schedulerRef.current.getStatus();
       setIsRunning(status.isRunning);
       setTaskCount(status.taskCount);
-      
+
       if (status.nextTask) {
         setNextTask({
           id: status.nextTask.id,
@@ -51,7 +50,7 @@ export function useNotificationScheduler(): UseNotificationSchedulerReturn {
         setNextTask(null);
       }
 
-      const currentTasks = scheduler.getCurrentTasks();
+      const currentTasks = schedulerRef.current.getCurrentTasks();
       setAllTasks(currentTasks.map(task => ({
         id: task.id,
         configId: task.configId,
@@ -65,29 +64,29 @@ export function useNotificationScheduler(): UseNotificationSchedulerReturn {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'スケジューラー状態の取得に失敗');
     }
-  }, [scheduler]);
+  }, []);
 
   // スケジューラーの開始
   const start = useCallback(async () => {
     try {
       setError(null);
-      await scheduler.start();
+      await schedulerRef.current.start();
       updateStatus();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'スケジューラーの開始に失敗');
     }
-  }, [scheduler, updateStatus]);
+  }, [updateStatus]);
 
   // スケジューラーの停止
   const stop = useCallback(() => {
     try {
       setError(null);
-      scheduler.stop();
+      schedulerRef.current.stop();
       updateStatus();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'スケジューラーの停止に失敗');
     }
-  }, [scheduler, updateStatus]);
+  }, [updateStatus]);
 
   // 状態の再読み込み
   const refresh = useCallback(() => {

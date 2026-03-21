@@ -84,6 +84,13 @@ export const useInitialSetup = () => {
     });
   }, [hobbies, location, hobbiesLoading, weatherLoading]);
 
+  // ローディング状態を同期的に反映
+  useEffect(() => {
+    if (hobbiesLoading || weatherLoading) {
+      setSetupState(prev => ({ ...prev, isLoading: true }));
+    }
+  }, [hobbiesLoading, weatherLoading]);
+
   // 初期化時とデータ変更時に設定状態を更新
   useEffect(() => {
     if (!hobbiesLoading && !weatherLoading) {

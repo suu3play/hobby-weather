@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { NotificationConfigService } from '../services/notification-config.service';
 import type {
   NotificationConfig,
@@ -36,29 +36,38 @@ export function useNotificationConfig(): UseNotificationConfigReturn {
   const [error, setError] = useState<string | null>(null);
 
   const configService = useMemo(() => new NotificationConfigService(), []);
+  // loadData の呼び出し順を追跡するカウンター。最新の呼び出しのみ state を更新する
+  const loadSeqRef = useRef(0);
 
   // 初期データの読み込み
   const loadData = useCallback(async () => {
+    const seq = ++loadSeqRef.current;
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const [configsData, settingsData, historyData] = await Promise.all([
         configService.getAllNotificationConfigs(),
         configService.getNotificationSettings(),
         configService.getNotificationHistory({ limit: 50 }) // 最新50件
       ]);
-      
+
+      // 自分より後に呼ばれた loadData がある場合は古い結果を捨てる
+      if (seq !== loadSeqRef.current) return;
+
       setConfigs(configsData);
       setSettings(settingsData || null);
       setHistory(historyData);
     } catch (err) {
+      if (seq !== loadSeqRef.current) return;
       setError(err instanceof Error ? err.message : '通知設定の読み込みに失敗しました');
       if (import.meta.env.DEV) {
         console.error('通知設定読み込みエラー:', err);
       }
     } finally {
-      setIsLoading(false);
+      if (seq === loadSeqRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [configService]);
 
