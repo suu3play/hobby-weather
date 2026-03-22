@@ -64,6 +64,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   // 日付のフォーマット
   const formatDate = (date: Date | string): string => {
     const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return '日付不明';
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);

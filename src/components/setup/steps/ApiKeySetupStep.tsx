@@ -9,14 +9,15 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
   const [isTesting, setIsTesting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [testPassed, setTestPassed] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const isMountedRef = useRef(true);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    isMountedRef.current = true;
     return () => {
-      isMountedRef.current = false;
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+      }
     };
   }, []);
 
@@ -28,7 +29,7 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
         const parsed = JSON.parse(savedSettings);
         if (parsed.openWeatherApiKey) {
           setApiKey(parsed.openWeatherApiKey);
-          setSaved(true);
+          setSuccess(true);
         }
       } catch (error) {
         if (import.meta.env.DEV) {
@@ -56,13 +57,11 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
       const { weatherService } = await import('../../../services/weather.service');
       weatherService.refreshApiKey();
 
-      setSaved(true);
+      setSuccess(true);
 
       // 少し待ってから次のステップに進む
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          onComplete();
-        }
+      timerRef.current = setTimeout(() => {
+        onComplete();
       }, 1000);
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -124,9 +123,9 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
           <h3 className="font-medium text-blue-900 mb-2">📋 API Key取得手順</h3>
           <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
             <li>
-              <a 
-                href="https://openweathermap.org/api" 
-                target="_blank" 
+              <a
+                href="https://openweathermap.org/api"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-700 underline"
               >
@@ -153,8 +152,8 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
               onChange={(e) => {
                 setApiKey(e.target.value);
                 setError(null);
+                setSuccess(false);
                 setTestPassed(false);
-                setSaved(false);
               }}
               placeholder="API Keyを入力してください"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -172,20 +171,22 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
             </div>
           )}
 
+          {/* Test Success Message */}
+          {testPassed && !success && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="flex items-center">
+                <span className="text-blue-400 mr-2">✅</span>
+                <span className="text-sm text-blue-700">API接続テスト成功。「保存して次へ」を押して設定を保存してください。</span>
+              </div>
+            </div>
+          )}
+
           {/* Success Message */}
-          {saved && (
+          {success && (
             <div className="bg-green-50 border border-green-200 rounded-md p-3">
               <div className="flex items-center">
                 <span className="text-green-400 mr-2">✅</span>
                 <span className="text-sm text-green-700">API Keyが正常に保存されました</span>
-              </div>
-            </div>
-          )}
-          {testPassed && !saved && (
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-              <div className="flex items-center">
-                <span className="text-blue-400 mr-2">✅</span>
-                <span className="text-sm text-blue-700">API接続テストに成功しました。「保存して次へ」を押してください</span>
               </div>
             </div>
           )}

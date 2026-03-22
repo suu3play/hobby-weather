@@ -14,18 +14,22 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 }) => {
     const { currentTheme } = useTheme();
     const formatTime = (date: Date | string) => {
+        const d = date instanceof Date ? date : new Date(date);
+        if (isNaN(d.getTime())) return '--:--';
         return new Intl.DateTimeFormat('ja-JP', {
             hour: '2-digit',
             minute: '2-digit',
-        }).format(new Date(date));
+        }).format(d);
     };
 
     const formatDate = (date: Date | string) => {
+        const d = date instanceof Date ? date : new Date(date);
+        if (isNaN(d.getTime())) return '日付不明';
         return new Intl.DateTimeFormat('ja-JP', {
             month: 'short',
             day: 'numeric',
             weekday: 'short',
-        }).format(new Date(date));
+        }).format(d);
     };
 
     const getWindDirection = (degrees: number): string => {

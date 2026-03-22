@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
 
-const UNUSED_VARS_IGNORE_PATTERN = '^_'
+const IGNORE_PATTERN = '^_';
 
 export default tseslint.config([
   globalIgnores(['dist', '.vite', 'coverage', '*.config.js.timestamp-*']),
@@ -23,8 +23,8 @@ export default tseslint.config([
     },
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: UNUSED_VARS_IGNORE_PATTERN,
-        varsIgnorePattern: UNUSED_VARS_IGNORE_PATTERN,
+        argsIgnorePattern: IGNORE_PATTERN,
+        varsIgnorePattern: IGNORE_PATTERN,
       }],
     },
   },

@@ -11,17 +11,40 @@ interface NotificationSettingsProps {
 
 export function NotificationSettings({ className = "" }: NotificationSettingsProps) {
   const { currentTheme } = useTheme();
-  const { permission } = useNotification();
-  const { 
-    configs, 
-    settings, 
-    isLoading, 
-    error, 
-    toggleConfig, 
+  const { permission, sendTestNotification } = useNotification();
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testMessage, setTestMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleTestNotification = async () => {
+    setIsSendingTest(true);
+    setTestMessage(null);
+    try {
+      const result = await sendTestNotification();
+      if (result) {
+        setTestMessage({ type: 'success', text: 'テスト通知を送信しました' });
+      } else {
+        setTestMessage({ type: 'error', text: '通知の送信に失敗しました' });
+      }
+    } catch (error) {
+      setTestMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : '予期しないエラーが発生しました'
+      });
+    } finally {
+      setIsSendingTest(false);
+      setTimeout(() => setTestMessage(null), 3000);
+    }
+  };
+  const {
+    configs,
+    settings,
+    isLoading,
+    error,
+    toggleConfig,
     updateSettings,
-    getStats 
+    getStats
   } = useNotificationConfig();
-  
+
   const [showStats, setShowStats] = useState(false);
   const [stats, setStats] = useState<{
     totalSent: number;
@@ -32,6 +55,7 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
   const [quietHoursEnabled, setQuietHoursEnabled] = useState(false);
   const [quietStart, setQuietStart] = useState('22:00');
   const [quietEnd, setQuietEnd] = useState('07:00');
+  const [settingsError, setSettingsError] = useState<string | null>(null);
 
   // 設定の初期化
   useEffect(() => {
@@ -55,13 +79,18 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
     }
   };
 
+  const safeUpdateSettings = async (patch: Parameters<typeof updateSettings>[0]) => {
+    setSettingsError(null);
+    try {
+      await updateSettings(patch);
+    } catch (e) {
+      setSettingsError(e instanceof Error ? e.message : '設定の更新に失敗しました');
+    }
+  };
+
   // グローバル設定の更新
   const handleGlobalToggle = async (enabled: boolean) => {
-    try {
-      await updateSettings({ globalEnabled: enabled });
-    } catch {
-      // エラーはuseNotificationConfigのerror stateで管理
-    }
+    await safeUpdateSettings({ globalEnabled: enabled });
   };
 
   // 静寂時間の更新
@@ -69,60 +98,45 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
     const quietHours: TimeRange | null = quietHoursEnabled
       ? { start: quietStart, end: quietEnd }
       : null;
-    try {
-      await updateSettings({ quietHours });
-    } catch {
-      // エラーはuseNotificationConfigのerror stateで管理
-    }
+
+    await safeUpdateSettings({ quietHours });
   };
 
   // 最大通知数の更新
   const handleMaxNotificationsChange = async (max: number) => {
-    try {
-      await updateSettings({ maxDailyNotifications: max });
-    } catch {
-      // エラーはuseNotificationConfigのerror stateで管理
-    }
+    await safeUpdateSettings({ maxDailyNotifications: max });
   };
 
   // 音・振動設定の更新
   const handleSoundToggle = async (enabled: boolean) => {
-    try {
-      await updateSettings({ soundEnabled: enabled });
-    } catch {
-      // エラーはuseNotificationConfigのerror stateで管理
-    }
+    await safeUpdateSettings({ soundEnabled: enabled });
   };
 
   const handleVibrationToggle = async (enabled: boolean) => {
-    try {
-      await updateSettings({ vibrationEnabled: enabled });
-    } catch {
-      // エラーはuseNotificationConfigのerror stateで管理
-    }
+    await safeUpdateSettings({ vibrationEnabled: enabled });
   };
 
   if (isLoading) {
     return (
-      <div 
+      <div
         className={`rounded-lg shadow p-6 ${className}`}
         style={{ backgroundColor: currentTheme.colors.surface.primary }}
       >
         <div className="animate-pulse">
-          <div 
+          <div
             className="h-6 rounded mb-4"
             style={{ backgroundColor: currentTheme.colors.surface.secondary }}
           ></div>
           <div className="space-y-3">
-            <div 
+            <div
               className="h-4 rounded"
               style={{ backgroundColor: currentTheme.colors.surface.secondary }}
             ></div>
-            <div 
+            <div
               className="h-4 rounded"
               style={{ backgroundColor: currentTheme.colors.surface.secondary }}
             ></div>
-            <div 
+            <div
               className="h-4 rounded"
               style={{ backgroundColor: currentTheme.colors.surface.secondary }}
             ></div>
@@ -134,30 +148,30 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
   if (error) {
     return (
-      <div 
+      <div
         className={`border rounded-lg p-4 ${className}`}
         style={{
-          backgroundColor: currentTheme.mode === 'dark' 
-            ? 'rgba(239, 68, 68, 0.1)' 
+          backgroundColor: currentTheme.mode === 'dark'
+            ? 'rgba(239, 68, 68, 0.1)'
             : 'rgb(254, 242, 242)',
           borderColor: currentTheme.colors.error
         }}
       >
         <div className="flex items-center">
-          <div 
+          <div
             className="mr-2"
             style={{ color: currentTheme.colors.error }}
           >
             ❌
           </div>
           <div>
-            <h3 
+            <h3
               className="text-sm font-medium"
               style={{ color: currentTheme.colors.error }}
             >
               エラーが発生しました
             </h3>
-            <p 
+            <p
               className="text-sm mt-1"
               style={{ color: currentTheme.colors.error }}
             >
@@ -171,32 +185,39 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
   return (
     <div className={`space-y-6 ${className}`}>
+      {/* 設定更新エラー */}
+      {settingsError && (
+        <div className="border rounded-lg p-3 text-sm" style={{ borderColor: currentTheme.colors.error, color: currentTheme.colors.error }}>
+          {settingsError}
+        </div>
+      )}
+
       {/* 通知許可プロンプト */}
       <NotificationPermissionPrompt />
 
       {/* グローバル設定 */}
-      <div 
+      <div
         className="rounded-lg shadow p-6"
         style={{ backgroundColor: currentTheme.colors.surface.primary }}
       >
-        <h2 
+        <h2
           className="text-lg font-semibold mb-4"
           style={{ color: currentTheme.colors.text.primary }}
         >
           🔔 通知設定
         </h2>
-        
+
         <div className="space-y-4">
           {/* 全体の有効/無効 */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 
+              <h3
                 className="text-sm font-medium"
                 style={{ color: currentTheme.colors.text.primary }}
               >
                 通知機能
               </h3>
-              <p 
+              <p
                 className="text-sm"
                 style={{ color: currentTheme.colors.text.tertiary }}
               >
@@ -219,13 +240,13 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 
+                <h3
                   className="text-sm font-medium"
                   style={{ color: currentTheme.colors.text.primary }}
                 >
                   静寂時間
                 </h3>
-                <p 
+                <p
                   className="text-sm"
                   style={{ color: currentTheme.colors.text.tertiary }}
                 >
@@ -238,16 +259,17 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
                   checked={quietHoursEnabled}
                   onChange={async (e) => {
                     setQuietHoursEnabled(e.target.checked);
-                    if (!e.target.checked) {
-                      await updateSettings({ quietHours: null });
-                    }
+                    const quietHours: TimeRange | null = e.target.checked
+                      ? { start: quietStart, end: quietEnd }
+                      : null;
+                    await safeUpdateSettings({ quietHours });
                   }}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
-            
+
             {quietHoursEnabled && (
               <div className="flex items-center space-x-2 mt-2">
                 <input
@@ -263,7 +285,7 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
                     border: `1px solid ${currentTheme.colors.border.primary}`
                   }}
                 />
-                <span 
+                <span
                   className="text-sm"
                   style={{ color: currentTheme.colors.text.tertiary }}
                 >
@@ -282,7 +304,7 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
                     border: `1px solid ${currentTheme.colors.border.primary}`
                   }}
                 />
-                <span 
+                <span
                   className="text-sm"
                   style={{ color: currentTheme.colors.text.tertiary }}
                 >
@@ -296,13 +318,13 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
           <div className="border-t pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 
+                <h3
                   className="text-sm font-medium"
                   style={{ color: currentTheme.colors.text.primary }}
                 >
                   1日の最大通知数
                 </h3>
-                <p 
+                <p
                   className="text-sm"
                   style={{ color: currentTheme.colors.text.tertiary }}
                 >
@@ -328,17 +350,49 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
             </div>
           </div>
 
+          {/* テスト通知 */}
+          <div className="border-t pt-4">
+            <h3
+              className="text-sm font-medium mb-1"
+              style={{ color: currentTheme.colors.text.primary }}
+            >
+              通知テスト
+            </h3>
+            <p
+              className="text-sm mb-3"
+              style={{ color: currentTheme.colors.text.tertiary }}
+            >
+              通知機能が正常に動作するか確認できます
+            </p>
+            <button
+              onClick={handleTestNotification}
+              disabled={!permission.granted || isSendingTest}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                permission.granted && !isSendingTest
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isSendingTest ? '送信中...' : 'テスト通知を送信'}
+            </button>
+            {testMessage && (
+              <div className={`mt-2 text-sm ${testMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                {testMessage.text}
+              </div>
+            )}
+          </div>
+
           {/* 音・振動設定 */}
           <div className="border-t pt-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 
+                <h3
                   className="text-sm font-medium"
                   style={{ color: currentTheme.colors.text.primary }}
                 >
                   通知音
                 </h3>
-                <p 
+                <p
                   className="text-sm"
                   style={{ color: currentTheme.colors.text.tertiary }}
                 >
@@ -358,13 +412,13 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 
+                <h3
                   className="text-sm font-medium"
                   style={{ color: currentTheme.colors.text.primary }}
                 >
                   バイブレーション
                 </h3>
-                <p 
+                <p
                   className="text-sm"
                   style={{ color: currentTheme.colors.text.tertiary }}
                 >
@@ -386,17 +440,17 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
       </div>
 
       {/* 通知タイプ別設定 */}
-      <div 
+      <div
         className="rounded-lg shadow p-6"
         style={{ backgroundColor: currentTheme.colors.surface.primary }}
       >
-        <h2 
+        <h2
           className="text-lg font-semibold mb-4"
           style={{ color: currentTheme.colors.text.primary }}
         >
           📋 通知タイプ設定
         </h2>
-        
+
         <div className="space-y-4">
           {configs.map((config) => (
             <NotificationConfigItem
@@ -405,9 +459,9 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
               onToggle={toggleConfig}
             />
           ))}
-          
+
           {configs.length === 0 && (
-            <p 
+            <p
               className="text-sm text-center py-4"
               style={{ color: currentTheme.colors.text.tertiary }}
             >
@@ -418,12 +472,12 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
       </div>
 
       {/* 統計情報 */}
-      <div 
+      <div
         className="rounded-lg shadow p-6"
         style={{ backgroundColor: currentTheme.colors.surface.primary }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 
+          <h2
             className="text-lg font-semibold"
             style={{ color: currentTheme.colors.text.primary }}
           >
@@ -437,17 +491,17 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
             {showStats ? '再読み込み' : '統計を表示'}
           </button>
         </div>
-        
+
         {showStats && stats && (
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div 
+              <div
                 className="text-2xl font-bold"
                 style={{ color: currentTheme.colors.primary }}
               >
                 {stats.totalSent}
               </div>
-              <div 
+              <div
                 className="text-sm"
                 style={{ color: currentTheme.colors.text.tertiary }}
               >
@@ -455,13 +509,13 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
               </div>
             </div>
             <div>
-              <div 
+              <div
                 className="text-2xl font-bold"
                 style={{ color: currentTheme.colors.success }}
               >
                 {(stats.clickRate * 100).toFixed(1)}%
               </div>
-              <div 
+              <div
                 className="text-sm"
                 style={{ color: currentTheme.colors.text.tertiary }}
               >
@@ -469,13 +523,13 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
               </div>
             </div>
             <div>
-              <div 
+              <div
                 className="text-2xl font-bold"
                 style={{ color: currentTheme.colors.warning }}
               >
                 {(stats.dismissRate * 100).toFixed(1)}%
               </div>
-              <div 
+              <div
                 className="text-sm"
                 style={{ color: currentTheme.colors.text.tertiary }}
               >
@@ -490,12 +544,12 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 }
 
 // 個別の通知設定項目コンポーネント
-function NotificationConfigItem({ 
-  config, 
-  onToggle 
-}: { 
-  config: NotificationConfig; 
-  onToggle: (id: number) => Promise<void>; 
+function NotificationConfigItem({
+  config,
+  onToggle
+}: {
+  config: NotificationConfig;
+  onToggle: (id: number) => Promise<void>;
 }) {
   const { currentTheme } = useTheme();
   const getConfigIcon = (type: string) => {
@@ -523,7 +577,7 @@ function NotificationConfigItem({
   };
 
   return (
-    <div 
+    <div
       className="flex items-center justify-between p-3 rounded-lg"
       style={{
         backgroundColor: currentTheme.colors.surface.secondary,
@@ -534,13 +588,13 @@ function NotificationConfigItem({
       <div className="flex items-center space-x-3">
         <span className="text-xl">{getConfigIcon(config.type)}</span>
         <div>
-          <h4 
+          <h4
             className="text-sm font-medium"
             style={{ color: currentTheme.colors.text.primary }}
           >
             {config.title}
           </h4>
-          <p 
+          <p
             className="text-sm"
             style={{ color: currentTheme.colors.text.tertiary }}
           >
@@ -548,7 +602,7 @@ function NotificationConfigItem({
           </p>
         </div>
       </div>
-      
+
       <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"

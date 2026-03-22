@@ -16,14 +16,16 @@ export const ForecastList: React.FC<ForecastListProps> = ({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const formatCacheTime = (date: Date | string | null) => {
-        if (date === null || date === undefined) return '--';
+    const formatCacheTime = (date: Date | string | null | undefined): string => {
+        if (date == null) return '不明';
+        const d = date instanceof Date ? date : new Date(date);
+        if (isNaN(d.getTime())) return '不明';
         return new Intl.DateTimeFormat('ja-JP', {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-        }).format(new Date(date));
+        }).format(d);
     };
 
     return (

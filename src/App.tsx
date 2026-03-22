@@ -1,5 +1,4 @@
-import React, { useRef, useCallback, Suspense, lazy, Component } from 'react';
-import type { ReactNode } from 'react';
+import React, { useRef, useCallback, Suspense, lazy, Component, type ErrorInfo, type ReactNode } from 'react';
 import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
 import { useInitialSetup } from './hooks/useInitialSetup';
 import { ThemeToggle } from './components/theme/ThemeToggle';
@@ -13,35 +12,36 @@ const WeatherDisplay = lazy(() => import('./components/weather/WeatherDisplay').
 const RecommendationDashboard = lazy(() => import('./components/recommendation/RecommendationDashboard').then(module => ({ default: module.RecommendationDashboard })));
 const SettingsPage = lazy(() => import('./components/settings/SettingsPage').then(module => ({ default: module.SettingsPage })));
 
-// コード分割失敗時のフォールバック用ErrorBoundary
-class LazyErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-    constructor(props: { children: ReactNode }) {
-        super(props);
-        this.state = { hasError: false };
-    }
+// チャンク読み込みエラーをキャッチするErrorBoundary
+class LazyErrorBoundary extends Component<
+  { children: ReactNode; fallback?: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback?: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-    static getDerivedStateFromError() {
-        return { hasError: true };
-    }
+  static getDerivedStateFromError(_: Error) {
+    return { hasError: true };
+  }
 
-    render() {
-        if (this.state.hasError) {
-            return (
-                <div className="flex items-center justify-center py-12">
-                    <div className="text-center">
-                        <p className="text-text-secondary mb-2">コンテンツの読み込みに失敗しました</p>
-                        <button
-                            onClick={() => this.setState({ hasError: false })}
-                            className="text-sm text-primary-500 underline"
-                        >
-                            再試行
-                        </button>
-                    </div>
-                </div>
-            );
-        }
-        return this.props.children;
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    if (import.meta.env.DEV) {
+      console.error('Lazy load error:', error, info);
     }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? (
+        <div className="flex items-center justify-center py-12 text-text-secondary">
+          <span>コンポーネントの読み込みに失敗しました。ページを再読み込みしてください。</span>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 // アプリケーションのメインタブ
@@ -100,7 +100,7 @@ function App() {
         }
 
         const nextTab = tabs[nextIndex]; if (nextTab) { setActiveTab(nextTab.id); }
-        
+
         // フォーカスを新しいタブに移動
         if (navRef.current && navRef.current.querySelectorAll('[role="tab"]')[nextIndex]) {
             const tabButton = navRef.current.querySelectorAll('[role="tab"]')[nextIndex] as HTMLButtonElement;
@@ -132,7 +132,7 @@ function App() {
             {/* PWAコンポーネント */}
             <InstallPrompt />
             <OfflineIndicator />
-            
+
             {/* ヘッダー */}
             <header className="fixed top-0 left-0 right-0 bg-surface-primary shadow-sm border-b border-border-primary z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,10 +156,10 @@ function App() {
                             <ThemeToggle variant="button" />
 
                             {/* ナビゲーションタブ */}
-                            <nav 
+                            <nav
                                 ref={navRef}
-                                className="flex space-x-1" 
-                                role="tablist" 
+                                className="flex space-x-1"
+                                role="tablist"
                                 aria-label="メインナビゲーション"
                                 onKeyDown={handleKeyboardNavigation}
                             >
@@ -200,11 +200,13 @@ function App() {
                         aria-labelledby="recommendations-tab"
                         hidden={activeTab !== 'recommendations'}
                     >
-                        <LazyErrorBoundary>
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <RecommendationDashboard />
-                            </Suspense>
-                        </LazyErrorBoundary>
+                        {activeTab === 'recommendations' && (
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <RecommendationDashboard />
+                                </Suspense>
+                            </LazyErrorBoundary>
+                        )}
                     </div>
                     <div
                         id="weather-panel"
@@ -213,11 +215,13 @@ function App() {
                         aria-labelledby="weather-tab"
                         hidden={activeTab !== 'weather'}
                     >
-                        <LazyErrorBoundary>
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <WeatherDisplay />
-                            </Suspense>
-                        </LazyErrorBoundary>
+                        {activeTab === 'weather' && (
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <WeatherDisplay />
+                                </Suspense>
+                            </LazyErrorBoundary>
+                        )}
                     </div>
                     <div
                         id="hobbies-panel"
@@ -226,11 +230,13 @@ function App() {
                         aria-labelledby="hobbies-tab"
                         hidden={activeTab !== 'hobbies'}
                     >
-                        <LazyErrorBoundary>
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <HobbyManager />
-                            </Suspense>
-                        </LazyErrorBoundary>
+                        {activeTab === 'hobbies' && (
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <HobbyManager />
+                                </Suspense>
+                            </LazyErrorBoundary>
+                        )}
                     </div>
                     <div
                         id="settings-panel"
@@ -239,11 +245,13 @@ function App() {
                         aria-labelledby="settings-tab"
                         hidden={activeTab !== 'settings'}
                     >
-                        <LazyErrorBoundary>
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <SettingsPage />
-                            </Suspense>
-                        </LazyErrorBoundary>
+                        {activeTab === 'settings' && (
+                            <LazyErrorBoundary>
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <SettingsPage />
+                                </Suspense>
+                            </LazyErrorBoundary>
+                        )}
                     </div>
                 </div>
             </main>
