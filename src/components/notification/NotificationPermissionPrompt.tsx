@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 
 interface NotificationPermissionPromptProps {
@@ -6,12 +7,14 @@ interface NotificationPermissionPromptProps {
   className?: string;
 }
 
-export function NotificationPermissionPrompt({ 
-  onPermissionGranted, 
+export function NotificationPermissionPrompt({
+  onPermissionGranted,
   onPermissionDenied,
   className = ""
 }: NotificationPermissionPromptProps) {
   const { permission, isSupported, isLoading, requestPermission, sendTestNotification } = useNotification();
+  const [isSending, setIsSending] = useState(false);
+  const [testMessage, setTestMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleRequestPermission = async () => {
     try {
@@ -29,13 +32,23 @@ export function NotificationPermissionPrompt({
   };
 
   const handleTestNotification = async () => {
+    setIsSending(true);
+    setTestMessage(null);
     try {
       const success = await sendTestNotification();
-      if (!success && import.meta.env.DEV) {
-        console.error('テスト通知の送信に失敗しました');
+      if (success) {
+        setTestMessage({ type: 'success', text: 'テスト通知を送信しました' });
+      } else {
+        setTestMessage({ type: 'error', text: '通知の送信に失敗しました' });
       }
     } catch (error) {
-      console.error('テスト通知の送信中にエラーが発生しました', error);
+      setTestMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : '予期しないエラーが発生しました'
+      });
+    } finally {
+      setIsSending(false);
+      setTimeout(() => setTestMessage(null), 3000);
     }
   };
 
@@ -72,13 +85,20 @@ export function NotificationPermissionPrompt({
               </p>
             </div>
           </div>
-          <button
-            onClick={handleTestNotification}
-            disabled={isLoading}
-            className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-          >
-            テスト送信
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={handleTestNotification}
+              disabled={isLoading || isSending}
+              className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              {isSending ? '送信中...' : 'テスト送信'}
+            </button>
+            {testMessage && (
+              <span className={`text-xs ${testMessage.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                {testMessage.type === 'success' ? '✅' : '❌'} {testMessage.text}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );

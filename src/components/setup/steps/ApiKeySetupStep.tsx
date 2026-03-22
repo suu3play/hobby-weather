@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ApiKeySetupStepProps {
   onComplete: () => void;
@@ -6,9 +6,20 @@ interface ApiKeySetupStepProps {
 
 export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) => {
   const [apiKey, setApiKey] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [testPassed, setTestPassed] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   // 既存のAPI Key設定を読み込み
   useEffect(() => {
@@ -34,22 +45,22 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
       return;
     }
 
-    setIsLoading(true);
+    setIsSaving(true);
     setError(null);
 
     try {
       // APIキーを保存
       const settings = { openWeatherApiKey: apiKey.trim() };
       localStorage.setItem('hobby-weather-api-settings', JSON.stringify(settings));
-      
+
       // WeatherServiceのAPIキーを更新
       const { weatherService } = await import('../../../services/weather.service');
       weatherService.refreshApiKey();
-      
+
       setSuccess(true);
-      
+
       // 少し待ってから次のステップに進む
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         onComplete();
       }, 1000);
     } catch (error) {
@@ -58,7 +69,7 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
       }
       setError('API Keyの保存に失敗しました。もう一度お試しください。');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -68,7 +79,7 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
       return;
     }
 
-    setIsLoading(true);
+    setIsTesting(true);
     setError(null);
 
     try {
@@ -76,7 +87,7 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=${apiKey.trim()}&units=metric`
       );
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error('API Keyが無効です。正しいキーを入力してください。');
@@ -84,14 +95,14 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
           throw new Error('API接続に失敗しました。しばらく時間をおいてから再度お試しください。');
         }
       }
-      
-      setSuccess(true);
+
+      setTestPassed(true);
       setError(null);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'API接続テストに失敗しました');
-      setSuccess(false);
+      setTestPassed(false);
     } finally {
-      setIsLoading(false);
+      setIsTesting(false);
     }
   };
 
@@ -142,10 +153,11 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
                 setApiKey(e.target.value);
                 setError(null);
                 setSuccess(false);
+                setTestPassed(false);
               }}
               placeholder="API Keyを入力してください"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={isLoading}
+              disabled={isTesting || isSaving}
             />
           </div>
 
@@ -159,12 +171,22 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
             </div>
           )}
 
+          {/* Test Success Message */}
+          {testPassed && !success && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="flex items-center">
+                <span className="text-blue-400 mr-2">✅</span>
+                <span className="text-sm text-blue-700">API接続テスト成功。「保存して次へ」を押して設定を保存してください。</span>
+              </div>
+            </div>
+          )}
+
           {/* Success Message */}
           {success && (
             <div className="bg-green-50 border border-green-200 rounded-md p-3">
               <div className="flex items-center">
                 <span className="text-green-400 mr-2">✅</span>
-                <span className="text-sm text-green-700">API Keyが正常に設定されました</span>
+                <span className="text-sm text-green-700">API Keyが正常に保存されました</span>
               </div>
             </div>
           )}
@@ -173,18 +195,18 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
           <div className="flex space-x-3">
             <button
               onClick={handleTestApiKey}
-              disabled={isLoading || !apiKey.trim()}
+              disabled={isTesting || isSaving || !apiKey.trim()}
               className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'テスト中...' : 'API接続テスト'}
+              {isTesting ? 'テスト中...' : 'API接続テスト'}
             </button>
-            
+
             <button
               onClick={handleSaveApiKey}
-              disabled={isLoading || !apiKey.trim()}
+              disabled={isTesting || isSaving || !apiKey.trim()}
               className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? '保存中...' : '保存して次へ'}
+              {isSaving ? '保存中...' : '保存して次へ'}
             </button>
           </div>
         </div>

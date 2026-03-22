@@ -10,8 +10,8 @@ interface UseHobbyState {
 }
 
 interface UseHobbyReturn extends UseHobbyState {
-  createHobby: (hobby: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  updateHobby: (id: number, changes: Partial<Hobby>) => Promise<void>;
+  createHobby: (hobby: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
+  updateHobby: (id: number, changes: Partial<Hobby>) => Promise<boolean>;
   deleteHobby: (id: number) => Promise<void>;
   toggleHobbyActive: (id: number) => Promise<void>;
   refreshHobbies: () => Promise<void>;
@@ -56,31 +56,35 @@ export const useHobby = (): UseHobbyReturn => {
     }
   }, [updateState]);
 
-  const createHobby = useCallback(async (hobbyData: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createHobby = useCallback(async (hobbyData: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
     updateState({ isLoading: true, error: null });
 
     try {
       await databaseService.createHobby(hobbyData);
       await loadHobbies();
+      return true;
     } catch (error) {
       updateState({
         error: error instanceof Error ? error.message : '趣味の作成に失敗しました',
       });
+      return false;
     } finally {
       updateState({ isLoading: false });
     }
   }, [updateState, loadHobbies]);
 
-  const updateHobby = useCallback(async (id: number, changes: Partial<Hobby>) => {
+  const updateHobby = useCallback(async (id: number, changes: Partial<Hobby>): Promise<boolean> => {
     updateState({ isLoading: true, error: null });
 
     try {
       await databaseService.updateHobby(id, changes);
       await loadHobbies();
+      return true;
     } catch (error) {
       updateState({
         error: error instanceof Error ? error.message : '趣味の更新に失敗しました',
       });
+      return false;
     } finally {
       updateState({ isLoading: false });
     }

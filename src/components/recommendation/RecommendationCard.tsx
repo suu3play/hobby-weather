@@ -60,19 +60,21 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   };
 
   // 日付のフォーマット
-  const formatDate = (date: Date): string => {
+  const formatDate = (date: Date | string): string => {
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return '日付不明';
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    if (date.toDateString() === today.toDateString()) return '今日';
-    if (date.toDateString() === tomorrow.toDateString()) return '明日';
+    if (d.toDateString() === today.toDateString()) return '今日';
+    if (d.toDateString() === tomorrow.toDateString()) return '明日';
 
     return new Intl.DateTimeFormat('ja-JP', {
       month: 'short',
       day: 'numeric',
       weekday: 'short'
-    }).format(date);
+    }).format(d);
   };
 
   return (
