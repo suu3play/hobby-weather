@@ -33,8 +33,8 @@ export const HobbyManager: React.FC = () => {
     const handleCreate = async (
         hobbyData: Omit<Hobby, 'id' | 'createdAt' | 'updatedAt'>
     ) => {
-        await createHobby(hobbyData);
-        if (!error) {
+        const success = await createHobby(hobbyData);
+        if (success) {
             setViewMode('list');
         }
     };
@@ -44,8 +44,8 @@ export const HobbyManager: React.FC = () => {
     ) => {
         if (!editingHobby?.id) return;
 
-        await updateHobby(editingHobby.id, hobbyData);
-        if (!error) {
+        const success = await updateHobby(editingHobby.id, hobbyData);
+        if (success) {
             setViewMode('list');
             setEditingHobby(null);
         }

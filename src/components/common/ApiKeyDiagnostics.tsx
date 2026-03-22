@@ -118,49 +118,30 @@ export const ApiKeyDiagnostics: React.FC = () => {
       {results && !isLoading && (
         <div className="space-y-4">
           {/* サマリー */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 rounded-lg p-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">
-                  {getStatusIcon(results.environment.hasApiKey)}
-                </span>
-                <div>
-                  <p className="font-medium">環境変数</p>
-                  <p className={`text-sm ${getStatusColor(results.environment.hasApiKey)}`}>
-                    {results.environment.hasApiKey ? '設定済み' : '未設定'}
-                  </p>
-                </div>
+          {(() => {
+            const summaryCards = [
+              { label: '環境変数', ok: results.environment.hasApiKey, okText: '設定済み', ngText: '未設定' },
+              { label: 'サービス読み込み', ok: results.weatherService.hasApiKey, okText: '正常', ngText: 'エラー' },
+              { label: 'API接続', ok: results.apiConnection.success, okText: '接続OK', ngText: '接続失敗' },
+            ];
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {summaryCards.map(({ label, ok, okText, ngText }) => (
+                  <div key={label} className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{getStatusIcon(ok)}</span>
+                      <div>
+                        <p className="font-medium">{label}</p>
+                        <p className={`text-sm ${getStatusColor(ok)}`}>
+                          {ok ? okText : ngText}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">
-                  {getStatusIcon(results.weatherService.hasApiKey)}
-                </span>
-                <div>
-                  <p className="font-medium">サービス読み込み</p>
-                  <p className={`text-sm ${getStatusColor(results.weatherService.hasApiKey)}`}>
-                    {results.weatherService.hasApiKey ? '正常' : 'エラー'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">
-                  {getStatusIcon(results.apiConnection.success)}
-                </span>
-                <div>
-                  <p className="font-medium">API接続</p>
-                  <p className={`text-sm ${getStatusColor(results.apiConnection.success)}`}>
-                    {results.apiConnection.success ? '接続OK' : '接続失敗'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* 推奨事項 */}
           <div className="bg-blue-50 rounded-lg p-4">
@@ -183,7 +164,9 @@ export const ApiKeyDiagnostics: React.FC = () => {
                 <div className="bg-gray-100 rounded p-3 text-sm font-mono">
                   <p>設定状況: {results.environment.hasApiKey ? '✅ 設定済み' : '❌ 未設定'}</p>
                   <p>キー長: {results.environment.apiKeyLength}文字</p>
-                  <p>プレビュー: {results.environment.apiKeyPreview}</p>
+                  {import.meta.env.DEV && (
+                    <p>プレビュー: {results.environment.apiKeyPreview}</p>
+                  )}
                 </div>
               </div>
 
@@ -193,7 +176,9 @@ export const ApiKeyDiagnostics: React.FC = () => {
                 <div className="bg-gray-100 rounded p-3 text-sm font-mono">
                   <p>読み込み状況: {results.weatherService.hasApiKey ? '✅ 正常' : '❌ エラー'}</p>
                   <p>キー長: {results.weatherService.apiKeyLength}文字</p>
-                  <p>プレビュー: {results.weatherService.apiKeyPreview}</p>
+                  {import.meta.env.DEV && (
+                    <p>プレビュー: {results.weatherService.apiKeyPreview}</p>
+                  )}
                   {results.weatherService.error && (
                     <p className="text-red-600">エラー: {results.weatherService.error}</p>
                   )}

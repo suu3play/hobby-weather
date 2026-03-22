@@ -1,4 +1,5 @@
-import React, { useRef, useCallback, Suspense, lazy } from 'react';
+import React, { useRef, useCallback, Suspense, lazy, Component } from 'react';
+import type { ReactNode } from 'react';
 import { InitialSetupFlow } from './components/setup/InitialSetupFlow';
 import { useInitialSetup } from './hooks/useInitialSetup';
 import { ThemeToggle } from './components/theme/ThemeToggle';
@@ -11,6 +12,37 @@ const HobbyManager = lazy(() => import('./components/hobby/HobbyManager').then(m
 const WeatherDisplay = lazy(() => import('./components/weather/WeatherDisplay').then(module => ({ default: module.WeatherDisplay })));
 const RecommendationDashboard = lazy(() => import('./components/recommendation/RecommendationDashboard').then(module => ({ default: module.RecommendationDashboard })));
 const SettingsPage = lazy(() => import('./components/settings/SettingsPage').then(module => ({ default: module.SettingsPage })));
+
+// コード分割失敗時のフォールバック用ErrorBoundary
+class LazyErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+    constructor(props: { children: ReactNode }) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                        <p className="text-text-secondary mb-2">コンテンツの読み込みに失敗しました</p>
+                        <button
+                            onClick={() => this.setState({ hasError: false })}
+                            className="text-sm text-primary-500 underline"
+                        >
+                            再試行
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 
 // アプリケーションのメインタブ
 type TabType = 'weather' | 'hobbies' | 'recommendations' | 'settings';
@@ -160,57 +192,58 @@ function App() {
             {/* メインコンテンツ */}
             <main className="pt-16 py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div 
-                        id="recommendations-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    {/* タブパネルはhiddenのみで制御しコンポーネントを保持する */}
+                    <div
+                        id="recommendations-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="recommendations-tab"
                         hidden={activeTab !== 'recommendations'}
                     >
-                        {activeTab === 'recommendations' && (
+                        <LazyErrorBoundary>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <RecommendationDashboard />
                             </Suspense>
-                        )}
+                        </LazyErrorBoundary>
                     </div>
-                    <div 
-                        id="weather-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    <div
+                        id="weather-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="weather-tab"
                         hidden={activeTab !== 'weather'}
                     >
-                        {activeTab === 'weather' && (
+                        <LazyErrorBoundary>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <WeatherDisplay />
                             </Suspense>
-                        )}
+                        </LazyErrorBoundary>
                     </div>
-                    <div 
-                        id="hobbies-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    <div
+                        id="hobbies-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="hobbies-tab"
                         hidden={activeTab !== 'hobbies'}
                     >
-                        {activeTab === 'hobbies' && (
+                        <LazyErrorBoundary>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <HobbyManager />
                             </Suspense>
-                        )}
+                        </LazyErrorBoundary>
                     </div>
-                    <div 
-                        id="settings-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    <div
+                        id="settings-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="settings-tab"
                         hidden={activeTab !== 'settings'}
                     >
-                        {activeTab === 'settings' && (
+                        <LazyErrorBoundary>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <SettingsPage />
                             </Suspense>
-                        )}
+                        </LazyErrorBoundary>
                     </div>
                 </div>
             </main>

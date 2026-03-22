@@ -209,7 +209,7 @@ export const HobbyList: React.FC<HobbyListProps> = ({
 
                             <div className="flex flex-col space-y-2 ml-4">
                                 <button
-                                    onClick={() => onToggleActive(hobby.id!)}
+                                    onClick={() => hobby.id !== undefined && onToggleActive(hobby.id)}
                                     className="px-3 py-1 text-xs font-medium rounded-md transition-opacity hover:opacity-80"
                                     style={{
                                         backgroundColor: hobby.isActive
@@ -246,7 +246,7 @@ export const HobbyList: React.FC<HobbyListProps> = ({
                                                 `「${hobby.name}」を削除しますか？この操作は取り消せません。`
                                             )
                                         ) {
-                                            onDelete(hobby.id!);
+                                            if (hobby.id !== undefined) onDelete(hobby.id);
                                         }
                                     }}
                                     className="px-3 py-1 text-xs font-medium rounded-md transition-opacity hover:opacity-80"

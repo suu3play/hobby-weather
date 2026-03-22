@@ -1,7 +1,12 @@
 import React from 'react';
 import type { HobbyRecommendation } from '../../services/recommendation.service';
+import type { WeatherCondition } from '../../types';
 import { getWeatherConditionIcon, getWeatherConditionLabel } from '../../hooks/useHobby';
 import { useTheme } from '../../contexts/ThemeContext';
+
+// WeatherConditionオブジェクトかどうかを判定する型ガード
+const isWeatherConditionObject = (weather: WeatherCondition | string): weather is WeatherCondition =>
+  typeof weather === 'object' && weather !== null && 'condition' in weather;
 
 // おすすめ詳細モーダルのプロパティ
 interface RecommendationDetailModalProps {
@@ -136,15 +141,15 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
                   {hobby.preferredWeather && hobby.preferredWeather.length > 0 ? (
                     hobby.preferredWeather.map((weather, index) => (
                       <span key={index} className="inline-flex items-center mr-2">
-                        {typeof weather === 'string' ? (
-                          <>
-                            {getWeatherConditionIcon(weather)}
-                            <span className="ml-1">{getWeatherConditionLabel(weather)}</span>
-                          </>
-                        ) : (
+                        {isWeatherConditionObject(weather) ? (
                           <>
                             {getWeatherConditionIcon(weather.condition)}
                             <span className="ml-1">{getWeatherConditionLabel(weather.condition)}</span>
+                          </>
+                        ) : (
+                          <>
+                            {getWeatherConditionIcon(weather)}
+                            <span className="ml-1">{getWeatherConditionLabel(weather)}</span>
                           </>
                         )}
                       </span>

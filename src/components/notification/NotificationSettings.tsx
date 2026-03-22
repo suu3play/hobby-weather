@@ -57,30 +57,49 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
 
   // グローバル設定の更新
   const handleGlobalToggle = async (enabled: boolean) => {
-    await updateSettings({ globalEnabled: enabled });
+    try {
+      await updateSettings({ globalEnabled: enabled });
+    } catch {
+      // エラーはuseNotificationConfigのerror stateで管理
+    }
   };
 
   // 静寂時間の更新
   const handleQuietHoursChange = async () => {
-    const quietHours: TimeRange | null = quietHoursEnabled 
+    const quietHours: TimeRange | null = quietHoursEnabled
       ? { start: quietStart, end: quietEnd }
       : null;
-    
-    await updateSettings({ quietHours });
+    try {
+      await updateSettings({ quietHours });
+    } catch {
+      // エラーはuseNotificationConfigのerror stateで管理
+    }
   };
 
   // 最大通知数の更新
   const handleMaxNotificationsChange = async (max: number) => {
-    await updateSettings({ maxDailyNotifications: max });
+    try {
+      await updateSettings({ maxDailyNotifications: max });
+    } catch {
+      // エラーはuseNotificationConfigのerror stateで管理
+    }
   };
 
   // 音・振動設定の更新
   const handleSoundToggle = async (enabled: boolean) => {
-    await updateSettings({ soundEnabled: enabled });
+    try {
+      await updateSettings({ soundEnabled: enabled });
+    } catch {
+      // エラーはuseNotificationConfigのerror stateで管理
+    }
   };
 
   const handleVibrationToggle = async (enabled: boolean) => {
-    await updateSettings({ vibrationEnabled: enabled });
+    try {
+      await updateSettings({ vibrationEnabled: enabled });
+    } catch {
+      // エラーはuseNotificationConfigのerror stateで管理
+    }
   };
 
   if (isLoading) {
@@ -217,7 +236,12 @@ export function NotificationSettings({ className = "" }: NotificationSettingsPro
                 <input
                   type="checkbox"
                   checked={quietHoursEnabled}
-                  onChange={(e) => setQuietHoursEnabled(e.target.checked)}
+                  onChange={async (e) => {
+                    setQuietHoursEnabled(e.target.checked);
+                    if (!e.target.checked) {
+                      await updateSettings({ quietHours: null });
+                    }
+                  }}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>

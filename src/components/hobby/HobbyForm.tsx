@@ -41,6 +41,21 @@ export const HobbyForm: React.FC<HobbyFormProps> = ({
 
   const [errors, setErrors] = useState<string[]>([]);
 
+  // ボタンスタイル計算の共通ヘルパー（天気・時間帯ボタンで共用可）
+  const getToggleButtonStyle = (isSelected: boolean): React.CSSProperties => ({
+    borderColor: isSelected
+      ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.8)' : 'rgb(59, 130, 246)')
+      : (currentTheme.mode === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgb(209, 213, 219)'),
+    backgroundColor: isSelected
+      ? (currentTheme.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgb(239, 246, 255)')
+      : currentTheme.colors.background.primary,
+    color: isSelected
+      ? currentTheme.colors.primary
+      : currentTheme.colors.text.primary,
+    cursor: 'pointer',
+  });
+  void getToggleButtonStyle; // 今後の重複排除時に活用予定
+
   useEffect(() => {
     if (hobby) {
       setFormData({

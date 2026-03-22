@@ -119,7 +119,7 @@ export const SettingsPage: React.FC = () => {
                   OpenWeatherMap API Key
                 </label>
                 <input
-                  type="text"
+                  type="password"
                   id="api-key"
                   value={apiSettings.openWeatherApiKey}
                   onChange={(e) => setApiSettings({ ...apiSettings, openWeatherApiKey: e.target.value })}

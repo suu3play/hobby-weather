@@ -13,19 +13,19 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
     className = '',
 }) => {
     const { currentTheme } = useTheme();
-    const formatTime = (date: Date) => {
+    const formatTime = (date: Date | string) => {
         return new Intl.DateTimeFormat('ja-JP', {
             hour: '2-digit',
             minute: '2-digit',
-        }).format(date);
+        }).format(new Date(date));
     };
 
-    const formatDate = (date: Date) => {
+    const formatDate = (date: Date | string) => {
         return new Intl.DateTimeFormat('ja-JP', {
             month: 'short',
             day: 'numeric',
             weekday: 'short',
-        }).format(date);
+        }).format(new Date(date));
     };
 
     const getWindDirection = (degrees: number): string => {
