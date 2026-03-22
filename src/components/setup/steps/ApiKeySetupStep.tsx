@@ -123,9 +123,9 @@ export const ApiKeySetupStep: React.FC<ApiKeySetupStepProps> = ({ onComplete }) 
           <h3 className="font-medium text-blue-900 mb-2">📋 API Key取得手順</h3>
           <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
             <li>
-              <a 
-                href="https://openweathermap.org/api" 
-                target="_blank" 
+              <a
+                href="https://openweathermap.org/api"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-700 underline"
               >

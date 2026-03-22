@@ -100,7 +100,7 @@ function App() {
         }
 
         const nextTab = tabs[nextIndex]; if (nextTab) { setActiveTab(nextTab.id); }
-        
+
         // フォーカスを新しいタブに移動
         if (navRef.current && navRef.current.querySelectorAll('[role="tab"]')[nextIndex]) {
             const tabButton = navRef.current.querySelectorAll('[role="tab"]')[nextIndex] as HTMLButtonElement;
@@ -132,7 +132,7 @@ function App() {
             {/* PWAコンポーネント */}
             <InstallPrompt />
             <OfflineIndicator />
-            
+
             {/* ヘッダー */}
             <header className="fixed top-0 left-0 right-0 bg-surface-primary shadow-sm border-b border-border-primary z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,10 +156,10 @@ function App() {
                             <ThemeToggle variant="button" />
 
                             {/* ナビゲーションタブ */}
-                            <nav 
+                            <nav
                                 ref={navRef}
-                                className="flex space-x-1" 
-                                role="tablist" 
+                                className="flex space-x-1"
+                                role="tablist"
                                 aria-label="メインナビゲーション"
                                 onKeyDown={handleKeyboardNavigation}
                             >
@@ -192,10 +192,11 @@ function App() {
             {/* メインコンテンツ */}
             <main className="pt-16 py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div 
-                        id="recommendations-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    {/* タブパネルはhiddenのみで制御しコンポーネントを保持する */}
+                    <div
+                        id="recommendations-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="recommendations-tab"
                         hidden={activeTab !== 'recommendations'}
                     >
@@ -207,10 +208,10 @@ function App() {
                             </LazyErrorBoundary>
                         )}
                     </div>
-                    <div 
-                        id="weather-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    <div
+                        id="weather-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="weather-tab"
                         hidden={activeTab !== 'weather'}
                     >
@@ -222,10 +223,10 @@ function App() {
                             </LazyErrorBoundary>
                         )}
                     </div>
-                    <div 
-                        id="hobbies-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    <div
+                        id="hobbies-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="hobbies-tab"
                         hidden={activeTab !== 'hobbies'}
                     >
@@ -237,10 +238,10 @@ function App() {
                             </LazyErrorBoundary>
                         )}
                     </div>
-                    <div 
-                        id="settings-panel" 
-                        role="tabpanel" 
-                        tabIndex={0} 
+                    <div
+                        id="settings-panel"
+                        role="tabpanel"
+                        tabIndex={0}
                         aria-labelledby="settings-tab"
                         hidden={activeTab !== 'settings'}
                     >

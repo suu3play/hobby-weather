@@ -158,6 +158,9 @@ export default {
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
       },
+      spacing: {
+        'header': '4rem', // ヘッダー高さ (16 * 4px = 64px)
+      },
     },
   },
   plugins: [],

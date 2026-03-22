@@ -301,18 +301,28 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
 
             {/* Expanded Filters */}
             {isExpanded && (
-                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div
+                    className="px-6 py-4 border-t"
+                    style={{
+                        borderColor: currentTheme.colors.border.primary,
+                        backgroundColor: currentTheme.colors.background.secondary ?? currentTheme.colors.background.primary,
+                    }}
+                >
                     <div className="space-y-6">
                         {/* Date Range */}
                         <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-3">
+                            <h4
+                                className="text-sm font-medium mb-3"
+                                style={{ color: currentTheme.colors.text.primary }}
+                            >
                                 期間設定
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label
                                         htmlFor="start-date"
-                                        className="block text-sm text-gray-700 mb-1"
+                                        className="block text-sm mb-1"
+                                        style={{ color: currentTheme.colors.text.secondary }}
                                     >
                                         開始日
                                     </label>
@@ -334,7 +344,8 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
                                 <div>
                                     <label
                                         htmlFor="end-date"
-                                        className="block text-sm text-gray-700 mb-1"
+                                        className="block text-sm mb-1"
+                                        style={{ color: currentTheme.colors.text.secondary }}
                                     >
                                         終了日
                                     </label>
@@ -358,7 +369,10 @@ export const RecommendationFilters: React.FC<RecommendationFiltersProps> = ({
 
                         {/* All Weather Types */}
                         <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-3">
+                            <h4
+                                className="text-sm font-medium mb-3"
+                                style={{ color: currentTheme.colors.text.primary }}
+                            >
                                 天気条件
                             </h4>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

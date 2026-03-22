@@ -43,19 +43,21 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     );
   }
 
+  const SCORE_THRESHOLDS = { excellent: 80, good: 60, fair: 40 } as const;
+
   // スコアに基づく色分け
   const getScoreColor = (score: number): string => {
-    if (score >= 80) return 'text-green-600 bg-green-100';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-100';
-    if (score >= 40) return 'text-orange-600 bg-orange-100';
+    if (score >= SCORE_THRESHOLDS.excellent) return 'text-green-600 bg-green-100';
+    if (score >= SCORE_THRESHOLDS.good) return 'text-yellow-600 bg-yellow-100';
+    if (score >= SCORE_THRESHOLDS.fair) return 'text-orange-600 bg-orange-100';
     return 'text-red-600 bg-red-100';
   };
 
   // スコアラベルの取得
   const getScoreLabel = (score: number): string => {
-    if (score >= 80) return '最適';
-    if (score >= 60) return '良好';
-    if (score >= 40) return '普通';
+    if (score >= SCORE_THRESHOLDS.excellent) return '最適';
+    if (score >= SCORE_THRESHOLDS.good) return '良好';
+    if (score >= SCORE_THRESHOLDS.fair) return '普通';
     return '注意';
   };
 

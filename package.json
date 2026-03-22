@@ -37,6 +37,12 @@
     "engines": {
         "node": ">=20.19.0"
     },
+    "browserslist": [
+        "> 0.5%",
+        "last 2 versions",
+        "not dead",
+        "not ie 11"
+    ],
     "devDependencies": {
         "@eslint/js": "^9.29.0",
         "@playwright/test": "^1.55.0",
